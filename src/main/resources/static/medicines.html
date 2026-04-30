@@ -1,161 +1,497 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>MediMart - Medicine CRUD Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediMart - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body{font-family:Arial;margin:20px;}
-        input, select{padding:6px;margin:4px;}
-        button{padding:6px 10px;margin:4px;cursor:pointer;}
-        table{border-collapse:collapse;width:100%;margin-top:12px;}
-        th,td{border:1px solid #ccc;padding:8px;text-align:left;}
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --secondary: #10B981;
+            --bg-color: #0F172A;
+            --surface: rgba(30, 41, 59, 0.7);
+            --surface-border: rgba(255, 255, 255, 0.1);
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --danger: #EF4444;
+            --danger-hover: #DC2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--surface-border);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button.danger {
+            background: var(--danger);
+        }
+
+        button.danger:hover {
+            background: var(--danger-hover);
+        }
+
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--surface-border);
+        }
+
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--surface-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.8);
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-available { background: rgba(16, 185, 129, 0.2); color: #34D399; }
+        .status-out { background: rgba(239, 68, 68, 0.2); color: #F87171; }
+        .status-disc { background: rgba(107, 114, 128, 0.2); color: #9CA3AF; }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+        }
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        #toast.error {
+            background: var(--danger);
+        }
     </style>
 </head>
 <body>
-<h2>Medicine CRUD (Test UI)</h2>
 
-<section>
-    <h3>1) Categories</h3>
-    <input id="catName" placeholder="Category name e.g. Pain Relief">
-    <button onclick="createCategory()">Add Category</button>
-    <button onclick="loadCategories()">Refresh Categories</button>
-    <select id="categorySelect"></select>
-</section>
+    <div class="container">
+        
+        <div class="header-actions">
+            <h1>MediMart Dashboard</h1>
+            <p style="color: var(--text-muted)">Manage Inventory & Categories</p>
+        </div>
 
-<hr>
+        <!-- Categories Section -->
+        <div class="glass-panel">
+            <h2>Categories</h2>
+            <div class="flex-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>Category Name</label>
+                    <input id="catName" placeholder="e.g. Pain Relief, Antibiotics">
+                </div>
+                <button onclick="createCategory()">Add Category</button>
+                <button class="secondary" onclick="loadCategories()">Refresh</button>
+            </div>
+        </div>
 
-<section>
-    <h3>2) Add / Update Medicine</h3>
-    <input id="medId" placeholder="ID (only for update)">
-    <input id="sku" placeholder="SKU (MED001)">
-    <input id="name" placeholder="Name (Panadol)">
-    <input id="brand" placeholder="Brand">
-    <input id="dosage" placeholder="Dosage (500mg)">
-    <input id="price" placeholder="Price (50.00)">
-    <input id="stockQty" placeholder="Stock (100)">
-    <input id="expiryDate" placeholder="Expiry (YYYY-MM-DD)">
-    <select id="prescriptionRequired">
-        <option value="false">OTC (No Prescription)</option>
-        <option value="true">Prescription Required</option>
-    </select>
-    <select id="status">
-        <option>AVAILABLE</option>
-        <option>OUT_OF_STOCK</option>
-        <option>DISCONTINUED</option>
-    </select>
-    <br>
-    <button onclick="createMedicine()">Create</button>
-    <button onclick="updateMedicine()">Update</button>
-    <button onclick="loadMedicines()">Refresh List</button>
-</section>
+        <!-- Add/Update Medicine Section -->
+        <div class="glass-panel">
+            <h2>Manage Medicine</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>ID (Leave empty to Create)</label>
+                    <input id="medId" placeholder="Medicine ID">
+                </div>
 
-<section>
-    <h3>3) Medicine List</h3>
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th><th>SKU</th><th>Name</th><th>Brand</th><th>Price</th>
-            <th>Stock</th><th>Status</th><th>Category</th><th>Actions</th>
-        </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-    </table>
-</section>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input id="name" placeholder="e.g. Panadol">
+                </div>
+                <div class="form-group">
+                    <label>Brand</label>
+                    <input id="brand" placeholder="e.g. GSK">
+                </div>
+                <div class="form-group">
+                    <label>Dosage</label>
+                    <input id="dosage" placeholder="e.g. 500mg">
+                </div>
+                <div class="form-group">
+                    <label>Price ($)</label>
+                    <input type="number" step="0.01" id="price" placeholder="e.g. 10.50">
+                </div>
+                <div class="form-group">
+                    <label>Stock Quantity</label>
+                    <input type="number" id="stockQty" placeholder="e.g. 100">
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="date" id="expiryDate">
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="type">
+                        <option value="OTC">OTC (No Prescription)</option>
+                        <option value="PRESCRIPTION">Prescription Required</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="categorySelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>Status (Update Only)</label>
+                    <select id="status">
+                        <option value="AVAILABLE">Available</option>
+                        <option value="OUT_OF_STOCK">Out of Stock</option>
+                        <option value="DISCONTINUED">Discontinued</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex-row" style="margin-top: 1.5rem;">
+                <button onclick="saveMedicine()">Save Medicine</button>
+                <button class="secondary" onclick="clearForm()">Clear Form</button>
+            </div>
+        </div>
 
-<script>
-    async function loadCategories(){
-        const res = await fetch('/api/categories');
-        const data = await res.json();
-        const sel = document.getElementById('categorySelect');
-        sel.innerHTML = '';
-        data.forEach(c=>{
-            const opt = document.createElement('option');
-            opt.value = c.id;
-            opt.textContent = `${c.id} - ${c.name}`;
-            sel.appendChild(opt);
+        <!-- Inventory List Section -->
+        <div class="glass-panel">
+            <div class="header-actions" style="margin-bottom: 1rem;">
+                <h2>Inventory List</h2>
+                <button class="secondary" onclick="loadMedicines()">Refresh List</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>SKU</th>
+                            <th>Name & Brand</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rows">
+                        <!-- Rows will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast">Operation successful</div>
+
+    <script>
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = isError ? 'error show' : 'show';
+            setTimeout(() => toast.className = '', 3000);
+        }
+
+        async function apiCall(url, method = 'GET', body = null) {
+            try {
+                const options = {
+                    method,
+                    headers: body ? { 'Content-Type': 'application/json' } : {}
+                };
+                if (body) options.body = JSON.stringify(body);
+                
+                const res = await fetch(url, options);
+                
+                if (!res.ok) {
+                    const errText = await res.text();
+                    let errMsg = errText;
+                    try { 
+                        const errJson = JSON.parse(errText);
+                        errMsg = Object.values(errJson).join(', ') || errJson.error || errText;
+                    } catch(e) {}
+                    throw new Error(errMsg);
+                }
+                
+                if(res.status !== 204) {
+                    return await res.json();
+                }
+            } catch (err) {
+                showToast(err.message, true);
+                throw err;
+            }
+        }
+
+        async function loadCategories() {
+            const data = await apiCall('/api/categories');
+            const sel = document.getElementById('categorySelect');
+            sel.innerHTML = '';
+            data.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                sel.appendChild(opt);
+            });
+        }
+
+        async function createCategory() {
+            const name = document.getElementById('catName').value.trim();
+            if (!name) return showToast('Category name is required', true);
+            await apiCall('/api/categories', 'POST', { name });
+            document.getElementById('catName').value = '';
+            showToast('Category added successfully');
+            await loadCategories();
+        }
+
+        function clearForm() {
+            ['medId', 'name', 'brand', 'dosage', 'price', 'stockQty', 'expiryDate'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        function editMedicine(med) {
+            document.getElementById('medId').value = med.id || '';
+
+            document.getElementById('name').value = med.name || '';
+            document.getElementById('brand').value = med.brand || '';
+            document.getElementById('dosage').value = med.dosage || '';
+            document.getElementById('price').value = med.price || '';
+            document.getElementById('stockQty').value = med.stockQty || '';
+            document.getElementById('expiryDate').value = med.expiryDate || '';
+            document.getElementById('type').value = med.prescriptionRequired ? 'PRESCRIPTION' : 'OTC';
+            document.getElementById('categorySelect').value = med.categoryId || '';
+            document.getElementById('status').value = med.status || 'AVAILABLE';
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function saveMedicine() {
+            const id = document.getElementById('medId').value.trim();
+            
+            const payload = {
+                name: document.getElementById('name').value.trim(),
+                brand: document.getElementById('brand').value.trim(),
+                dosage: document.getElementById('dosage').value.trim(),
+                price: parseFloat(document.getElementById('price').value || '0'),
+                stockQty: parseInt(document.getElementById('stockQty').value || '0', 10),
+                expiryDate: document.getElementById('expiryDate').value || null,
+                categoryId: parseInt(document.getElementById('categorySelect').value, 10),
+                status: document.getElementById('status').value
+            };
+
+            if (id) {
+                // Update
+                await apiCall(`/api/medicines/${id}`, 'PUT', payload);
+                showToast('Medicine updated successfully');
+            } else {
+                // Create
+
+                payload.type = document.getElementById('type').value;
+                await apiCall(`/api/medicines`, 'POST', payload);
+                showToast('Medicine created successfully');
+            }
+            
+            clearForm();
+            await loadMedicines();
+        }
+
+        async function deleteMedicine(id) {
+            if(!confirm('Are you sure you want to discontinue this medicine?')) return;
+            await apiCall(`/api/medicines/${id}`, 'DELETE');
+            showToast('Medicine discontinued');
+            await loadMedicines();
+        }
+
+        function getStatusBadge(status) {
+            const statusMap = {
+                'AVAILABLE': '<span class="status-badge status-available">Available</span>',
+                'OUT_OF_STOCK': '<span class="status-badge status-out">Out of Stock</span>',
+                'DISCONTINUED': '<span class="status-badge status-disc">Discontinued</span>'
+            };
+            return statusMap[status] || status;
+        }
+
+        async function loadMedicines() {
+            const data = await apiCall('/api/medicines');
+            const tbody = document.getElementById('rows');
+            tbody.innerHTML = '';
+            
+            // Store data globally for editing
+            window.medicinesData = data;
+
+            data.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${m.id}</td>
+                    <td style="font-family: monospace; color: var(--text-muted);">${m.sku}</td>
+                    <td>
+                        <div style="font-weight: 500; color: white;">${m.name} ${m.dosage ? `(${m.dosage})` : ''}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${m.brand || 'No Brand'}</div>
+                    </td>
+                    <td>${m.categoryName || '-'}</td>
+                    <td style="font-weight: 500;">$${m.price?.toFixed(2)}</td>
+                    <td>${m.stockQty}</td>
+                    <td>${getStatusBadge(m.status)}</td>
+                    <td>
+                        <button class="secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick='editMedicine(window.medicinesData.find(x => x.id === ${m.id}))'>Edit</button>
+                        <button class="danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="deleteMedicine(${m.id})">Discontinue</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Init
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCategories().then(loadMedicines);
         });
-    }
-
-    async function createCategory(){
-        const name = document.getElementById('catName').value.trim();
-        if(!name) return alert('Category name required');
-        await fetch('/api/categories', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({name})
-        });
-        document.getElementById('catName').value = '';
-        await loadCategories();
-    }
-
-    function readMedForm(){
-        return {
-            sku: document.getElementById('sku').value.trim(),
-            name: document.getElementById('name').value.trim(),
-            brand: document.getElementById('brand').value.trim(),
-            dosage: document.getElementById('dosage').value.trim(),
-            price: document.getElementById('price').value,
-            stockQty: parseInt(document.getElementById('stockQty').value || '0', 10),
-            expiryDate: document.getElementById('expiryDate').value || null,
-            prescriptionRequired: document.getElementById('prescriptionRequired').value === 'true',
-            status: document.getElementById('status').value
-        };
-    }
-
-    async function createMedicine(){
-        const categoryId = document.getElementById('categorySelect').value;
-        const m = readMedForm();
-        if(!m.sku || !m.name) return alert('SKU and Name required');
-        await fetch(`/api/medicines?categoryId=${categoryId}`, {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify(m)
-        });
-        await loadMedicines();
-    }
-
-    async function updateMedicine(){
-        const id = document.getElementById('medId').value.trim();
-        if(!id) return alert('Put ID for update');
-        const categoryId = document.getElementById('categorySelect').value;
-        const m = readMedForm();
-        await fetch(`/api/medicines/${id}?categoryId=${categoryId}`, {
-            method:'PUT',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify(m)
-        });
-        await loadMedicines();
-    }
-
-    async function deleteMedicine(id){
-        await fetch(`/api/medicines/${id}`, { method:'DELETE' });
-        await loadMedicines();
-    }
-
-    async function loadMedicines(){
-        const res = await fetch('/api/medicines');
-        const data = await res.json();
-        const tbody = document.getElementById('rows');
-        tbody.innerHTML = '';
-        data.forEach(m=>{
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-        <td>${m.id}</td>
-        <td>${m.sku}</td>
-        <td>${m.name}</td>
-        <td>${m.brand ?? ''}</td>
-        <td>${m.price}</td>
-        <td>${m.stockQty}</td>
-        <td>${m.status}</td>
-        <td>${m.category?.name ?? ''}</td>
-        <td><button onclick="deleteMedicine(${m.id})">Delete</button></td>
-      `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    // init
-    loadCategories().then(loadMedicines);
-</script>
+    </script>
 </body>
 </html>
