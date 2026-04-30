@@ -8,7 +8,12 @@ import org.pgno20.medimart.service.MedicineService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/medicines")
@@ -26,15 +31,31 @@ public class MedicineController {
         return ResponseEntity.ok(medicineService.create(req));
     }
 
-    // Read all / search
     @GetMapping
-    public ResponseEntity<List<MedicineResponse>> list(
+    public ResponseEntity<Page<MedicineResponse>> list(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            @PageableDefault(size = 20) Pageable pageable
     ) {
-        return ResponseEntity.ok(medicineService.search(name, brand, categoryId, status));
+        return ResponseEntity.ok(medicineService.search(name, brand, categoryId, status, pageable));
+    }
+
+    @GetMapping("/storefront")
+    public ResponseEntity<Page<org.pgno20.medimart.dto.StorefrontMedicineDTO>> listStorefront(
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        if (search != null && !search.isBlank()) {
+            return ResponseEntity.ok(medicineService.searchStorefrontMedicines(search, pageable));
+        }
+        return ResponseEntity.ok(medicineService.getStorefrontMedicines(pageable));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getStats() {
+        return ResponseEntity.ok(medicineService.getStats());
     }
 
     // Read one

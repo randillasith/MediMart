@@ -46,8 +46,9 @@ public abstract class Medicine {
 
     protected Medicine() {}
 
-    // Polymorphism example: subclasses can change label
+    // Polymorphism example: subclasses can change label and calculate price differently
     public abstract String getTypeLabel();
+    public abstract BigDecimal getFinalPrice();
 
     // Common helpers
     public boolean isExpired() {
