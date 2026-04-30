@@ -9,8 +9,6 @@ public class MedicineCreateRequest {
     @NotBlank
     private String type; // OTC or PRESCRIPTION
 
-    @NotBlank
-    private String sku;
 
     @NotBlank
     private String name;
@@ -31,7 +29,6 @@ public class MedicineCreateRequest {
 
     // getters/setters
     public String getType() { return type; }
-    public String getSku() { return sku; }
     public String getName() { return name; }
     public String getBrand() { return brand; }
     public String getDosage() { return dosage; }
@@ -41,7 +38,6 @@ public class MedicineCreateRequest {
     public Long getCategoryId() { return categoryId; }
 
     public void setType(String type) { this.type = type; }
-    public void setSku(String sku) { this.sku = sku; }
     public void setName(String name) { this.name = name; }
     public void setBrand(String brand) { this.brand = brand; }
     public void setDosage(String dosage) { this.dosage = dosage; }

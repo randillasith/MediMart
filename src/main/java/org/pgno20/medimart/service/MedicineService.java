@@ -24,18 +24,17 @@ public class MedicineService {
 
     @Transactional
     public MedicineResponse create(MedicineCreateRequest req) {
-        if (medicineRepository.findBySku(req.getSku()).isPresent()) {
-            throw new IllegalArgumentException("SKU already exists: " + req.getSku());
-        }
+
 
         Category category = categoryRepository.findById(req.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
         Medicine medicine = buildMedicineByType(req.getType());
-        medicine.setSku(req.getSku());
+        // Shorten the temp string so it fits in the 40-char limit
+        medicine.setSku("TEMP-" + java.util.UUID.randomUUID().toString().substring(0, 8));
         medicine.setName(req.getName());
         medicine.setBrand(req.getBrand());
-        medicine.setDosage(req.getDosage());
+        medicine.setDosage(formatDosage(req.getDosage()));
         medicine.setPrice(req.getPrice());
         medicine.setStockQty(req.getStockQty());
         medicine.setExpiryDate(req.getExpiryDate());
@@ -48,7 +47,13 @@ public class MedicineService {
             medicine.normalizeStatusFromStock();
         }
 
+        // First save to generate the ID
         Medicine saved = medicineRepository.save(medicine);
+        
+        // Update SKU with the MED001 format based on the generated ID
+        saved.setSku(String.format("MED%03d", saved.getId()));
+        saved = medicineRepository.save(saved);
+        
         return toResponse(saved);
     }
 
@@ -89,7 +94,7 @@ public class MedicineService {
 
         medicine.setName(req.getName());
         medicine.setBrand(req.getBrand());
-        medicine.setDosage(req.getDosage());
+        medicine.setDosage(formatDosage(req.getDosage()));
         medicine.setPrice(req.getPrice());
         medicine.setStockQty(req.getStockQty());
         medicine.setExpiryDate(req.getExpiryDate());
@@ -143,5 +148,16 @@ public class MedicineService {
         r.setCategoryId(m.getCategory().getId());
         r.setCategoryName(m.getCategory().getName());
         return r;
+    }
+
+    private String formatDosage(String dosage) {
+        if (dosage == null || dosage.isBlank()) {
+            return dosage;
+        }
+        dosage = dosage.trim();
+        if (dosage.matches("\\d+(\\.\\d+)?")) {
+            return dosage + "mg";
+        }
+        return dosage;
     }
 }
