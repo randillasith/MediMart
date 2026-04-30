@@ -9,7 +9,12 @@ import org.pgno20.medimart.repository.MedicineRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.math.BigDecimal;
 
 @Service
 public class MedicineService {
@@ -24,18 +29,17 @@ public class MedicineService {
 
     @Transactional
     public MedicineResponse create(MedicineCreateRequest req) {
-        if (medicineRepository.findBySku(req.getSku()).isPresent()) {
-            throw new IllegalArgumentException("SKU already exists: " + req.getSku());
-        }
+
 
         Category category = categoryRepository.findById(req.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
         Medicine medicine = buildMedicineByType(req.getType());
-        medicine.setSku(req.getSku());
+        // Shorten the temp string so it fits in the 40-char limit
+        medicine.setSku("TEMP-" + java.util.UUID.randomUUID().toString().substring(0, 8));
         medicine.setName(req.getName());
         medicine.setBrand(req.getBrand());
-        medicine.setDosage(req.getDosage());
+        medicine.setDosage(formatDosage(req.getDosage()));
         medicine.setPrice(req.getPrice());
         medicine.setStockQty(req.getStockQty());
         medicine.setExpiryDate(req.getExpiryDate());
@@ -48,12 +52,35 @@ public class MedicineService {
             medicine.normalizeStatusFromStock();
         }
 
+        // First save to generate the ID
         Medicine saved = medicineRepository.save(medicine);
+        
+        // Update SKU with the MED001 format based on the generated ID
+        saved.setSku(String.format("MED%03d", saved.getId()));
+        saved = medicineRepository.save(saved);
+        
         return toResponse(saved);
     }
 
-    public List<MedicineResponse> listAll() {
-        return medicineRepository.findAll().stream().map(this::toResponse).toList();
+    public Page<MedicineResponse> listAll(Pageable pageable) {
+        return medicineRepository.findAll(pageable).map(this::toResponse);
+    }
+
+    public Page<org.pgno20.medimart.dto.StorefrontMedicineDTO> getStorefrontMedicines(Pageable pageable) {
+        return medicineRepository.getStorefrontMedicines(pageable);
+    }
+
+    public Page<org.pgno20.medimart.dto.StorefrontMedicineDTO> searchStorefrontMedicines(String search, Pageable pageable) {
+        return medicineRepository.searchStorefrontMedicines(search, pageable);
+    }
+
+    public Map<String, Object> getStats() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalProducts", medicineRepository.countAll());
+        stats.put("lowStock",      medicineRepository.countLowStock());
+        stats.put("outOfStock",    medicineRepository.countOutOfStock());
+        stats.put("totalValue",    medicineRepository.sumTotalValue());
+        return stats;
     }
 
     public MedicineResponse getById(Long id) {
@@ -62,21 +89,24 @@ public class MedicineService {
         return toResponse(m);
     }
 
-    public List<MedicineResponse> search(String name, String brand, Long categoryId, String status) {
+    public Page<MedicineResponse> search(String name, String brand, Long categoryId, String status, Pageable pageable) {
         // simple search priority (you can improve later)
         if (name != null && !name.isBlank()) {
-            return medicineRepository.findByNameContainingIgnoreCase(name).stream().map(this::toResponse).toList();
+            return medicineRepository.findByNameContainingIgnoreCase(name, pageable).map(this::toResponse);
         }
         if (brand != null && !brand.isBlank()) {
-            return medicineRepository.findByBrandContainingIgnoreCase(brand).stream().map(this::toResponse).toList();
+            return medicineRepository.findByBrandContainingIgnoreCase(brand, pageable).map(this::toResponse);
         }
         if (categoryId != null) {
-            return medicineRepository.findByCategory_Id(categoryId).stream().map(this::toResponse).toList();
+            return medicineRepository.findByCategory_Id(categoryId, pageable).map(this::toResponse);
         }
         if (status != null && !status.isBlank()) {
-            return medicineRepository.findByStatus(status).stream().map(this::toResponse).toList();
+            if ("LOW_STOCK".equalsIgnoreCase(status)) {
+                return medicineRepository.findByStockQtyBetween(1, 19, pageable).map(this::toResponse);
+            }
+            return medicineRepository.findByStatus(status, pageable).map(this::toResponse);
         }
-        return listAll();
+        return listAll(pageable);
     }
 
     @Transactional
@@ -89,7 +119,7 @@ public class MedicineService {
 
         medicine.setName(req.getName());
         medicine.setBrand(req.getBrand());
-        medicine.setDosage(req.getDosage());
+        medicine.setDosage(formatDosage(req.getDosage()));
         medicine.setPrice(req.getPrice());
         medicine.setStockQty(req.getStockQty());
         medicine.setExpiryDate(req.getExpiryDate());
@@ -135,6 +165,7 @@ public class MedicineService {
         r.setBrand(m.getBrand());
         r.setDosage(m.getDosage());
         r.setPrice(m.getPrice());
+        r.setFinalPrice(m.getFinalPrice());
         r.setStockQty(m.getStockQty());
         r.setExpiryDate(m.getExpiryDate());
         r.setPrescriptionRequired(Boolean.TRUE.equals(m.getPrescriptionRequired()));
@@ -143,5 +174,16 @@ public class MedicineService {
         r.setCategoryId(m.getCategory().getId());
         r.setCategoryName(m.getCategory().getName());
         return r;
+    }
+
+    private String formatDosage(String dosage) {
+        if (dosage == null || dosage.isBlank()) {
+            return dosage;
+        }
+        dosage = dosage.trim();
+        if (dosage.matches("\\d+(\\.\\d+)?")) {
+            return dosage + "mg";
+        }
+        return dosage;
     }
 }
