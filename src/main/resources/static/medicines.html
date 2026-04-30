@@ -303,9 +303,18 @@
 
         <!-- Inventory List Section -->
         <div class="glass-panel">
-            <div class="header-actions" style="margin-bottom: 1rem;">
-                <h2>Inventory List</h2>
-                <button class="secondary" onclick="loadMedicines()">Refresh List</button>
+            <div class="header-actions" style="margin-bottom: 1rem; align-items: flex-end;">
+                <div>
+                    <h2>Inventory List</h2>
+                </div>
+                <div class="flex-row" style="align-items: center;">
+                    <input id="searchName" placeholder="Search name..." style="padding: 0.5rem; width: 140px;">
+                    <input id="searchBrand" placeholder="Search brand..." style="padding: 0.5rem; width: 140px;">
+                    <select id="searchCategory" style="padding: 0.5rem; width: 140px;">
+                        <option value="">All Categories</option>
+                    </select>
+                    <button class="secondary" onclick="loadMedicines()" style="padding: 0.5rem 1rem;">Search</button>
+                </div>
             </div>
             <div class="table-container">
                 <table>
@@ -315,7 +324,8 @@
                             <th>SKU</th>
                             <th>Name & Brand</th>
                             <th>Category</th>
-                            <th>Price</th>
+                            <th>Base Price</th>
+                            <th>Final Price</th>
                             <th>Stock</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -371,13 +381,23 @@
 
         async function loadCategories() {
             const data = await apiCall('/api/categories');
+            
             const sel = document.getElementById('categorySelect');
             sel.innerHTML = '';
+            
+            const searchSel = document.getElementById('searchCategory');
+            searchSel.innerHTML = '<option value="">All Categories</option>';
+            
             (data.content || data).forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
                 opt.textContent = c.name;
                 sel.appendChild(opt);
+                
+                const searchOpt = document.createElement('option');
+                searchOpt.value = c.id;
+                searchOpt.textContent = c.name;
+                searchSel.appendChild(searchOpt);
             });
         }
 
@@ -459,7 +479,16 @@
         }
 
         async function loadMedicines() {
-            const data = await apiCall('/api/medicines');
+            const sName = document.getElementById('searchName')?.value || '';
+            const sBrand = document.getElementById('searchBrand')?.value || '';
+            const sCat = document.getElementById('searchCategory')?.value || '';
+            
+            let url = '/api/medicines?';
+            if (sName) url += `name=${encodeURIComponent(sName)}&`;
+            if (sBrand) url += `brand=${encodeURIComponent(sBrand)}&`;
+            if (sCat) url += `categoryId=${sCat}&`;
+            
+            const data = await apiCall(url);
             const tbody = document.getElementById('rows');
             tbody.innerHTML = '';
             
@@ -476,7 +505,8 @@
                         <div style="font-size: 0.8rem; color: var(--text-muted);">${m.brand || 'No Brand'}</div>
                     </td>
                     <td>${m.categoryName || '-'}</td>
-                    <td style="font-weight: 500;">$${m.price?.toFixed(2)}</td>
+                    <td style="color: var(--text-muted); text-decoration: line-through; font-size: 0.85rem;">$${m.price?.toFixed(2)}</td>
+                    <td style="font-weight: 600; color: #34D399;">$${m.finalPrice?.toFixed(2)} <span style="font-size:0.65rem; color:var(--text-muted);">${m.typeLabel}</span></td>
                     <td>${m.stockQty}</td>
                     <td>${getStatusBadge(m.status)}</td>
                     <td>

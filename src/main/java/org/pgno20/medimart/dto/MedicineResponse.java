@@ -10,6 +10,7 @@ public class MedicineResponse {
     private String brand;
     private String dosage;
     private BigDecimal price;
+    private BigDecimal finalPrice;
     private Integer stockQty;
     private LocalDate expiryDate;
     private boolean prescriptionRequired;
@@ -25,6 +26,7 @@ public class MedicineResponse {
     public String getBrand() { return brand; }
     public String getDosage() { return dosage; }
     public BigDecimal getPrice() { return price; }
+    public BigDecimal getFinalPrice() { return finalPrice; }
     public Integer getStockQty() { return stockQty; }
     public LocalDate getExpiryDate() { return expiryDate; }
     public boolean isPrescriptionRequired() { return prescriptionRequired; }
@@ -39,6 +41,7 @@ public class MedicineResponse {
     public void setBrand(String brand) { this.brand = brand; }
     public void setDosage(String dosage) { this.dosage = dosage; }
     public void setPrice(BigDecimal price) { this.price = price; }
+    public void setFinalPrice(BigDecimal finalPrice) { this.finalPrice = finalPrice; }
     public void setStockQty(Integer stockQty) { this.stockQty = stockQty; }
     public void setExpiryDate(LocalDate expiryDate) { this.expiryDate = expiryDate; }
     public void setPrescriptionRequired(boolean prescriptionRequired) { this.prescriptionRequired = prescriptionRequired; }

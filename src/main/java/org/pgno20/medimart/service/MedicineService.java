@@ -143,6 +143,7 @@ public class MedicineService {
         r.setBrand(m.getBrand());
         r.setDosage(m.getDosage());
         r.setPrice(m.getPrice());
+        r.setFinalPrice(m.getFinalPrice());
         r.setStockQty(m.getStockQty());
         r.setExpiryDate(m.getExpiryDate());
         r.setPrescriptionRequired(Boolean.TRUE.equals(m.getPrescriptionRequired()));
