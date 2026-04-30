@@ -44,8 +44,12 @@ public class MedicineController {
 
     @GetMapping("/storefront")
     public ResponseEntity<Page<org.pgno20.medimart.dto.StorefrontMedicineDTO>> listStorefront(
+            @RequestParam(required = false) String search,
             @PageableDefault(size = 20) Pageable pageable
     ) {
+        if (search != null && !search.isBlank()) {
+            return ResponseEntity.ok(medicineService.searchStorefrontMedicines(search, pageable));
+        }
         return ResponseEntity.ok(medicineService.getStorefrontMedicines(pageable));
     }
 

@@ -1,10 +1,12 @@
 package org.pgno20.medimart.repository;
 
+import org.pgno20.medimart.dto.StorefrontMedicineDTO;
 import org.pgno20.medimart.model.Medicine;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -23,12 +25,19 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     Page<Medicine> findByStockQtyBetween(Integer min, Integer max, Pageable pageable);
 
-    // --- Storefront query (groups batches together) ---
+    // --- Storefront queries (groups batches together for customer view) ---
+
     @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate)) " +
            "FROM Medicine m " +
            "WHERE m.status = 'AVAILABLE' " +
            "GROUP BY m.name, m.brand, m.dosage, m.category.name")
-    Page<org.pgno20.medimart.dto.StorefrontMedicineDTO> getStorefrontMedicines(Pageable pageable);
+    Page<StorefrontMedicineDTO> getStorefrontMedicines(Pageable pageable);
+
+    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate)) " +
+           "FROM Medicine m " +
+           "WHERE m.status = 'AVAILABLE' AND LOWER(m.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "GROUP BY m.name, m.brand, m.dosage, m.category.name")
+    Page<StorefrontMedicineDTO> searchStorefrontMedicines(@Param("search") String search, Pageable pageable);
 
     // --- Stats queries (run entirely in DB, never loads all rows into memory) ---
     @Query("SELECT COUNT(m) FROM Medicine m")
