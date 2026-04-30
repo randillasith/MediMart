@@ -18,6 +18,7 @@ public class MedicineResponse {
     private String typeLabel;
     private Long categoryId;
     private String categoryName;
+    private String imageUrl;
 
     // getters/setters
     public Long getId() { return id; }
@@ -34,6 +35,7 @@ public class MedicineResponse {
     public String getTypeLabel() { return typeLabel; }
     public Long getCategoryId() { return categoryId; }
     public String getCategoryName() { return categoryName; }
+    public String getImageUrl() { return imageUrl; }
 
     public void setId(Long id) { this.id = id; }
     public void setSku(String sku) { this.sku = sku; }
@@ -49,4 +51,5 @@ public class MedicineResponse {
     public void setTypeLabel(String typeLabel) { this.typeLabel = typeLabel; }
     public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

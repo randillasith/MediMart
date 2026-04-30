@@ -375,6 +375,11 @@
                         <input type="date" id="expiryDate"
                             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Product Image</label>
+                        <input type="file" id="imageFile" accept="image/*"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
+                    </div>
                     <div id="statusGroup" class="hidden">
                         <label
                             class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Status</label>
@@ -723,12 +728,14 @@
                     categoryId: parseInt(document.getElementById('categorySelect').value, 10)
                 };
 
+                let savedId = id;
                 if (id) {
                     payload.status = document.getElementById('status').value;
                     await apiCall(`/api/medicines/${id}`, 'PUT', payload);
+                    await uploadPendingImage(id);
                     showToast('Product updated successfully');
                     closeModal();
-                    await loadMedicines(currentPage);
+                    loadMedicines(currentPage);
                 } else {
                     payload.type = document.getElementById('type').value;
 
@@ -763,8 +770,22 @@
             }
         }
 
+        async function uploadPendingImage(id) {
+            const imageInput = document.getElementById('imageFile');
+            if (imageInput && imageInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('image', imageInput.files[0]);
+                const res = await fetch(`/api/medicines/${id}/image`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!res.ok) throw new Error("Product saved, but image upload failed.");
+            }
+        }
+
         async function executeSave(payload) {
             const savedProduct = await apiCall(`/api/medicines`, 'POST', payload);
+            await uploadPendingImage(savedProduct.id);
             closeModal();
             showSuccessModal(savedProduct);
         }

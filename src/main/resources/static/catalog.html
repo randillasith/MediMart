@@ -430,7 +430,7 @@
 
     function renderProductCard(p, index) {
         const grid = document.getElementById('productGrid');
-        const img = PRODUCT_IMAGES[index % PRODUCT_IMAGES.length];
+        const img = p.imageUrl ? `/uploads/${p.imageUrl}` : PRODUCT_IMAGES[index % PRODUCT_IMAGES.length];
         const title = p.name;
         const price = p.minPrice ? `$${Number(p.minPrice).toFixed(2)}` : '$0.00';
         

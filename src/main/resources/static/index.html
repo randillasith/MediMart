@@ -294,7 +294,7 @@
     function renderCard(p, index, tag) {
         const title = p.dosage ? `${p.name} ${p.dosage}` : p.name;
         const price = p.minPrice ? `$${Number(p.minPrice).toFixed(2)}` : '$0.00';
-        const img = IMAGES[index % IMAGES.length];
+        const img = p.imageUrl ? `/uploads/${p.imageUrl}` : IMAGES[index % IMAGES.length];
         let stock = '';
         if (p.totalStock === 0) stock = '<p class="text-xs text-error font-bold mb-4">Out of Stock</p>';
         else if (p.totalStock < 50) stock = `<p class="text-xs text-orange-500 font-bold mb-4">Only ${p.totalStock} left</p>`;
@@ -327,7 +327,7 @@
             const grid = document.getElementById('newArrivalsGrid');
             grid.innerHTML = '';
             products.forEach((p, i) => {
-                const dto = { name: p.name, brand: p.brand, dosage: p.dosage, minPrice: p.price, totalStock: p.stockQty, categoryName: p.categoryName };
+                const dto = { name: p.name, brand: p.brand, dosage: p.dosage, minPrice: p.price, totalStock: p.stockQty, categoryName: p.categoryName, imageUrl: p.imageUrl };
                 grid.appendChild(renderCard(dto, i + 2, i === 0 ? 'New' : ''));
             });
         } catch(e) { console.error(e); }

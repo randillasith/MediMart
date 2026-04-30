@@ -12,6 +12,7 @@ public class StorefrontMedicineDTO {
     private String categoryName;
     private LocalDate earliestExpiry;
     private Boolean prescriptionRequired;
+    private String imageUrl;
 
     public StorefrontMedicineDTO() {}
 
@@ -26,10 +27,11 @@ public class StorefrontMedicineDTO {
         this.earliestExpiry = earliestExpiry;
     }
 
-    // Constructor including prescriptionRequired (8 args)
-    public StorefrontMedicineDTO(String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry, Boolean prescriptionRequired) {
+    // Constructor including prescriptionRequired and imageUrl
+    public StorefrontMedicineDTO(String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry, Boolean prescriptionRequired, String imageUrl) {
         this(name, brand, dosage, minPrice, totalStock, categoryName, earliestExpiry);
         this.prescriptionRequired = prescriptionRequired;
+        this.imageUrl = imageUrl;
     }
 
     public String getName() { return name; }
@@ -55,4 +57,7 @@ public class StorefrontMedicineDTO {
 
     public Boolean getPrescriptionRequired() { return prescriptionRequired; }
     public void setPrescriptionRequired(Boolean prescriptionRequired) { this.prescriptionRequired = prescriptionRequired; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

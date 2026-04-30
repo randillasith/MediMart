@@ -40,6 +40,9 @@ public abstract class Medicine {
     @Column(nullable=false, length=30)
     private String status = "AVAILABLE"; // AVAILABLE / OUT_OF_STOCK / DISCONTINUED
 
+    @Column(length=255)
+    private String imageUrl;
+
     @ManyToOne(optional=false)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -71,6 +74,7 @@ public abstract class Medicine {
     public LocalDate getExpiryDate() { return expiryDate; }
     public Boolean getPrescriptionRequired() { return prescriptionRequired; }
     public String getStatus() { return status; }
+    public String getImageUrl() { return imageUrl; }
     public Category getCategory() { return category; }
 
     public void setId(Long id) { this.id = id; }
@@ -83,5 +87,6 @@ public abstract class Medicine {
     public void setExpiryDate(LocalDate expiryDate) { this.expiryDate = expiryDate; }
     public void setPrescriptionRequired(Boolean prescriptionRequired) { this.prescriptionRequired = prescriptionRequired; }
     public void setStatus(String status) { this.status = status; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public void setCategory(Category category) { this.category = category; }
 }

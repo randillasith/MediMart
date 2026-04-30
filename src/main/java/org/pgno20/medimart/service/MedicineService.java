@@ -15,6 +15,12 @@ import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.HashMap;
 import java.math.BigDecimal;
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
+import java.util.UUID;
 
 @Service
 public class MedicineService {
@@ -148,6 +154,41 @@ public class MedicineService {
         medicineRepository.save(medicine);
     }
 
+    @Transactional
+    public String uploadImage(Long id, MultipartFile file) {
+        Medicine medicine = medicineRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Medicine not found"));
+
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+
+            String filename = medicine.getSku() + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
+            Path uploadPath = Paths.get("uploads");
+            
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), filePath);
+
+            medicine.setImageUrl(filename);
+            medicineRepository.save(medicine);
+
+            return filename;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store image file", e);
+        }
+    }
+
     private Medicine buildMedicineByType(String type) {
         if (type == null) throw new IllegalArgumentException("type is required");
 
@@ -174,6 +215,7 @@ public class MedicineService {
         r.setTypeLabel(m.getTypeLabel());
         r.setCategoryId(m.getCategory().getId());
         r.setCategoryName(m.getCategory().getName());
+        r.setImageUrl(m.getImageUrl());
         return r;
     }
 
