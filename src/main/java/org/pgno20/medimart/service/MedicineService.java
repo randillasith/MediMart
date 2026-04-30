@@ -111,6 +111,9 @@ public class MedicineService {
             return medicineRepository.findByCategory_Id(categoryId, pageable).map(this::toResponse);
         }
         if (status != null && !status.isBlank()) {
+            if ("LOW_STOCK".equalsIgnoreCase(status)) {
+                return medicineRepository.findByStockQtyBetween(1, 19, pageable).map(this::toResponse);
+            }
             return medicineRepository.findByStatus(status, pageable).map(this::toResponse);
         }
         return listAll(pageable);

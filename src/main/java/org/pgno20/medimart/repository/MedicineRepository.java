@@ -16,6 +16,7 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
     Page<Medicine> findByBrandContainingIgnoreCase(String brand, Pageable pageable);
 
     Page<Medicine> findByStatus(String status, Pageable pageable);
-
     Page<Medicine> findByCategory_Id(Long categoryId, Pageable pageable);
+
+    Page<Medicine> findByStockQtyBetween(Integer min, Integer max, Pageable pageable);
 }
