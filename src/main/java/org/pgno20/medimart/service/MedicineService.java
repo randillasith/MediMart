@@ -132,7 +132,8 @@ public class MedicineService {
         // Business rules
         if (medicine.isExpired()) {
             medicine.setStatus("DISCONTINUED");
-        } else {
+        } else if (req.getStatus() == null || req.getStatus().isBlank()) {
+            // Only auto-normalize if the admin didn't explicitly set a status
             medicine.normalizeStatusFromStock();
         }
 
