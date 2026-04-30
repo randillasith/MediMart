@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/medicines")
@@ -39,6 +40,11 @@ public class MedicineController {
             @PageableDefault(size = 20) Pageable pageable
     ) {
         return ResponseEntity.ok(medicineService.search(name, brand, categoryId, status, pageable));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getStats() {
+        return ResponseEntity.ok(medicineService.getStats());
     }
 
     // Read one
