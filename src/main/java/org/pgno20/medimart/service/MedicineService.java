@@ -66,6 +66,10 @@ public class MedicineService {
         return medicineRepository.findAll(pageable).map(this::toResponse);
     }
 
+    public Page<org.pgno20.medimart.dto.StorefrontMedicineDTO> getStorefrontMedicines(Pageable pageable) {
+        return medicineRepository.getStorefrontMedicines(pageable);
+    }
+
     public Map<String, Object> getStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalProducts", medicineRepository.countAll());

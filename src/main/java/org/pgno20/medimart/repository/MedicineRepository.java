@@ -23,6 +23,13 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     Page<Medicine> findByStockQtyBetween(Integer min, Integer max, Pageable pageable);
 
+    // --- Storefront query (groups batches together) ---
+    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate)) " +
+           "FROM Medicine m " +
+           "WHERE m.status = 'AVAILABLE' " +
+           "GROUP BY m.name, m.brand, m.dosage, m.category.name")
+    Page<org.pgno20.medimart.dto.StorefrontMedicineDTO> getStorefrontMedicines(Pageable pageable);
+
     // --- Stats queries (run entirely in DB, never loads all rows into memory) ---
     @Query("SELECT COUNT(m) FROM Medicine m")
     long countAll();

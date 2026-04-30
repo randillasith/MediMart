@@ -42,6 +42,13 @@ public class MedicineController {
         return ResponseEntity.ok(medicineService.search(name, brand, categoryId, status, pageable));
     }
 
+    @GetMapping("/storefront")
+    public ResponseEntity<Page<org.pgno20.medimart.dto.StorefrontMedicineDTO>> listStorefront(
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        return ResponseEntity.ok(medicineService.getStorefrontMedicines(pageable));
+    }
+
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
         return ResponseEntity.ok(medicineService.getStats());
