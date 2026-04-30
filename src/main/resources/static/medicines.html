@@ -36,10 +36,14 @@ html_content = """<!DOCTYPE html>
 <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
         }
-        body { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .glass-overlay {
+            backdrop-filter: blur(12px);
+            background: rgba(249, 249, 255, 0.8);
+        }
+        .shadow-clinical {
+            box-shadow: 0 12px 40px rgba(25, 28, 33, 0.06);
+        }
         
         #toast {
             position: fixed;
@@ -560,6 +564,8 @@ html_content = """<!DOCTYPE html>
         document.getElementById('medicineModal').classList.add('hidden');
     }
 
+    let pendingSavePayload = null;
+
     async function saveMedicine(event) {
         if (event) event.preventDefault();
         
@@ -596,14 +602,84 @@ html_content = """<!DOCTYPE html>
                 await loadMedicines(currentPage);
             } else {
                 payload.type = document.getElementById('type').value;
-                const savedProduct = await apiCall(`/api/medicines`, 'POST', payload);
-                closeModal();
-                showSuccessModal(savedProduct);
+                
+                // Pre-flight duplicate check
+                let pDosage = payload.dosage;
+                if (/^\d+(\.\d+)?$/.test(pDosage)) pDosage += 'mg';
+
+                const checkRes = await apiCall(`/api/medicines?name=${encodeURIComponent(payload.name)}&brand=${encodeURIComponent(payload.brand)}`);
+                const matches = (checkRes.content || checkRes).filter(m => 
+                    m.name.toLowerCase() === payload.name.toLowerCase() && 
+                    (m.brand || '').toLowerCase() === payload.brand.toLowerCase() && 
+                    (m.dosage || '').toLowerCase() === pDosage.toLowerCase() &&
+                    m.typeLabel === payload.type &&
+                    m.price === payload.price &&
+                    m.stockQty === payload.stockQty &&
+                    (m.expiryDate || '') === (payload.expiryDate || '')
+                );
+
+                if (matches.length > 0) {
+                    // Conflict found
+                    pendingSavePayload = payload;
+                    closeModal(); // Hide the Add New Product form
+                    showConflictModal(matches[0], payload);
+                    return; // Pause execution, modal buttons will resume
+                }
+
+                await executeSave(payload);
             }
-            
         } finally {
             saveBtn.disabled = false;
             saveBtn.textContent = originalText;
+        }
+    }
+
+    async function executeSave(payload) {
+        const savedProduct = await apiCall(`/api/medicines`, 'POST', payload);
+        closeModal();
+        showSuccessModal(savedProduct);
+    }
+
+    function showConflictModal(existing, pending) {
+        document.getElementById('conflictExistingName').textContent = existing.name;
+        document.getElementById('conflictExistingBrand').textContent = existing.brand || '-';
+        document.getElementById('conflictExistingDosage').textContent = existing.dosage || '-';
+        document.getElementById('conflictExistingType').textContent = existing.typeLabel || '-';
+        document.getElementById('conflictExistingPrice').textContent = `$${existing.price.toFixed(2)}`;
+        document.getElementById('conflictExistingStock').textContent = `${existing.stockQty} Units in Central`;
+
+        const typeSelect = document.getElementById('type');
+        const pendingTypeLabel = typeSelect.options[typeSelect.selectedIndex].text;
+
+        document.getElementById('conflictNewName').textContent = pending.name;
+        document.getElementById('conflictNewBrand').textContent = pending.brand || '-';
+        document.getElementById('conflictNewDosage').textContent = pending.dosage || '-';
+        document.getElementById('conflictNewType').textContent = pendingTypeLabel;
+        document.getElementById('conflictNewPrice').textContent = `$${pending.price.toFixed(2)}`;
+        document.getElementById('conflictNewStock').textContent = `${pending.stockQty} (New Entry)`;
+
+        document.getElementById('conflictModal').classList.remove('hidden');
+    }
+
+    function discardConflict() {
+        document.getElementById('conflictModal').classList.add('hidden');
+        closeModal();
+        pendingSavePayload = null;
+    }
+
+    async function forceSaveDuplicate() {
+        document.getElementById('conflictModal').classList.add('hidden');
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+        try {
+            await executeSave(pendingSavePayload);
+        } catch (err) {
+            // Error is handled by apiCall toast
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Product';
+            pendingSavePayload = null;
         }
     }
 
@@ -693,6 +769,126 @@ html_content = """<!DOCTYPE html>
         </div>
         <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-secondary to-primary opacity-20"></div>
     </div>
+</div>
+
+<!-- Conflict Modal Overlay Container -->
+<div id="conflictModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-6 glass-overlay">
+<!-- Modal Content -->
+<div class="max-w-4xl w-full max-h-[90vh] bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-clinical border border-outline-variant/10 flex flex-col">
+<!-- Warning Header -->
+<div class="p-8 bg-error-container/30 flex items-start gap-6">
+<div class="w-14 h-14 rounded-full bg-error flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div class="flex-1">
+<h3 class="text-2xl font-black text-on-background mb-1">Duplicate Product Detected</h3>
+<p class="text-slate-500 font-medium">A product with the same details already exists in the catalog. Please review the comparison below before proceeding.</p>
+</div>
+</div>
+<!-- Comparison Section -->
+<div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 relative overflow-y-auto">
+<!-- Vertical Divider Line -->
+<div class="absolute left-1/2 top-10 bottom-10 w-px bg-slate-200"></div>
+<!-- Existing Product Column -->
+<div class="space-y-6">
+<div class="flex items-center gap-3 mb-4">
+<span class="text-xs font-bold uppercase tracking-widest text-slate-500">Existing Catalog Entry</span>
+<span class="px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 text-[10px] font-bold">MATCH FOUND</span>
+</div>
+<div class="h-32 w-full rounded-xl overflow-hidden bg-surface-container-low mb-6">
+<img class="w-full h-full object-cover mix-blend-multiply opacity-80" alt="Existing Product Image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlfZTLIkxP-1IYZnwYj4D6VJ4lOsV2-BKhF9ACt_5sb01TsooMSHoxX9_SZ7orNxCgVefWzanVHKwQWLX-HbdCc18Bp-MWBT3g2oq8eg5xRrv94S5VE-7fR070to7CpihgWtCTh_ZUrSmKJRoQJVKW2eGCgHwAtTqtTkZkCHV3vsfGEEZ2dF-_xnVVRbZxz2SoYlAahcdAo8tXbQjwGmnV22WRlGLC06e-pmi5PHHNgpzntZM0k2sSK89hW6HlCi3t7VXHy94rBWE"/>
+</div>
+<div class="grid grid-cols-1 gap-6">
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Product Name</span>
+<span id="conflictExistingName" class="text-lg font-black text-primary">Amoxicillin Clavulanate</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Brand</span>
+<span id="conflictExistingBrand" class="text-sm font-semibold">MediPharma Pro</span>
+</div>
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Dosage</span>
+<span id="conflictExistingDosage" class="text-sm font-semibold">500mg / 125mg</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Type</span>
+<span id="conflictExistingType" class="text-sm font-semibold">Film-Coated Tablet</span>
+</div>
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Price</span>
+<span id="conflictExistingPrice" class="text-sm font-bold text-teal-600">$24.50</span>
+</div>
+</div>
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Stock Level</span>
+<div class="flex items-center gap-2">
+<span class="h-2 w-2 rounded-full bg-teal-500"></span>
+<span id="conflictExistingStock" class="text-sm font-semibold text-slate-700">142 Units in Central</span>
+</div>
+</div>
+</div>
+</div>
+<!-- New Entry Column -->
+<div class="space-y-6">
+<div class="flex items-center gap-3 mb-4">
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Your New Entry</span>
+<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px]">PENDING</span>
+</div>
+<div class="h-32 w-full rounded-xl overflow-hidden bg-slate-50 mb-6 border-2 border-dashed border-slate-200 flex items-center justify-center">
+<div class="text-center">
+<span class="material-symbols-outlined text-slate-400 text-3xl mb-2">image_not_supported</span>
+<p class="text-xs text-slate-500 font-medium">No Image Uploaded</p>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-6">
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Product Name</span>
+<span id="conflictNewName" class="text-lg font-black text-primary">Amoxicillin Clavulanate</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Brand</span>
+<span id="conflictNewBrand" class="text-sm font-semibold">MediPharma Pro</span>
+</div>
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Dosage</span>
+<span id="conflictNewDosage" class="text-sm font-semibold">500mg / 125mg</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Type</span>
+<span id="conflictNewType" class="text-sm font-semibold">Tablet</span>
+</div>
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Price</span>
+<span id="conflictNewPrice" class="text-sm font-bold text-primary">$26.00</span>
+</div>
+</div>
+<div>
+<span class="block text-xs font-bold text-slate-500 mb-1">Stock Level</span>
+<div class="flex items-center gap-2">
+<span class="h-2 w-2 rounded-full bg-slate-300"></span>
+<span id="conflictNewStock" class="text-sm font-semibold text-slate-500">0 (New Entry)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="px-10 py-6 bg-slate-50 flex justify-end items-center gap-4 border-t border-slate-100">
+<button type="button" onclick="discardConflict()" class="px-6 py-2 rounded-full text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors">
+    Discard Entry
+</button>
+<button type="button" onclick="forceSaveDuplicate()" class="px-6 py-2 rounded-full bg-primary text-white font-bold text-sm shadow-sm hover:bg-blue-800 transition-colors">
+    Add as Duplicate
+</button>
+</div>
+</div>
 </div>
 
 <div id="toast"></div>
