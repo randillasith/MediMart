@@ -29,18 +29,18 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired) " +
            "FROM Medicine m " +
-           "WHERE m.status = 'AVAILABLE' " +
+           "WHERE m.status <> 'DISCONTINUED' " +
            "GROUP BY m.name, m.brand, m.dosage, m.category.name, m.prescriptionRequired")
     Page<StorefrontMedicineDTO> getStorefrontMedicines(Pageable pageable);
 
     @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired) " +
            "FROM Medicine m " +
-           "WHERE m.status = 'AVAILABLE' AND LOWER(m.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "WHERE m.status <> 'DISCONTINUED' AND LOWER(m.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "GROUP BY m.name, m.brand, m.dosage, m.category.name, m.prescriptionRequired")
     Page<StorefrontMedicineDTO> searchStorefrontMedicines(@Param("search") String search, Pageable pageable);
 
     // --- Stats queries (run entirely in DB, never loads all rows into memory) ---
-    @Query("SELECT COUNT(m) FROM Medicine m")
+    @Query("SELECT COUNT(m) FROM Medicine m WHERE m.status <> 'DISCONTINUED'")
     long countAll();
 
     @Query("SELECT COUNT(m) FROM Medicine m WHERE m.stockQty > 0 AND m.stockQty < 20")
