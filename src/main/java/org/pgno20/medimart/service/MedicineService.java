@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.math.BigDecimal;
@@ -68,28 +67,11 @@ public class MedicineService {
     }
 
     public Map<String, Object> getStats() {
-        List<Medicine> all = medicineRepository.findAll();
-        long totalProducts = all.size();
-        long lowStock = 0;
-        long outOfStock = 0;
-        BigDecimal totalValue = BigDecimal.ZERO;
-
-        for (Medicine m : all) {
-            if (m.getStockQty() != null) {
-                if (m.getStockQty() == 0) outOfStock++;
-                else if (m.getStockQty() < 20) lowStock++;
-                
-                if (m.getPrice() != null) {
-                    totalValue = totalValue.add(m.getPrice().multiply(BigDecimal.valueOf(m.getStockQty())));
-                }
-            }
-        }
-
         Map<String, Object> stats = new HashMap<>();
-        stats.put("totalProducts", totalProducts);
-        stats.put("lowStock", lowStock);
-        stats.put("outOfStock", outOfStock);
-        stats.put("totalValue", totalValue);
+        stats.put("totalProducts", medicineRepository.countAll());
+        stats.put("lowStock",      medicineRepository.countLowStock());
+        stats.put("outOfStock",    medicineRepository.countOutOfStock());
+        stats.put("totalValue",    medicineRepository.sumTotalValue());
         return stats;
     }
 
