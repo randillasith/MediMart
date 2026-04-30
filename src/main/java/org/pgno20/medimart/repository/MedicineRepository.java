@@ -1,20 +1,21 @@
 package org.pgno20.medimart.repository;
 
 import org.pgno20.medimart.model.Medicine;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     Optional<Medicine> findBySku(String sku);
 
-    List<Medicine> findByNameContainingIgnoreCase(String name);
+    Page<Medicine> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-    List<Medicine> findByBrandContainingIgnoreCase(String brand);
+    Page<Medicine> findByBrandContainingIgnoreCase(String brand, Pageable pageable);
 
-    List<Medicine> findByStatus(String status);
+    Page<Medicine> findByStatus(String status, Pageable pageable);
 
-    List<Medicine> findByCategory_Id(Long categoryId);
+    Page<Medicine> findByCategory_Id(Long categoryId, Pageable pageable);
 }

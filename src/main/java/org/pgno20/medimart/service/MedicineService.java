@@ -9,6 +9,9 @@ import org.pgno20.medimart.repository.MedicineRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 @Service
@@ -57,8 +60,8 @@ public class MedicineService {
         return toResponse(saved);
     }
 
-    public List<MedicineResponse> listAll() {
-        return medicineRepository.findAll().stream().map(this::toResponse).toList();
+    public Page<MedicineResponse> listAll(Pageable pageable) {
+        return medicineRepository.findAll(pageable).map(this::toResponse);
     }
 
     public MedicineResponse getById(Long id) {
@@ -67,21 +70,21 @@ public class MedicineService {
         return toResponse(m);
     }
 
-    public List<MedicineResponse> search(String name, String brand, Long categoryId, String status) {
+    public Page<MedicineResponse> search(String name, String brand, Long categoryId, String status, Pageable pageable) {
         // simple search priority (you can improve later)
         if (name != null && !name.isBlank()) {
-            return medicineRepository.findByNameContainingIgnoreCase(name).stream().map(this::toResponse).toList();
+            return medicineRepository.findByNameContainingIgnoreCase(name, pageable).map(this::toResponse);
         }
         if (brand != null && !brand.isBlank()) {
-            return medicineRepository.findByBrandContainingIgnoreCase(brand).stream().map(this::toResponse).toList();
+            return medicineRepository.findByBrandContainingIgnoreCase(brand, pageable).map(this::toResponse);
         }
         if (categoryId != null) {
-            return medicineRepository.findByCategory_Id(categoryId).stream().map(this::toResponse).toList();
+            return medicineRepository.findByCategory_Id(categoryId, pageable).map(this::toResponse);
         }
         if (status != null && !status.isBlank()) {
-            return medicineRepository.findByStatus(status).stream().map(this::toResponse).toList();
+            return medicineRepository.findByStatus(status, pageable).map(this::toResponse);
         }
-        return listAll();
+        return listAll(pageable);
     }
 
     @Transactional

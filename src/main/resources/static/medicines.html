@@ -373,7 +373,7 @@
             const data = await apiCall('/api/categories');
             const sel = document.getElementById('categorySelect');
             sel.innerHTML = '';
-            data.forEach(c => {
+            (data.content || data).forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
                 opt.textContent = c.name;
@@ -464,9 +464,9 @@
             tbody.innerHTML = '';
             
             // Store data globally for editing
-            window.medicinesData = data;
+            window.medicinesData = data.content || data;
 
-            data.forEach(m => {
+            (data.content || data).forEach(m => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>#${m.id}</td>

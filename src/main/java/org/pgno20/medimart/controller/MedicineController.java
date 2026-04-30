@@ -8,6 +8,10 @@ import org.pgno20.medimart.service.MedicineService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+
 import java.util.List;
 
 @RestController
@@ -26,15 +30,15 @@ public class MedicineController {
         return ResponseEntity.ok(medicineService.create(req));
     }
 
-    // Read all / search
     @GetMapping
-    public ResponseEntity<List<MedicineResponse>> list(
+    public ResponseEntity<Page<MedicineResponse>> list(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            @PageableDefault(size = 20) Pageable pageable
     ) {
-        return ResponseEntity.ok(medicineService.search(name, brand, categoryId, status));
+        return ResponseEntity.ok(medicineService.search(name, brand, categoryId, status, pageable));
     }
 
     // Read one

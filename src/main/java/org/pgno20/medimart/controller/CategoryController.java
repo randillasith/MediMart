@@ -7,6 +7,10 @@ import org.pgno20.medimart.service.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+
 import java.util.List;
 
 @RestController
@@ -25,7 +29,7 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> list() {
-        return ResponseEntity.ok(categoryService.listAll());
+    public ResponseEntity<Page<CategoryResponse>> list(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(categoryService.listAll(pageable));
     }
 }
