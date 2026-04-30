@@ -1,0 +1,58 @@
+package org.pgno20.medimart.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public class StorefrontMedicineDTO {
+    private String name;
+    private String brand;
+    private String dosage;
+    private BigDecimal minPrice;
+    private Long totalStock;
+    private String categoryName;
+    private LocalDate earliestExpiry;
+    private Boolean prescriptionRequired;
+
+    public StorefrontMedicineDTO() {}
+
+    // Constructor used by the GROUP BY storefront query (7 args)
+    public StorefrontMedicineDTO(String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry) {
+        this.name = name;
+        this.brand = brand;
+        this.dosage = dosage;
+        this.minPrice = minPrice;
+        this.totalStock = totalStock;
+        this.categoryName = categoryName;
+        this.earliestExpiry = earliestExpiry;
+    }
+
+    // Constructor including prescriptionRequired (8 args)
+    public StorefrontMedicineDTO(String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry, Boolean prescriptionRequired) {
+        this(name, brand, dosage, minPrice, totalStock, categoryName, earliestExpiry);
+        this.prescriptionRequired = prescriptionRequired;
+    }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
+
+    public String getDosage() { return dosage; }
+    public void setDosage(String dosage) { this.dosage = dosage; }
+
+    public BigDecimal getMinPrice() { return minPrice; }
+    public void setMinPrice(BigDecimal minPrice) { this.minPrice = minPrice; }
+
+    public Long getTotalStock() { return totalStock; }
+    public void setTotalStock(Long totalStock) { this.totalStock = totalStock; }
+
+    public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+
+    public LocalDate getEarliestExpiry() { return earliestExpiry; }
+    public void setEarliestExpiry(LocalDate earliestExpiry) { this.earliestExpiry = earliestExpiry; }
+
+    public Boolean getPrescriptionRequired() { return prescriptionRequired; }
+    public void setPrescriptionRequired(Boolean prescriptionRequired) { this.prescriptionRequired = prescriptionRequired; }
+}
