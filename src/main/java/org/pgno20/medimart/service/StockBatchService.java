@@ -156,11 +156,7 @@ public class StockBatchService {
         medicine.setExpiryDate(earliestExpiry);
 
         // Recalculate status
-        if (medicine.isExpired()) {
-            medicine.setStatus("DISCONTINUED");
-        } else {
-            medicine.normalizeStatusFromStock();
-        }
+        medicine.normalizeStatusFromStock();
 
         medicineRepository.save(medicine);
     }

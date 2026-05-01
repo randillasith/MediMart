@@ -68,11 +68,11 @@ public abstract class Medicine {
     }
 
     public void normalizeStatusFromStock() {
+        if ("DISCONTINUED".equals(status)) return;
+        
         if (stockQty != null && stockQty <= 0) status = "OUT_OF_STOCK";
-        else if (!"DISCONTINUED".equals(status)) {
-            if (stockQty != null && stockQty <= 100) status = "LOW_STOCK";
-            else status = "AVAILABLE";
-        }
+        else if (stockQty != null && stockQty <= 100) status = "LOW_STOCK";
+        else status = "AVAILABLE";
     }
 
     // getters/setters
