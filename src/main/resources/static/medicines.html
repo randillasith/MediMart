@@ -868,12 +868,9 @@
                     const checkRes = await apiCall(`/api/medicines?name=${encodeURIComponent(payload.name)}&brand=${encodeURIComponent(payload.brand)}`);
                     const matches = (checkRes.content || checkRes).filter(m =>
                         m.name.toLowerCase() === payload.name.toLowerCase() &&
-                        (m.brand || '').toLowerCase() === payload.brand.toLowerCase() &&
-                        (m.dosage || '').toLowerCase() === payload.dosage.toLowerCase() &&
-                        m.typeLabel === payload.type &&
-                        m.price === payload.price &&
-                        m.stockQty === payload.stockQty &&
-                        (m.expiryDate || '') === (payload.expiryDate || '')
+                        (m.brand || '').toLowerCase() === (payload.brand || '').toLowerCase() &&
+                        (m.dosage || '').toLowerCase() === (payload.dosage || '').toLowerCase() &&
+                        (m.formType || '').toLowerCase() === (payload.formType || '').toLowerCase()
                     );
 
                     if (matches.length > 0) {
@@ -962,6 +959,8 @@
         }
 
         function showConflictModal(existing, pending) {
+            window.conflictExistingId = existing.id;
+            window.conflictExistingName = existing.name;
             document.getElementById('conflictExistingName').textContent = existing.name;
             document.getElementById('conflictExistingBrand').textContent = existing.brand || '-';
             document.getElementById('conflictExistingDosage').textContent = existing.dosage || '-';
@@ -988,20 +987,10 @@
             pendingSavePayload = null;
         }
 
-        async function forceSaveDuplicate() {
+        function openRestockForDuplicate() {
             document.getElementById('conflictModal').classList.add('hidden');
-            const saveBtn = document.getElementById('saveBtn');
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'Saving...';
-            try {
-                await executeSave(pendingSavePayload);
-            } catch (err) {
-                // Error is handled by apiCall toast
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Save Product';
-                pendingSavePayload = null;
-            }
+            pendingSavePayload = null;
+            openRestockModal(window.conflictExistingId, window.conflictExistingName);
         }
 
         async function deleteMedicine(id) {
@@ -1323,9 +1312,9 @@
                     class="px-6 py-2 rounded-full text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors">
                     Discard Entry
                 </button>
-                <button type="button" onclick="forceSaveDuplicate()"
-                    class="px-6 py-2 rounded-full bg-primary text-white font-bold text-sm shadow-sm hover:bg-blue-800 transition-colors">
-                    Add as Duplicate
+                <button type="button" onclick="openRestockForDuplicate()"
+                    class="px-6 py-2 rounded-full bg-green-600 text-white font-bold text-sm shadow-sm hover:bg-green-700 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">add_shopping_cart</span> Add as Batch
                 </button>
             </div>
         </div>
