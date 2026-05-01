@@ -9,6 +9,7 @@ public class MedicineUpdateRequest {
     @NotBlank
     private String name;
 
+    private String formType;
     private String brand;
     private String dosage;
 
@@ -27,6 +28,7 @@ public class MedicineUpdateRequest {
 
     // getters/setters
     public String getName() { return name; }
+    public String getFormType() { return formType; }
     public String getBrand() { return brand; }
     public String getDosage() { return dosage; }
     public BigDecimal getPrice() { return price; }
@@ -36,6 +38,7 @@ public class MedicineUpdateRequest {
     public String getStatus() { return status; }
 
     public void setName(String name) { this.name = name; }
+    public void setFormType(String formType) { this.formType = formType; }
     public void setBrand(String brand) { this.brand = brand; }
     public void setDosage(String dosage) { this.dosage = dosage; }
     public void setPrice(BigDecimal price) { this.price = price; }
