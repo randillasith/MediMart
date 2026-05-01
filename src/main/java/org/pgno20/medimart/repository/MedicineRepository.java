@@ -15,6 +15,17 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     Optional<Medicine> findBySku(String sku);
 
+    @Query("SELECT m FROM Medicine m WHERE " +
+           "LOWER(m.name) = LOWER(:name) AND " +
+           "((:brand IS NULL AND m.brand IS NULL) OR LOWER(m.brand) = LOWER(:brand)) AND " +
+           "((:dosage IS NULL AND m.dosage IS NULL) OR LOWER(m.dosage) = LOWER(:dosage)) AND " +
+           "((:formType IS NULL AND m.formType IS NULL) OR LOWER(m.formType) = LOWER(:formType))")
+    Optional<Medicine> findExactDuplicate(
+            @Param("name") String name, 
+            @Param("brand") String brand, 
+            @Param("dosage") String dosage, 
+            @Param("formType") String formType);
+
     Page<Medicine> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     Page<Medicine> findByBrandContainingIgnoreCase(String brand, Pageable pageable);

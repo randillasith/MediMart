@@ -46,24 +46,31 @@ public class MedicineService {
         Category category = categoryRepository.findById(req.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
+        String formattedDosage = formatDosage(req.getDosage());
+
+        // Check for exact duplicates
+        java.util.Optional<Medicine> duplicate = medicineRepository.findExactDuplicate(
+                req.getName(), req.getBrand(), formattedDosage, req.getFormType()
+        );
+
+        if (duplicate.isPresent()) {
+            throw new IllegalArgumentException("Duplicate item found! This medicine already exists. Please add your new stock to the existing item (" + duplicate.get().getSku() + ") instead of creating a new one.");
+        }
+
         Medicine medicine = buildMedicineByType(req.getType());
         // Shorten the temp string so it fits in the 40-char limit
         medicine.setSku("TEMP-" + java.util.UUID.randomUUID().toString().substring(0, 8));
         medicine.setName(req.getName());
         medicine.setBrand(req.getBrand());
         medicine.setFormType(req.getFormType());
-        medicine.setDosage(formatDosage(req.getDosage()));
+        medicine.setDosage(formattedDosage);
         medicine.setPrice(req.getPrice());
         medicine.setStockQty(req.getStockQty());
         medicine.setExpiryDate(req.getExpiryDate());
         medicine.setCategory(category);
 
         // Business rules
-        if (medicine.isExpired()) {
-            medicine.setStatus("DISCONTINUED");
-        } else {
-            medicine.normalizeStatusFromStock();
-        }
+        medicine.normalizeStatusFromStock();
 
         assignDefaultImage(medicine);
 
@@ -138,9 +145,7 @@ public class MedicineService {
         }
 
         // Business rules
-        if (medicine.isExpired()) {
-            medicine.setStatus("DISCONTINUED");
-        } else if (req.getStatus() == null || req.getStatus().isBlank()) {
+        if (req.getStatus() == null || req.getStatus().isBlank()) {
             // Only auto-normalize if the admin didn't explicitly set a status
             medicine.normalizeStatusFromStock();
         }
