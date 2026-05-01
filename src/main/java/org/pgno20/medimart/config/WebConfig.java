@@ -15,14 +15,14 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Expose the local uploads folder as /uploads/**
         Path uploadDir = Paths.get("uploads");
-        String uploadPath = uploadDir.toFile().getAbsolutePath();
+        String uploadUri = uploadDir.toUri().toString();
         
-        if (!uploadPath.endsWith("/")) {
-            uploadPath += "/";
+        if (!uploadUri.endsWith("/")) {
+            uploadUri += "/";
         }
         
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:/" + uploadPath);
+                .addResourceLocations(uploadUri);
                 
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/images/");
