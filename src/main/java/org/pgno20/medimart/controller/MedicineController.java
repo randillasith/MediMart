@@ -76,4 +76,13 @@ public class MedicineController {
         medicineService.discontinue(id);
         return ResponseEntity.noContent().build();
     }
+
+    // Upload Image
+    @PostMapping("/{id}/image")
+    public ResponseEntity<Map<String, String>> uploadImage(
+            @PathVariable Long id, 
+            @org.springframework.web.bind.annotation.RequestParam("image") org.springframework.web.multipart.MultipartFile file) {
+        String filename = medicineService.uploadImage(id, file);
+        return ResponseEntity.ok(Map.of("imageUrl", filename));
+    }
 }
