@@ -95,9 +95,9 @@
                 <span class="text-2xl font-bold tracking-tighter text-[#00478D] dark:text-blue-400 hidden sm:block">MediMart</span>
             </a>
             <div class="hidden md:flex gap-6">
-                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="index.html">Home</a>
-                <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="catalog.html">Catalog</a>
-                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines.html">Admin Panel</a>
+                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/">Home</a>
+                <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="/catalog">Catalog</a>
+                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Admin Panel</a>
                 <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="#">Help</a>
             </div>
         </div>
@@ -275,15 +275,15 @@
 
 <!-- BottomNavBar Mobile -->
 <footer class="bg-white/90 dark:bg-slate-950/90 backdrop-blur-md md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 border-t border-[#C2C6D4]/15 shadow-[0_-12px_40px_rgba(25,28,33,0.06)]">
-    <a href="index.html" class="flex flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
+    <a href="/" class="flex flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
         <span class="material-symbols-outlined" data-icon="home">home</span>
         <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Home</span>
     </a>
-    <a href="catalog.html" class="flex flex-col items-center justify-center bg-[#7AF1FC]/20 text-[#006970] rounded-xl px-4 py-2 scale-105 shadow-sm">
+    <a href="/catalog" class="flex flex-col items-center justify-center bg-[#7AF1FC]/20 text-[#006970] rounded-xl px-4 py-2 scale-105 shadow-sm">
         <span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
         <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Catalog</span>
     </a>
-    <a href="/medicines.html" class="flex flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
+    <a href="/medicines" class="flex flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
         <span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
         <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Admin</span>
     </a>
@@ -309,7 +309,18 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const params = new URLSearchParams(window.location.search);
-        currentSearch = params.get('search') || '';
+        
+        // Use query param OR local storage for the search
+        currentSearch = params.get('search') || localStorage.getItem('searchQuery') || '';
+        
+        // Clear local storage after reading
+        localStorage.removeItem('searchQuery');
+        
+        // Remove the query string from the URL if it exists, without reloading the page
+        if (window.history.replaceState && window.location.search) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         document.getElementById('navSearchInput').value = currentSearch;
         
         loadCategories();

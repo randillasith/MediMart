@@ -96,16 +96,16 @@
                 <span class="text-2xl font-bold tracking-tighter text-[#00478D] dark:text-blue-400 hidden sm:block">MediMart</span>
             </a>
             <div class="hidden md:flex gap-6">
-                <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="index.html">Home</a>
-                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="catalog.html">Catalog</a>
-                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines.html">Admin Panel</a>
+                <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="/">Home</a>
+                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/catalog">Catalog</a>
+                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Admin Panel</a>
                 <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="#">Help</a>
             </div>
         </div>
         <div class="flex items-center gap-4">
             <div class="relative hidden sm:block">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-                <input onkeypress="if(event.key === 'Enter') { window.location.href='catalog.html?search='+encodeURIComponent(this.value); }" class="bg-surface-container-low border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all w-64" placeholder="Search catalog..." type="text"/>
+                <input onkeypress="if(event.key === 'Enter') { localStorage.setItem('searchQuery', this.value.trim()); window.location.href='/catalog'; }" class="bg-surface-container-low border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all w-64" placeholder="Search catalog..." type="text"/>
             </div>
             <button class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
                 <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
@@ -214,7 +214,7 @@
                     <h2 class="text-3xl font-bold tracking-tight text-primary">Trending in Health</h2>
                     <p class="text-on-surface-variant mt-2">The most trusted OTC choices by our medical community.</p>
                 </div>
-                <a class="text-secondary font-bold hover:underline flex items-center gap-2" href="catalog.html">
+                <a class="text-secondary font-bold hover:underline flex items-center gap-2" href="/catalog">
                     View All Catalog <span class="material-symbols-outlined text-sm">arrow_forward</span>
                 </a>
             </div>
@@ -231,7 +231,7 @@
                 <h2 class="text-3xl font-bold tracking-tight text-primary">New Arrivals</h2>
                 <p class="text-on-surface-variant mt-2">Recently added to our pharmacy catalog.</p>
             </div>
-            <a class="text-secondary font-bold hover:underline flex items-center gap-2" href="catalog.html">
+            <a class="text-secondary font-bold hover:underline flex items-center gap-2" href="/catalog">
                 Browse All <span class="material-symbols-outlined text-sm">arrow_forward</span>
             </a>
         </div>
@@ -291,7 +291,10 @@
 
     function doSearch() {
         const q = document.getElementById('heroSearchInput').value.trim();
-        if (q) window.location.href = 'catalog.html?search=' + encodeURIComponent(q);
+        if (q) {
+            localStorage.setItem('searchQuery', q);
+            window.location.href = '/catalog';
+        }
         return false;
     }
 
@@ -319,7 +322,7 @@
         let tagHtml = tag ? `<div class="absolute top-6 left-6"><span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">${tag}</span></div>` : '';
         const card = document.createElement('div');
         card.className = 'group cursor-pointer';
-        card.onclick = () => window.location.href = `catalog.html?search=${encodeURIComponent(p.name)}`;
+        card.onclick = () => { localStorage.setItem('searchQuery', p.name); window.location.href = '/catalog'; };
         card.innerHTML = `<div class="aspect-square bg-surface-container-lowest rounded-3xl overflow-hidden mb-6 transition-shadow group-hover:shadow-xl p-8 relative">${tagHtml}<img class="w-full h-full object-contain" src="${img}"/></div><h4 class="text-lg font-bold text-on-surface mb-1">${title}</h4><p class="text-on-surface-variant text-sm">${p.brand || p.categoryName || 'Generic'}</p>${stock}<div class="flex items-center justify-between"><span class="text-xl font-bold text-primary">${price}</span><button ${p.totalStock===0?'disabled':''} class="bg-surface-container-high text-on-primary-fixed-variant px-4 py-2 rounded-full font-bold text-sm hover:bg-secondary hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">Add to Cart</button></div>`;
         return card;
     }
