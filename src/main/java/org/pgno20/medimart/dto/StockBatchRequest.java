@@ -3,12 +3,14 @@ package org.pgno20.medimart.dto;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import org.pgno20.medimart.validation.MinimumShelfLife;
 
 public class StockBatchRequest {
 
     @NotNull @Min(1)
     private Integer quantity;
 
+    @MinimumShelfLife(months = 3)
     private LocalDate expiryDate;
 
     @DecimalMin("0.01")
