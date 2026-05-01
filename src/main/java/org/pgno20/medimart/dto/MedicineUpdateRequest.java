@@ -3,6 +3,7 @@ package org.pgno20.medimart.dto;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import org.pgno20.medimart.validation.MinimumShelfLife;
 
 public class MedicineUpdateRequest {
 
@@ -19,6 +20,7 @@ public class MedicineUpdateRequest {
     @NotNull @Min(0)
     private Integer stockQty;
 
+    @MinimumShelfLife(months = 3)
     private LocalDate expiryDate;
 
     @NotNull
