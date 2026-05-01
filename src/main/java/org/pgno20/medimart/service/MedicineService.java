@@ -6,6 +6,7 @@ import org.pgno20.medimart.dto.MedicineUpdateRequest;
 import org.pgno20.medimart.model.*;
 import org.pgno20.medimart.repository.CategoryRepository;
 import org.pgno20.medimart.repository.MedicineRepository;
+import org.pgno20.medimart.repository.StockBatchRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +28,15 @@ public class MedicineService {
 
     private final MedicineRepository medicineRepository;
     private final CategoryRepository categoryRepository;
+    private final StockBatchRepository stockBatchRepository;
+    private final StockBatchService stockBatchService;
 
-    public MedicineService(MedicineRepository medicineRepository, CategoryRepository categoryRepository) {
+    public MedicineService(MedicineRepository medicineRepository, CategoryRepository categoryRepository,
+                           StockBatchRepository stockBatchRepository, StockBatchService stockBatchService) {
         this.medicineRepository = medicineRepository;
         this.categoryRepository = categoryRepository;
+        this.stockBatchRepository = stockBatchRepository;
+        this.stockBatchService = stockBatchService;
     }
 
     @Transactional
@@ -45,6 +51,7 @@ public class MedicineService {
         medicine.setSku("TEMP-" + java.util.UUID.randomUUID().toString().substring(0, 8));
         medicine.setName(req.getName());
         medicine.setBrand(req.getBrand());
+        medicine.setFormType(req.getFormType());
         medicine.setDosage(formatDosage(req.getDosage()));
         medicine.setPrice(req.getPrice());
         medicine.setStockQty(req.getStockQty());
@@ -58,12 +65,17 @@ public class MedicineService {
             medicine.normalizeStatusFromStock();
         }
 
+        assignDefaultImage(medicine);
+
         // First save to generate the ID
         Medicine saved = medicineRepository.save(medicine);
         
         // Update SKU with the MED001 format based on the generated ID
         saved.setSku(String.format("MED%03d", saved.getId()));
         saved = medicineRepository.save(saved);
+
+        // Create the initial stock batch from the provided stockQty and expiryDate
+        stockBatchService.createInitialBatch(saved, req.getStockQty(), req.getExpiryDate());
         
         return toResponse(saved);
     }
@@ -96,23 +108,12 @@ public class MedicineService {
     }
 
     public Page<MedicineResponse> search(String name, String brand, Long categoryId, String status, Pageable pageable) {
-        // simple search priority (you can improve later)
-        if (name != null && !name.isBlank()) {
-            return medicineRepository.findByNameContainingIgnoreCase(name, pageable).map(this::toResponse);
-        }
-        if (brand != null && !brand.isBlank()) {
-            return medicineRepository.findByBrandContainingIgnoreCase(brand, pageable).map(this::toResponse);
-        }
-        if (categoryId != null) {
-            return medicineRepository.findByCategory_Id(categoryId, pageable).map(this::toResponse);
-        }
-        if (status != null && !status.isBlank()) {
-            if ("LOW_STOCK".equalsIgnoreCase(status)) {
-                return medicineRepository.findByStockQtyBetween(1, 19, pageable).map(this::toResponse);
-            }
-            return medicineRepository.findByStatus(status, pageable).map(this::toResponse);
-        }
-        return listAll(pageable);
+        String searchName = (name != null && !name.isBlank()) ? name : null;
+        String searchBrand = (brand != null && !brand.isBlank()) ? brand : null;
+        String searchStatus = (status != null && !status.isBlank()) ? status : null;
+        
+        return medicineRepository.searchMedicines(searchName, searchBrand, categoryId, searchStatus, pageable)
+                .map(this::toResponse);
     }
 
     @Transactional
@@ -125,6 +126,7 @@ public class MedicineService {
 
         medicine.setName(req.getName());
         medicine.setBrand(req.getBrand());
+        medicine.setFormType(req.getFormType());
         medicine.setDosage(formatDosage(req.getDosage()));
         medicine.setPrice(req.getPrice());
         medicine.setStockQty(req.getStockQty());
@@ -205,6 +207,7 @@ public class MedicineService {
         r.setSku(m.getSku());
         r.setName(m.getName());
         r.setBrand(m.getBrand());
+        r.setFormType(m.getFormType());
         r.setDosage(m.getDosage());
         r.setPrice(m.getPrice());
         r.setFinalPrice(m.getFinalPrice());
@@ -216,7 +219,35 @@ public class MedicineService {
         r.setCategoryId(m.getCategory().getId());
         r.setCategoryName(m.getCategory().getName());
         r.setImageUrl(m.getImageUrl());
+        r.setBatchCount(stockBatchRepository.countActiveBatchesByMedicineId(m.getId()));
         return r;
+    }
+
+    private void assignDefaultImage(Medicine medicine) {
+        String defaultName = "other.png";
+        if (medicine.getFormType() != null) {
+            switch(medicine.getFormType().toUpperCase()) {
+                case "TABLET": defaultName = "Tablet_Capsule_Pill.png"; break;
+                case "SYRUP": defaultName = "Syrup_Liquid.png"; break;
+                case "CREAM": defaultName = "cream.png"; break;
+            }
+        }
+        try {
+            Path uploadPath = Paths.get("uploads");
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            String newFilename = medicine.getSku() + "_default_" + defaultName;
+            Path dest = uploadPath.resolve(newFilename);
+            if (!Files.exists(dest)) {
+                try (java.io.InputStream in = getClass().getResourceAsStream("/images/" + defaultName)) {
+                    if (in != null) Files.copy(in, dest);
+                }
+            }
+            medicine.setImageUrl(newFilename);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private String formatDosage(String dosage) {

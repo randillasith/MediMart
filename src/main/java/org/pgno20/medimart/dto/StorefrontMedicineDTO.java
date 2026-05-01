@@ -13,6 +13,7 @@ public class StorefrontMedicineDTO {
     private LocalDate earliestExpiry;
     private Boolean prescriptionRequired;
     private String imageUrl;
+    private String formType;
 
     public StorefrontMedicineDTO() {}
 
@@ -27,11 +28,12 @@ public class StorefrontMedicineDTO {
         this.earliestExpiry = earliestExpiry;
     }
 
-    // Constructor including prescriptionRequired and imageUrl
-    public StorefrontMedicineDTO(String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry, Boolean prescriptionRequired, String imageUrl) {
+    // Constructor including prescriptionRequired, imageUrl, and formType
+    public StorefrontMedicineDTO(String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry, Boolean prescriptionRequired, String imageUrl, String formType) {
         this(name, brand, dosage, minPrice, totalStock, categoryName, earliestExpiry);
         this.prescriptionRequired = prescriptionRequired;
         this.imageUrl = imageUrl;
+        this.formType = formType;
     }
 
     public String getName() { return name; }
@@ -60,4 +62,7 @@ public class StorefrontMedicineDTO {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getFormType() { return formType; }
+    public void setFormType(String formType) { this.formType = formType; }
 }

@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>MediMart | Product Catalog</title>
+<link rel="icon" href="/logo.png" type="image/png"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -89,7 +90,10 @@
 <header class="bg-[#F2F3FB] dark:bg-slate-900 sticky top-0 z-50 shadow-sm">
     <nav class="flex justify-between items-center w-full px-8 py-4 max-w-full mx-auto">
         <div class="flex items-center gap-8">
-            <a href="index.html" class="text-2xl font-bold tracking-tighter text-[#00478D] dark:text-blue-400">MediMart</a>
+            <a href="index.html" class="flex items-center gap-2">
+                <img src="/logo.png" alt="MediMart Logo" class="h-8 w-auto">
+                <span class="text-2xl font-bold tracking-tighter text-[#00478D] dark:text-blue-400 hidden sm:block">MediMart</span>
+            </a>
             <div class="hidden md:flex gap-6">
                 <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="index.html">Home</a>
                 <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="catalog.html">Catalog</a>
@@ -430,7 +434,19 @@
 
     function renderProductCard(p, index) {
         const grid = document.getElementById('productGrid');
-        const img = p.imageUrl ? `/uploads/${p.imageUrl}` : PRODUCT_IMAGES[index % PRODUCT_IMAGES.length];
+        let img = PRODUCT_IMAGES[index % PRODUCT_IMAGES.length];
+        if (p.imageUrl) {
+            img = `/uploads/${p.imageUrl}`;
+        } else if (p.formType) {
+            const formType = p.formType.toUpperCase();
+            if (formType === 'CREAM') img = '/images/cream.png';
+            else if (formType === 'SYRUP') img = '/images/Syrup_Liquid.png';
+            else if (formType === 'TABLET') img = '/images/Tablet_Capsule_Pill.png';
+            else img = '/images/other.png';
+        } else {
+            img = '/images/other.png';
+        }
+        
         const title = p.name;
         const price = p.minPrice ? `$${Number(p.minPrice).toFixed(2)}` : '$0.00';
         
