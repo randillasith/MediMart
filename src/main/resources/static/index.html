@@ -86,7 +86,38 @@
         h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
     </style>
 </head>
-<body class="bg-background text-on-surface">
+<body class="bg-background text-on-surface overflow-hidden">
+<!-- Global Preloader -->
+<div id="medimart-preloader" class="fixed inset-0 z-[9999] bg-[#f9f9ff] flex flex-col items-center justify-center transition-opacity duration-700 ease-in-out overflow-hidden">
+    <!-- Lightweight Background Decorative Orbs -->
+    <div class="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[#00478D]/5 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#006970]/5 rounded-full blur-[100px] pointer-events-none"></div>
+    
+    <div class="relative flex flex-col items-center z-10">
+        <!-- Subtle Pulse Ring -->
+        <div class="absolute inset-0 bg-[#00478D]/10 rounded-full animate-ping" style="animation-duration: 3s; margin: -25px;"></div>
+        
+        <!-- Logo -->
+        <div class="bg-white p-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-2">
+            <img src="/logo.png" alt="MediMart Logo" class="h-16 w-auto relative z-10 animate-pulse"/>
+        </div>
+        
+        <!-- Brand Name -->
+        <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-[#00478D] font-headline">MediMart</h1>
+        <p class="text-slate-500 font-medium text-sm mt-1">Your Health, Digitally Refined.</p>
+        
+        <!-- Loading Text with Spinner -->
+        <div class="mt-8 flex flex-col items-center gap-3">
+            <svg class="animate-spin h-6 w-6 text-[#005EB8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-sm tracking-widest uppercase text-slate-500 font-bold bg-gradient-to-r from-[#00478D] to-[#006970] bg-clip-text text-transparent">
+                Preparing Your Catalog...
+            </span>
+        </div>
+    </div>
+</div>
 <!-- TopNavBar -->
 <header class="bg-[#F2F3FB] dark:bg-slate-900 sticky w-full top-0 z-50 shadow-sm">
     <nav class="flex justify-between items-center w-full px-8 py-4 max-w-full mx-auto">
@@ -285,9 +316,35 @@
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
-        loadStorefrontProducts();
-        loadNewArrivals();
+        Promise.all([
+            loadStorefrontProducts(),
+            loadNewArrivals()
+        ]).then(() => {
+            // Once products are loaded, wait for images and window to be fully ready
+            if (document.readyState === 'complete') {
+                removePreloader();
+            } else {
+                window.addEventListener('load', removePreloader);
+            }
+        }).catch((err) => {
+            console.error("Failed to load products:", err);
+            removePreloader(); // remove it anyway so the site isn't blocked
+        });
     });
+
+    function removePreloader() {
+        // Enforce a minimum display time for a smooth premium feel
+        setTimeout(() => {
+            const preloader = document.getElementById('medimart-preloader');
+            if (preloader) {
+                preloader.style.opacity = '0';
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                    document.body.classList.remove('overflow-hidden');
+                }, 700); // Wait for the opacity transition to finish
+            }
+        }, 500); 
+    }
 
     function doSearch() {
         const q = document.getElementById('heroSearchInput').value.trim();
