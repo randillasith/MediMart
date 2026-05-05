@@ -405,7 +405,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Base Price
-                            ($) *</label>
+                            (Rs.) *</label>
                         <input type="number" step="0.01" id="price" required
                             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
                     </div>
@@ -653,7 +653,7 @@
                 document.getElementById('kpiOutOfStock').textContent = stats.outOfStock || 0;
 
                 const totalValue = stats.totalValue || 0;
-                document.getElementById('kpiTotalValue').textContent = '$' + (totalValue > 1000 ? (totalValue / 1000).toFixed(1) + 'k' : totalValue.toFixed(2));
+                document.getElementById('kpiTotalValue').textContent = 'Rs. ' + (totalValue > 1000 ? (totalValue / 1000).toFixed(1) + 'k' : totalValue.toFixed(2));
             } catch (e) {
                 console.error('Error loading stats', e);
             }
@@ -708,8 +708,8 @@
                 </td>
                 <td class="px-6 py-4 text-sm text-slate-600 font-medium">${m.categoryName || '-'}</td>
                 <td class="px-6 py-4">
-                    <div class="text-sm font-bold text-[#34D399]">$${(m.finalPrice || m.price).toFixed(2)}</div>
-                    <div class="text-[10px] text-slate-400 line-through">$${m.price.toFixed(2)} Base</div>
+                    <div class="text-sm font-bold text-[#34D399]">Rs. ${(m.finalPrice || m.price).toFixed(2)}</div>
+                    <div class="text-[10px] text-slate-400 line-through">Rs. ${m.price.toFixed(2)} Base</div>
                 </td>
                 <td class="px-6 py-4">
                     <div class="w-24 md:w-32 cursor-pointer" onclick="viewBatches(${m.id}, '${m.name}')" title="Click to view batches">
@@ -965,7 +965,7 @@
             document.getElementById('conflictExistingBrand').textContent = existing.brand || '-';
             document.getElementById('conflictExistingDosage').textContent = existing.dosage || '-';
             document.getElementById('conflictExistingType').textContent = existing.typeLabel || '-';
-            document.getElementById('conflictExistingPrice').textContent = `$${existing.price.toFixed(2)}`;
+            document.getElementById('conflictExistingPrice').textContent = `Rs. ${existing.price.toFixed(2)}`;
             document.getElementById('conflictExistingStock').textContent = `${existing.stockQty} Units in Central`;
 
             const typeSelect = document.getElementById('type');
@@ -975,7 +975,7 @@
             document.getElementById('conflictNewBrand').textContent = pending.brand || '-';
             document.getElementById('conflictNewDosage').textContent = pending.dosage || '-';
             document.getElementById('conflictNewType').textContent = pendingTypeLabel;
-            document.getElementById('conflictNewPrice').textContent = `$${pending.price.toFixed(2)}`;
+            document.getElementById('conflictNewPrice').textContent = `Rs. ${pending.price.toFixed(2)}`;
             document.getElementById('conflictNewStock').textContent = `${pending.stockQty} (New Entry)`;
 
             document.getElementById('conflictModal').classList.remove('hidden');

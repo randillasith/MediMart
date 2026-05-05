@@ -459,7 +459,7 @@
         }
         
         const title = p.name;
-        const price = p.minPrice ? `$${Number(p.minPrice).toFixed(2)}` : '$0.00';
+        const price = p.minPrice ? `Rs. ${Number(p.minPrice).toFixed(2)}` : 'Rs. 0.00';
         
         let badgeHtml = '';
         if (p.prescriptionRequired) {
@@ -527,7 +527,7 @@
         document.getElementById('detailTitle').textContent = title;
         document.getElementById('detailCatLabel').textContent = product.categoryName || '';
         document.getElementById('detailBrand').textContent = `by ${product.brand || 'Generic'}`;
-        document.getElementById('detailPrice').textContent = product.minPrice ? `$${Number(product.minPrice).toFixed(2)}` : '$0.00';
+        document.getElementById('detailPrice').textContent = product.minPrice ? `Rs. ${Number(product.minPrice).toFixed(2)}` : 'Rs. 0.00';
         document.getElementById('detailImg').src = imgSrc;
         
         document.getElementById('detailCatInfo').textContent = product.categoryName || '-';
