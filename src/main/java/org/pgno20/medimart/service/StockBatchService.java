@@ -48,6 +48,8 @@ public class StockBatchService {
             batch.setStatus("EXPIRED");
         }
 
+
+
         StockBatch saved = stockBatchRepository.save(batch);
 
         // Update batch number to readable format: BATCH-0001
@@ -154,6 +156,15 @@ public class StockBatchService {
 
         medicine.setStockQty(totalStock);
         medicine.setExpiryDate(earliestExpiry);
+
+        // FEFO Pricing: Set the product's base price to the price of the oldest active batch (next to be sold)
+        List<StockBatch> activeBatches = stockBatchRepository.findByMedicineIdAndStatusOrderByExpiryDateAsc(medicine.getId(), "ACTIVE");
+        if (!activeBatches.isEmpty()) {
+            java.math.BigDecimal activePrice = activeBatches.get(0).getPurchasePrice();
+            if (activePrice != null) {
+                medicine.setPrice(activePrice);
+            }
+        }
 
         // Recalculate status
         medicine.normalizeStatusFromStock();
