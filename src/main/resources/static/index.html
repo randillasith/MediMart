@@ -357,7 +357,7 @@
 
     function renderCard(p, index, tag) {
         const title = p.dosage ? `${p.name} ${p.dosage}` : p.name;
-        const price = p.minPrice ? `$${Number(p.minPrice).toFixed(2)}` : '$0.00';
+        const price = p.minPrice ? `Rs. ${Number(p.minPrice).toFixed(2)}` : 'Rs. 0.00';
         
         let img = IMAGES[index % IMAGES.length];
         if (p.imageUrl) {
