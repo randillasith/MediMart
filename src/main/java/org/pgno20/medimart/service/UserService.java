@@ -7,6 +7,8 @@ import org.pgno20.medimart.dto.PasswordUpdateDTO;
 import org.pgno20.medimart.model.User;
 import org.pgno20.medimart.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,11 +66,39 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    /**
+     * Get all users with pagination (admin use).
+     */
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
+    /**
+     * Search users by name or email with pagination (admin use).
+     */
+    public Page<User> searchUsers(String search, Pageable pageable) {
+        String searchTerm = (search != null && !search.isBlank()) ? search : null;
+        return userRepository.searchUsers(searchTerm, pageable);
+    }
+
     public User updateUser(Long id, UserUpdateDTO dto) {
         User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
         user.setFullName(dto.getFullName());
         user.setDob(dto.getDob());
         user.setGender(dto.getGender());
+        return userRepository.save(user);
+    }
+
+    /**
+     * Update a user's role (admin use).
+     * Valid roles: ROLE_USER, ROLE_ADMIN
+     */
+    public User updateUserRole(Long id, String newRole) {
+        if (!"ROLE_USER".equals(newRole) && !"ROLE_ADMIN".equals(newRole)) {
+            throw new IllegalArgumentException("Invalid role. Must be ROLE_USER or ROLE_ADMIN");
+        }
+        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setRole(newRole);
         return userRepository.save(user);
     }
 
@@ -106,7 +136,7 @@ public class UserService {
      * - Contains at least one lowercase letter
      * - Contains at least one digit
      */
-    private void validatePasswordStrength(String password) {
+    void validatePasswordStrength(String password) {
         if (password.length() < 8) {
             throw new IllegalArgumentException("Password must be at least 8 characters long");
         }
@@ -121,7 +151,7 @@ public class UserService {
         }
     }
 
-    private String hashPassword(String password) {
+    String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] encodedhash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
