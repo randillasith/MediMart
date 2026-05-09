@@ -14,6 +14,8 @@ public class StorefrontMedicineDTO {
     private Boolean prescriptionRequired;
     private String imageUrl;
     private String formType;
+    private BigDecimal finalPrice;  // Price after tax/dispensing fee
+    private String typeLabel;       // "OTC" or "Prescription Required"
 
     public StorefrontMedicineDTO() {}
 
@@ -65,4 +67,10 @@ public class StorefrontMedicineDTO {
 
     public String getFormType() { return formType; }
     public void setFormType(String formType) { this.formType = formType; }
+
+    public BigDecimal getFinalPrice() { return finalPrice; }
+    public void setFinalPrice(BigDecimal finalPrice) { this.finalPrice = finalPrice; }
+
+    public String getTypeLabel() { return typeLabel; }
+    public void setTypeLabel(String typeLabel) { this.typeLabel = typeLabel; }
 }
