@@ -31,4 +31,7 @@ public class User {
 
     @Column(name = "role_name", nullable = false)
     private String role = "ROLE_USER"; // Default role
+
+    @Column(nullable = false)
+    private Boolean active = true; // For soft delete
 }
