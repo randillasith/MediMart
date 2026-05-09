@@ -92,11 +92,33 @@ public class MedicineService {
     }
 
     public Page<org.pgno20.medimart.dto.StorefrontMedicineDTO> getStorefrontMedicines(Pageable pageable) {
-        return medicineRepository.getStorefrontMedicines(pageable);
+        return medicineRepository.getStorefrontMedicines(pageable).map(this::applyFinalPrice);
     }
 
     public Page<org.pgno20.medimart.dto.StorefrontMedicineDTO> searchStorefrontMedicines(String search, Pageable pageable) {
-        return medicineRepository.searchStorefrontMedicines(search, pageable);
+        return medicineRepository.searchStorefrontMedicines(search, pageable).map(this::applyFinalPrice);
+    }
+
+    /**
+     * Applies OOP polymorphism pricing to storefront DTOs.
+     * OTC: base price + 10% tax
+     * Prescription: base price + $5.00 dispensing fee
+     */
+    private org.pgno20.medimart.dto.StorefrontMedicineDTO applyFinalPrice(org.pgno20.medimart.dto.StorefrontMedicineDTO dto) {
+        if (dto.getMinPrice() != null) {
+            if (Boolean.TRUE.equals(dto.getPrescriptionRequired())) {
+                dto.setFinalPrice(dto.getMinPrice().add(new java.math.BigDecimal("5.00")));
+                dto.setTypeLabel("Prescription Required");
+            } else {
+                dto.setFinalPrice(dto.getMinPrice().multiply(new java.math.BigDecimal("1.10"))
+                        .setScale(2, java.math.RoundingMode.HALF_UP));
+                dto.setTypeLabel("OTC");
+            }
+        } else {
+            dto.setFinalPrice(java.math.BigDecimal.ZERO);
+            dto.setTypeLabel("OTC");
+        }
+        return dto;
     }
 
     public Map<String, Object> getStats() {
