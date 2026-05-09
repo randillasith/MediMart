@@ -23,6 +23,14 @@ public class UserService {
     private UserRepository userRepository;
 
     public User registerUser(UserRegistrationDTO dto) {
+        // Confirm password check
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+
+        // Password strength validation
+        validatePasswordStrength(dto.getPassword());
+
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("Email already in use");
         }
@@ -35,12 +43,14 @@ public class UserService {
         // Store password as SHA-256 hash
         user.setPassword(hashPassword(dto.getPassword())); 
         user.setRole("ROLE_USER");
+        user.setActive(true);
 
         return userRepository.save(user);
     }
 
     public User loginUser(LoginDTO dto) {
-        Optional<User> userOpt = userRepository.findByEmail(dto.getEmail());
+        // Only allow active users to log in
+        Optional<User> userOpt = userRepository.findByEmailAndActiveTrue(dto.getEmail());
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (user.getPassword().equals(hashPassword(dto.getPassword()))) {
@@ -63,6 +73,14 @@ public class UserService {
     }
 
     public void updatePassword(Long id, PasswordUpdateDTO dto) {
+        // Confirm new password check
+        if (!dto.getNewPassword().equals(dto.getConfirmNewPassword())) {
+            throw new IllegalArgumentException("New passwords do not match");
+        }
+
+        // Password strength validation
+        validatePasswordStrength(dto.getNewPassword());
+
         User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
         if (!user.getPassword().equals(hashPassword(dto.getCurrentPassword()))) {
             throw new IllegalArgumentException("Incorrect current password");
@@ -71,11 +89,36 @@ public class UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Soft delete - sets active = false instead of removing from database.
+     * User data is preserved but they can no longer log in.
+     */
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("User not found");
+        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setActive(false);
+        userRepository.save(user);
+    }
+
+    /**
+     * Validates password meets strength requirements:
+     * - At least 8 characters
+     * - Contains at least one uppercase letter
+     * - Contains at least one lowercase letter
+     * - Contains at least one digit
+     */
+    private void validatePasswordStrength(String password) {
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters long");
         }
-        userRepository.deleteById(id);
+        if (!password.matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one uppercase letter");
+        }
+        if (!password.matches(".*[a-z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
+        }
+        if (!password.matches(".*\\d.*")) {
+            throw new IllegalArgumentException("Password must contain at least one number");
+        }
     }
 
     private String hashPassword(String password) {
