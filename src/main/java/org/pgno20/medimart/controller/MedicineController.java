@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -37,16 +36,14 @@ public class MedicineController {
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String status,
-            @PageableDefault(size = 20) Pageable pageable
-    ) {
+            @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(medicineService.search(name, brand, categoryId, status, pageable));
     }
 
     @GetMapping("/storefront")
     public ResponseEntity<Page<org.pgno20.medimart.dto.StorefrontMedicineDTO>> listStorefront(
             @RequestParam(required = false) String search,
-            @PageableDefault(size = 20) Pageable pageable
-    ) {
+            @PageableDefault(size = 20) Pageable pageable) {
         if (search != null && !search.isBlank()) {
             return ResponseEntity.ok(medicineService.searchStorefrontMedicines(search, pageable));
         }
@@ -66,7 +63,8 @@ public class MedicineController {
 
     // Update
     @PutMapping("/{id}")
-    public ResponseEntity<MedicineResponse> update(@PathVariable Long id, @Valid @RequestBody MedicineUpdateRequest req) {
+    public ResponseEntity<MedicineResponse> update(@PathVariable Long id,
+            @Valid @RequestBody MedicineUpdateRequest req) {
         return ResponseEntity.ok(medicineService.update(id, req));
     }
 
@@ -80,7 +78,7 @@ public class MedicineController {
     // Upload Image
     @PostMapping("/{id}/image")
     public ResponseEntity<Map<String, String>> uploadImage(
-            @PathVariable Long id, 
+            @PathVariable Long id,
             @org.springframework.web.bind.annotation.RequestParam("image") org.springframework.web.multipart.MultipartFile file) {
         String filename = medicineService.uploadImage(id, file);
         return ResponseEntity.ok(Map.of("imageUrl", filename));
