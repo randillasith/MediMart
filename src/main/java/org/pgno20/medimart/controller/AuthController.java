@@ -46,6 +46,13 @@ public class AuthController {
             session.setAttribute("userId", user.getId());
             session.setAttribute("userRole", user.getRole());
             
+            // Remember Me: extend session to 30 days, else default 30 minutes
+            if (dto.isRememberMe()) {
+                session.setMaxInactiveInterval(30 * 24 * 60 * 60); // 30 days in seconds
+            } else {
+                session.setMaxInactiveInterval(30 * 60); // 30 minutes
+            }
+            
             return ResponseEntity.ok(new AuthResponse("Login successful", true));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(e.getMessage(), false));
