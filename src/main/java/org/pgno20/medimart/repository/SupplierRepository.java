@@ -10,4 +10,7 @@ public interface SupplierRepository extends JpaRepository<Supplier, String> {
     List<Supplier> findByNameContainingIgnoreCase(String name);
     @Query("SELECT s FROM Supplier s WHERE LOWER(s.medicinesSupplied) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Supplier> findByMedicinesSuppliedContainingIgnoreCase(String keyword);
+
+    @Query("SELECT MAX(s.id) FROM Supplier s")
+    String findMaxId();
 }

@@ -65,9 +65,13 @@ public class SupplierService {
         return supplierRepository.findByMedicinesSuppliedContainingIgnoreCase(keyword);
     }
 
-    // Simple ID generator: SUP001, SUP002...
+    // Safe ID generator: SUP001, SUP002...
     private String generateNextId() {
-        long count = supplierRepository.count() + 1;
-        return String.format("SUP%03d", count);
+        String maxId = supplierRepository.findMaxId();
+        if (maxId == null || maxId.isBlank()) {
+            return "SUP001";
+        }
+        int currentNum = Integer.parseInt(maxId.substring(3));
+        return String.format("SUP%03d", currentNum + 1);
     }
 }

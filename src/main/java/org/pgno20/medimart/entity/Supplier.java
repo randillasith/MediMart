@@ -1,6 +1,7 @@
 package org.pgno20.medimart.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,15 +14,18 @@ public class Supplier extends org.pgno20.medimart.entity.AbstractSupplier {
     @Column(length = 10)
     private String id;
 
+    @NotBlank(message = "Name is required")
     @Column(nullable = false, length = 120)
     private String name;
 
+    @NotBlank(message = "Type is required")
     @Column(nullable = false, length = 20)
     private String type; // LOCAL / IMPORTED / GOVERNMENT
 
     @Column(length = 30)
     private String contact;
 
+    @Email(message = "Invalid email format")
     @Column(length = 120)
     private String email;
 
