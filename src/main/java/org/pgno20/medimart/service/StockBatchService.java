@@ -6,6 +6,8 @@ import org.pgno20.medimart.model.Medicine;
 import org.pgno20.medimart.model.StockBatch;
 import org.pgno20.medimart.repository.MedicineRepository;
 import org.pgno20.medimart.repository.StockBatchRepository;
+import org.pgno20.medimart.repository.SupplierRepository;
+import org.pgno20.medimart.entity.Supplier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +21,12 @@ public class StockBatchService {
 
     private final StockBatchRepository stockBatchRepository;
     private final MedicineRepository medicineRepository;
+    private final SupplierRepository supplierRepository;
 
-    public StockBatchService(StockBatchRepository stockBatchRepository, MedicineRepository medicineRepository) {
+    public StockBatchService(StockBatchRepository stockBatchRepository, MedicineRepository medicineRepository, SupplierRepository supplierRepository) {
         this.stockBatchRepository = stockBatchRepository;
         this.medicineRepository = medicineRepository;
+        this.supplierRepository = supplierRepository;
     }
 
     /**
@@ -42,6 +46,12 @@ public class StockBatchService {
         batch.setExpiryDate(req.getExpiryDate());
         batch.setPurchasePrice(req.getPurchasePrice() != null ? req.getPurchasePrice() : medicine.getPrice());
         batch.setStatus("ACTIVE");
+
+        if (req.getSupplierId() != null && !req.getSupplierId().isBlank()) {
+            Supplier supplier = supplierRepository.findById(req.getSupplierId())
+                    .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
+            batch.setSupplier(supplier);
+        }
 
         // Check if batch is already expired
         if (batch.isExpired()) {
@@ -67,7 +77,7 @@ public class StockBatchService {
      * Called internally by MedicineService.
      */
     @Transactional
-    public void createInitialBatch(Medicine medicine, Integer quantity, LocalDate expiryDate) {
+    public void createInitialBatch(Medicine medicine, Integer quantity, LocalDate expiryDate, String supplierId) {
         if (quantity == null || quantity <= 0) return;
 
         StockBatch batch = new StockBatch();
@@ -77,6 +87,12 @@ public class StockBatchService {
         batch.setExpiryDate(expiryDate);
         batch.setPurchasePrice(medicine.getPrice());
         batch.setStatus("ACTIVE");
+
+        if (supplierId != null && !supplierId.isBlank()) {
+            Supplier supplier = supplierRepository.findById(supplierId)
+                    .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
+            batch.setSupplier(supplier);
+        }
 
         if (batch.isExpired()) {
             batch.setStatus("EXPIRED");
@@ -119,6 +135,12 @@ public class StockBatchService {
         }
         if (req.getPurchasePrice() != null) {
             batch.setPurchasePrice(req.getPurchasePrice());
+        }
+
+        if (req.getSupplierId() != null && !req.getSupplierId().isBlank()) {
+            Supplier supplier = supplierRepository.findById(req.getSupplierId())
+                    .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
+            batch.setSupplier(supplier);
         }
 
         // Update status based on quantity and expiry
@@ -181,6 +203,10 @@ public class StockBatchService {
         r.setExpiryDate(batch.getExpiryDate());
         r.setAddedDate(batch.getAddedDate());
         r.setStatus(batch.getStatus());
+        if (batch.getSupplier() != null) {
+            r.setSupplierId(batch.getSupplier().getId());
+            r.setSupplierName(batch.getSupplier().getName());
+        }
         return r;
     }
 }
