@@ -35,9 +35,12 @@ public class SupplierController {
     // Read by id — returns 404 if not found
     @GetMapping("/{id}")
     public ResponseEntity<Supplier> getById(@PathVariable String id) {
-        return supplierService.getSupplierById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            Supplier supplier = supplierService.getSupplierById(id);
+            return ResponseEntity.ok(supplier);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // Update
