@@ -35,7 +35,26 @@ public class CategoryService {
     }
 
     public Page<CategoryResponse> listAll(Pageable pageable) {
-        return categoryRepository.findAll(pageable).map(this::toResponse);
+        return categoryRepository.findByStatus("ACTIVE", pageable).map(this::toResponse);
+    }
+
+    public CategoryResponse update(Long id, CategoryCreateRequest req) {
+        Category category = categoryRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        try {
+            category.setName(req.getName());
+            Category saved = categoryRepository.save(category);
+            return toResponse(saved);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("A category with this name already exists.");
+        }
+    }
+
+    public void delete(Long id) {
+        Category category = categoryRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        category.setStatus("INACTIVE");
+        categoryRepository.save(category);
     }
 
     private CategoryResponse toResponse(Category category) {
