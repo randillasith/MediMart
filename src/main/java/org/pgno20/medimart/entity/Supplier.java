@@ -28,7 +28,7 @@ public class Supplier extends org.pgno20.medimart.entity.AbstractSupplier {
     @Column(length = 255)
     private String address;
 
-    @Lob
+    @Column(length=1000)
     private String medicinesSupplied; // "Panadol,Amoxicillin,Metformin"
 
     public Supplier() {}
@@ -43,10 +43,6 @@ public class Supplier extends org.pgno20.medimart.entity.AbstractSupplier {
         this.address = address;
         this.medicinesSupplied = medicinesSupplied;
     }
-
-    // ==========================================
-    // ABSTRACTION - Abstract methods implement කිරීම
-    // ==========================================
 
     @Override
     public String getSupplierCategory() {
