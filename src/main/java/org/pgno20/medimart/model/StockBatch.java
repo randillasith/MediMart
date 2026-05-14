@@ -17,6 +17,10 @@ public class StockBatch {
     @JoinColumn(name = "medicine_id")
     private Medicine medicine;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private org.pgno20.medimart.entity.Supplier supplier;
+
     @Column(nullable = false, unique = true, length = 40)
     private String batchNumber; // BATCH-0001
 
@@ -54,6 +58,9 @@ public class StockBatch {
 
     public Medicine getMedicine() { return medicine; }
     public void setMedicine(Medicine medicine) { this.medicine = medicine; }
+
+    public org.pgno20.medimart.entity.Supplier getSupplier() { return supplier; }
+    public void setSupplier(org.pgno20.medimart.entity.Supplier supplier) { this.supplier = supplier; }
 
     public String getBatchNumber() { return batchNumber; }
     public void setBatchNumber(String batchNumber) { this.batchNumber = batchNumber; }

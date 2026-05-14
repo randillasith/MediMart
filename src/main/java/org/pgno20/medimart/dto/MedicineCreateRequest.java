@@ -30,6 +30,8 @@ public class MedicineCreateRequest {
     @NotNull
     private Long categoryId;
 
+    private String supplierId;
+
     // getters/setters
     public String getType() { return type; }
     public String getName() { return name; }
@@ -40,6 +42,7 @@ public class MedicineCreateRequest {
     public Integer getStockQty() { return stockQty; }
     public LocalDate getExpiryDate() { return expiryDate; }
     public Long getCategoryId() { return categoryId; }
+    public String getSupplierId() { return supplierId; }
 
     public void setType(String type) { this.type = type; }
     public void setName(String name) { this.name = name; }
@@ -50,4 +53,5 @@ public class MedicineCreateRequest {
     public void setStockQty(Integer stockQty) { this.stockQty = stockQty; }
     public void setExpiryDate(LocalDate expiryDate) { this.expiryDate = expiryDate; }
     public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
+    public void setSupplierId(String supplierId) { this.supplierId = supplierId; }
 }
