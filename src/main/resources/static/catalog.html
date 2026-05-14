@@ -109,7 +109,7 @@
             <button class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
                 <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
             </button>
-            <button class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
+            <button id="userAccountBtn" onclick="window.location.href='/login.html'" class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
                 <span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
             </button>
         </div>
@@ -325,6 +325,7 @@
         
         loadCategories();
         fetchProducts(true);
+        checkAuthStatus();
 
         // Search Input listener
         let debounceTimer;
@@ -459,7 +460,7 @@
         }
         
         const title = p.name;
-        const price = p.minPrice ? `Rs. ${Number(p.minPrice).toFixed(2)}` : 'Rs. 0.00';
+        const price = p.finalPrice ? `Rs. ${Number(p.finalPrice).toFixed(2)}` : 'Rs. 0.00';
         
         let badgeHtml = '';
         if (p.prescriptionRequired) {
@@ -527,7 +528,7 @@
         document.getElementById('detailTitle').textContent = title;
         document.getElementById('detailCatLabel').textContent = product.categoryName || '';
         document.getElementById('detailBrand').textContent = `by ${product.brand || 'Generic'}`;
-        document.getElementById('detailPrice').textContent = product.minPrice ? `Rs. ${Number(product.minPrice).toFixed(2)}` : 'Rs. 0.00';
+        document.getElementById('detailPrice').textContent = product.finalPrice ? `Rs. ${Number(product.finalPrice).toFixed(2)}` : 'Rs. 0.00';
         document.getElementById('detailImg').src = imgSrc;
         
         document.getElementById('detailCatInfo').textContent = product.categoryName || '-';
@@ -566,6 +567,17 @@
         document.getElementById('detailView').classList.add('hidden');
         document.getElementById('catalogView').classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function checkAuthStatus() {
+        try {
+            const res = await fetch('/api/auth/me');
+            const data = await res.json();
+            if (data.loggedIn) {
+                const btn = document.getElementById('userAccountBtn');
+                if (btn) btn.onclick = () => window.location.href = '/profile.html';
+            }
+        } catch(e) { console.error(e); }
     }
 </script>
 </body>
