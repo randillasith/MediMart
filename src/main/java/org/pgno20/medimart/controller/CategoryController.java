@@ -32,4 +32,15 @@ public class CategoryController {
     public ResponseEntity<Page<CategoryResponse>> list(@PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(categoryService.listAll(pageable));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryResponse> update(@PathVariable Long id, @Valid @RequestBody CategoryCreateRequest req) {
+        return ResponseEntity.ok(categoryService.update(id, req));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        categoryService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }
