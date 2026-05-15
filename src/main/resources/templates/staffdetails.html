@@ -170,10 +170,10 @@
                     <div class="md:col-span-2">
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Staff Role</label>
                         <select id="roleName" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all">
-                            <option value="STOCK_MANAGER">Stock Manager</option>
-                            <option value="ORDER_MANAGER">Order Manager</option>
-                            <option value="SUPPLIER_HANDLER">Supplier Handler</option>
-                            <option value="ADMIN">System Admin</option>
+                            <option value="ROLE_STOCK_MANAGER">Stock Manager</option>
+                            <option value="ROLE_ORDER_MANAGER">Order Manager</option>
+                            <option value="ROLE_SUPPLIER_HANDLER">Supplier Handler</option>
+                            <option value="ROLE_ADMIN">System Admin</option>
                         </select>
 
                         <div class="md:col-span-2">
@@ -205,13 +205,12 @@
         const tableBody = document.getElementById('staffTableBody');
         tableBody.innerHTML = '';
 
-        // 1. Calculate KPI Cards using the FULL users list
         // Total Staff (excluding Admins for the total count on this page)
-        const staffOnly = users.filter(u => u.roleName !== 'ADMIN');
+        const staffOnly = users.filter(u => u.roleName !== 'ROLE_ADMIN');
         document.getElementById('statTotalStaff').textContent = staffOnly.length;
 
         // Active Admins (still calculated from full list for the card)
-        const activeAdmins = users.filter(u => u.roleName === 'ADMIN' && (u.active || u.isActive)).length;
+        const activeAdmins = users.filter(u => u.roleName === 'ROLE_ADMIN' && (u.active || u.isActive)).length;
         document.getElementById('statActiveAdmins').textContent = activeAdmins;
 
         // System Roles

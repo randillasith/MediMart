@@ -282,6 +282,20 @@
         document.getElementById('profileEmail').textContent = currentUser.email || 'N/A';
         document.getElementById('profileDob').textContent = currentUser.dob || 'N/A';
         document.getElementById('profileGender').textContent = currentUser.gender || 'N/A';
+
+        // Add Admin Dashboard link
+        if (currentUser.roleName === 'ROLE_ADMIN') {
+            const nav = document.querySelector('nav.hidden.md\\:flex');
+            if (nav && !document.getElementById('adminDashLink')) {
+                const dashLink = document.createElement('a');
+                dashLink.id = 'adminDashLink';
+                dashLink.className = 'text-on-surface-variant hover:text-primary transition-colors font-body text-body-md font-medium';
+                dashLink.href = '/medicines';
+                dashLink.textContent = 'Dashboard';
+                // Insert it before the "Members" link (which is the last one)
+                nav.insertBefore(dashLink, nav.lastElementChild);
+            }
+        }
     }
 
     function switchTab(tabId) {
