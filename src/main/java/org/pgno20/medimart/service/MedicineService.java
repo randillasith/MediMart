@@ -82,7 +82,7 @@ public class MedicineService {
         saved = medicineRepository.save(saved);
 
         // Create the initial stock batch from the provided stockQty and expiryDate
-        stockBatchService.createInitialBatch(saved, req.getStockQty(), req.getExpiryDate());
+        stockBatchService.createInitialBatch(saved, req.getStockQty(), req.getExpiryDate(), req.getSupplierId());
         
         return toResponse(saved);
     }
