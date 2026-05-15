@@ -283,15 +283,15 @@
         document.getElementById('profileDob').textContent = currentUser.dob || 'N/A';
         document.getElementById('profileGender').textContent = currentUser.gender || 'N/A';
 
-        // Add Admin Dashboard link
-        if (currentUser.roleName === 'ROLE_ADMIN') {
+        // Add Dashboard link for Admins and Staff (everyone except ROLE_USER)
+        if (currentUser.roleName && currentUser.roleName !== 'ROLE_USER') {
             const nav = document.querySelector('nav.hidden.md\\:flex');
             if (nav && !document.getElementById('adminDashLink')) {
                 const dashLink = document.createElement('a');
                 dashLink.id = 'adminDashLink';
                 dashLink.className = 'text-on-surface-variant hover:text-primary transition-colors font-body text-body-md font-medium';
                 dashLink.href = '/medicines';
-                dashLink.textContent = 'Dashboard';
+                dashLink.textContent = currentUser.roleName === 'ROLE_ADMIN' ? 'Admin Dashboard' : 'Staff Dashboard';
                 // Insert it before the "Members" link (which is the last one)
                 nav.insertBefore(dashLink, nav.lastElementChild);
             }
