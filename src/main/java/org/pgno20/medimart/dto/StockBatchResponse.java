@@ -13,6 +13,8 @@ public class StockBatchResponse {
     private LocalDate expiryDate;
     private LocalDateTime addedDate;
     private String status;
+    private String supplierId;
+    private String supplierName;
 
     // Getters & Setters
     public Long getId() { return id; }
@@ -35,4 +37,10 @@ public class StockBatchResponse {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getSupplierId() { return supplierId; }
+    public void setSupplierId(String supplierId) { this.supplierId = supplierId; }
+
+    public String getSupplierName() { return supplierName; }
+    public void setSupplierName(String supplierName) { this.supplierName = supplierName; }
 }
