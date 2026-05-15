@@ -8,7 +8,7 @@ package org.pgno20.medimart.entity;
 
 public enum SupplierType {
 
-    LOCAL("LOCAL") {
+    WHOLESALER("Wholesale Distributor") {
         @Override
         public int getLeadDays() { return 2; }
 
@@ -21,7 +21,7 @@ public enum SupplierType {
         }
     },
 
-    IMPORTED("IMPORTED") {
+    MANUFACTURER("Direct Manufacturer") {
         @Override
         public int getLeadDays() { return 14; }
 
@@ -34,7 +34,20 @@ public enum SupplierType {
         }
     },
 
-    GOVERNMENT("GOVERNMENT") {
+    SPECIALIST("Specialist Pharmacy") {
+        @Override
+        public int getLeadDays() { return 5; }
+
+        @Override
+        public double getMarkupRate() { return 1.10; } // 10% markup
+
+        @Override
+        public String getOrderNotes() {
+            return "Specialized transport required - temperature controlled";
+        }
+    },
+
+    LOGISTICS("Logistics Partner") {
         @Override
         public int getLeadDays() { return 7; }
 
@@ -43,7 +56,7 @@ public enum SupplierType {
 
         @Override
         public String getOrderNotes() {
-            return "Government tender process - official PO required";
+            return "Third-party logistics process";
         }
     };
 

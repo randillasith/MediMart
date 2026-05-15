@@ -75,7 +75,7 @@ public class Supplier extends org.pgno20.medimart.entity.AbstractSupplier {
         try {
             return SupplierType.valueOf(type.toUpperCase());
         } catch (Exception e) {
-            return SupplierType.LOCAL;
+            return SupplierType.WHOLESALER;
         }
     }
 
