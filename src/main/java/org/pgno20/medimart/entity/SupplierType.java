@@ -8,42 +8,55 @@ package org.pgno20.medimart.entity;
 
 public enum SupplierType {
 
-    LOCAL("LOCAL") {
+    WHOLESALER("Wholesale Distributor") {
         @Override
-        public int getLeadDays() { return 2; }
+        public int getLeadDays() { return 3; }
+
+        @Override
+        public double getMarkupRate() { return 1.08; } // 8% markup
+
+        @Override
+        public String getOrderNotes() {
+            return "Wholesale bulk order - standard distribution channel";
+        }
+    },
+
+    MANUFACTURER("Direct Manufacturer") {
+        @Override
+        public int getLeadDays() { return 7; }
 
         @Override
         public double getMarkupRate() { return 1.05; } // 5% markup
 
         @Override
         public String getOrderNotes() {
-            return "Local delivery - standard road transport applies";
+            return "Direct from manufacturer - quality certification required";
         }
     },
 
-    IMPORTED("IMPORTED") {
+    SPECIALIST("Specialist Pharmacy") {
         @Override
-        public int getLeadDays() { return 14; }
+        public int getLeadDays() { return 5; }
 
         @Override
-        public double getMarkupRate() { return 1.20; } // 20% import markup
+        public double getMarkupRate() { return 1.15; } // 15% markup
 
         @Override
         public String getOrderNotes() {
-            return "Import clearance required - customs duty applies";
+            return "Specialist supply - controlled substance protocols may apply";
         }
     },
 
-    GOVERNMENT("GOVERNMENT") {
+    LOGISTICS("Logistics Partner") {
         @Override
-        public int getLeadDays() { return 7; }
+        public int getLeadDays() { return 2; }
 
         @Override
-        public double getMarkupRate() { return 1.0; } // no markup
+        public double getMarkupRate() { return 1.10; } // 10% markup
 
         @Override
         public String getOrderNotes() {
-            return "Government tender process - official PO required";
+            return "Logistics partner - cold chain transport available";
         }
     };
 
