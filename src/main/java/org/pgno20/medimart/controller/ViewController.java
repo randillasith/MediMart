@@ -10,20 +10,22 @@ import jakarta.servlet.http.HttpSession;
 public class ViewController {
 
     @GetMapping("/users-portal")
-    public String users() {
-        // Must match exactly: src/main/resources/templates/userdetails.html
+    public String users(HttpSession session) {
+        if (session.getAttribute("userId") == null) return "redirect:/login.html";
+        if (!"ROLE_ADMIN".equals(session.getAttribute("userRole"))) return "redirect:/medicines";
         return "staffdetails"; 
     }
 
-    @GetMapping("/medicines") // Changed from /medicine to match your sidebar link
-    public String medicines() {
-
+    @GetMapping("/medicines") 
+    public String medicines(HttpSession session) {
+        if (session.getAttribute("userId") == null) return "redirect:/login.html";
         return "medicines"; 
     }
 
-     @GetMapping("/addmindetails") // Changed from /medicine to match your sidebar link
-    public String addmindetails() {
-
+    @GetMapping("/addmindetails") 
+    public String addmindetails(HttpSession session) {
+        if (session.getAttribute("userId") == null) return "redirect:/login.html";
+        if (!"ROLE_ADMIN".equals(session.getAttribute("userRole"))) return "redirect:/medicines";
         return "addmindetails"; 
     }
 
@@ -44,7 +46,8 @@ public String logout(HttpSession session) {
     }
 
     @GetMapping("/supplier-details")
-    public String supplierDetails() {
+    public String supplierDetails(HttpSession session) {
+        if (session.getAttribute("userId") == null) return "redirect:/login.html";
         return "suppliers";
     }
 }

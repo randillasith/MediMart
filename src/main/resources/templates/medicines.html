@@ -184,7 +184,7 @@
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Out of Stock</p>
                     <h3 id="kpiOutOfStock" class="text-3xl font-extrabold text-on-surface mt-1">-</h3>
                 </div>
-                <div
+                <div th:if="${session.userRole == 'ROLE_ADMIN'}"
                     class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_12px_40px_rgba(25,28,33,0.06)] border border-slate-100/50">
                     <div class="flex items-center justify-between mb-4">
                         <div class="w-12 h-12 rounded-full bg-teal-50 text-secondary flex items-center justify-center">
@@ -452,7 +452,8 @@
         </div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
+        window.userRole = /*[[${session.userRole}]]*/ 'ROLE_USER';
         let currentPage = 0;
         let totalPages = 1;
         let searchTimeout;
@@ -780,12 +781,14 @@
                     <button onclick='openRestockModal(${m.id}, "${m.name.replace(/'/g, "\\'")}")' class="p-2 text-slate-400 hover:text-green-600 transition-colors" title="Restock">
                         <span class="material-symbols-outlined">add_shopping_cart</span>
                     </button>
+                    ${window.userRole === 'ROLE_ADMIN' ? `
                     <button onclick='openEditModal(${m.id})' class="p-2 text-slate-400 hover:text-primary transition-colors" title="Edit">
                         <span class="material-symbols-outlined">edit_square</span>
                     </button>
                     <button onclick='deleteMedicine(${m.id})' class="p-2 text-slate-400 hover:text-error transition-colors" title="Discontinue">
                         <span class="material-symbols-outlined">delete</span>
                     </button>
+                    ` : ''}
                 </td>
             `;
                 tbody.appendChild(tr);
