@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html class="light" lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Staff Management | MediMart Portal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00478d",
+                        "primary-container": "#005eb8",
+                        "secondary": "#006970",
+                        "error": "#ba1a1a",
+                        "surface": "#f9f9ff",
+                        "on-surface": "#191c21",
+                        "outline-variant": "#c2c6d4"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .cta-gradient { background: linear-gradient(135deg, #00478D 0%, #005EB8 100%); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
+</head>
+
+<body class="bg-surface font-body text-on-surface flex min-h-screen">
+
+    <!-- Sidebar Fragment -->
+    <div th:replace="~{fragments/sidebar :: medimart-sidebar}"></div>
+
+    <div class="flex-1 flex flex-col min-w-0 md:ml-72">
+        <!-- Top Navigation Bar -->
+        <header class="h-16 sticky top-0 bg-white/80 backdrop-blur-xl z-40 flex justify-between items-center px-8 border-b border-slate-100">
+            <div class="flex items-center gap-4 flex-1">
+                <div class="relative w-full max-w-md">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                    <input class="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-full text-sm focus:ring-2 focus:ring-primary/10 transition-all" 
+                           placeholder="Search staff members..." type="text" />
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs font-bold text-on-surface">Admin Portal</p>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">Management</p>
+                </div>
+                <img alt="Admin" class="h-10 w-10 rounded-full border-2 border-white shadow-sm" src="https://ui-avatars.com/api/?name=Admin&background=00478d&color=fff" />
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="p-8 space-y-8 max-w-7xl mx-auto w-full">
+    
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h2 class="text-4xl font-headline font-extrabold text-primary tracking-tight">Staff Management</h2>
+            <p class="text-slate-500 mt-2 font-medium">Manage medical personnel, access levels, and system roles.</p>
+        </div>
+        <button onclick="openStaffModal()" class="cta-gradient text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl shadow-primary/20 hover:opacity-90 transition-all active:scale-95">
+            <span class="material-symbols-outlined">person_add</span>
+            Add New Member
+        </button>
+    </div>
+
+    <!-- KPI Cards (Now with IDs for Dynamic Updates) -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="p-3 bg-blue-50 rounded-2xl text-primary">
+                    <span class="material-symbols-outlined">group</span>
+                </div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Staff</span>
+            </div>
+            <h3 id="statTotalStaff" class="text-3xl font-black text-primary">0</h3>
+        </div>
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="p-3 bg-teal-50 rounded-2xl text-secondary">
+                    <span class="material-symbols-outlined">verified_user</span>
+                </div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Admins</span>
+            </div>
+            <h3 id="statActiveAdmins" class="text-3xl font-black text-primary">0</h3>
+        </div>
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="p-3 bg-orange-50 rounded-2xl text-orange-600">
+                    <span class="material-symbols-outlined">category</span>
+                </div>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Roles</span>
+            </div>
+            <h3 id="statSystemRoles" class="text-3xl font-black text-primary">0</h3>
+        </div>
+    </section>
+
+    <!-- Table Container -->
+    <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Member</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Email</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Role</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Status</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="staffTableBody" class="divide-y divide-slate-50"></tbody>
+            </table>
+        </div>
+    </div>
+        </main>
+    </div>
+
+    <!-- Add Staff Modal (Popup Form) -->
+    <div id="staffModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div>
+                    <h3 id="modalTitle" class="text-xl font-black text-primary">Register New Staff</h3>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Personnel Entry Form</p>
+                </div>
+                <button onclick="closeStaffModal()" class="text-slate-400 hover:text-slate-600">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form id="staffForm" onsubmit="saveStaff(event)" class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Full Name</label>
+                        <input type="text" id="fullName" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email Address</label>
+                        <input type="email" id="email" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Password</label>
+                        <input type="password" id="password" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Date of Birth</label>
+                        <input type="date" id="dob" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Gender</label>
+                        <select id="gender" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all">
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Staff Role</label>
+                        <select id="roleName" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all">
+                            <option value="STOCK_MANAGER">Stock Manager</option>
+                            <option value="ORDER_MANAGER">Order Manager</option>
+                            <option value="SUPPLIER_HANDLER">Supplier Handler</option>
+                            <option value="ADMIN">System Admin</option>
+                        </select>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Member Status</label>
+                            <select id="userStatus" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all">
+                                <option value="true">Active (Access Enabled)</option>
+                                <option value="false">Inactive (Access Disabled)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex gap-4">
+    <button type="button" onclick="closeStaffModal()" class="flex-1 py-4 text-slate-600 font-bold bg-slate-100 rounded-xl">Cancel</button>
+    <button type="submit" id="submitBtn" class="flex-[2] py-4 cta-gradient text-white font-bold rounded-xl shadow-lg shadow-primary/20">Register Member</button>
+</div>
+
+                <input type="hidden" id="staffId">
+            </form>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', loadStaffTable);
+
+   async function loadStaffTable() {
+    try {
+        const res = await fetch('/api/users');
+        const users = await res.json();
+        const tableBody = document.getElementById('staffTableBody');
+        tableBody.innerHTML = '';
+
+        // 1. Calculate KPI Cards using the FULL users list
+        // Total Staff (excluding Admins for the total count on this page)
+        const staffOnly = users.filter(u => u.roleName !== 'ADMIN');
+        document.getElementById('statTotalStaff').textContent = staffOnly.length;
+
+        // Active Admins (still calculated from full list for the card)
+        const activeAdmins = users.filter(u => u.roleName === 'ADMIN' && (u.active || u.isActive)).length;
+        document.getElementById('statActiveAdmins').textContent = activeAdmins;
+
+        // System Roles
+        const uniqueRoles = [...new Set(users.map(u => u.roleName))].length;
+        document.getElementById('statSystemRoles').textContent = uniqueRoles;
+
+        // 2. Render ONLY Staff Members (Hidden Admins from the grid)
+        staffOnly.forEach(user => {
+            // Determine active status
+            const isUserActive = user.active !== undefined ? user.active : user.isActive;
+            
+            const row = `
+                <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                ${user.fullName ? user.fullName.charAt(0) : '?'}
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-on-surface">${user.fullName}</p>
+                                <p class="text-[11px] text-slate-500">${user.gender}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-600">${user.email}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full bg-blue-100 text-primary text-[10px] font-bold uppercase">
+                            ${user.roleName ? user.roleName.replace('_', ' ') : 'STAFF'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full ${isUserActive ? 'bg-secondary' : 'bg-slate-300'}"></span>
+                            <span class="text-xs font-bold ${isUserActive ? 'text-secondary' : 'text-slate-400'}">
+                                ${isUserActive ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="editUser(${user.id})" class="p-2 text-slate-400 hover:text-primary transition-all">
+                                <span class="material-symbols-outlined">edit_square</span>
+                            </button>
+                            <button onclick="deleteUser(${user.id})" class="p-2 text-slate-400 hover:text-error transition-all">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', row);
+        });
+    } catch (err) { 
+        console.error("Load error:", err); 
+    }
+}
+
+   function openStaffModal() {
+    document.getElementById('staffForm').reset();
+    document.getElementById('staffId').value = '';
+    
+    // Reset the Title and Button
+    document.getElementById('modalTitle').textContent = 'Register New Staff';
+    document.getElementById('submitBtn').textContent = 'Register Member';
+    
+    // RESET PASSWORD FIELD FOR NEW USER
+    const passwordField = document.getElementById('password');
+    passwordField.required = true;               // Must have password for new users
+    passwordField.placeholder = 'Mandotory';      // Standard dots placeholder
+    
+    document.getElementById('staffModal').classList.remove('hidden');
+    document.getElementById('userStatus').value = "true"; 
+    document.getElementById('staffModal').classList.remove('hidden');
+}
+
+   async function editUser(id) {
+    try {
+        const res = await fetch('/api/users');
+        const users = await res.json();
+        const user = users.find(u => u.id == id);
+        
+        if (user) {
+            document.getElementById('staffId').value = user.id;
+            document.getElementById('fullName').value = user.fullName;
+            document.getElementById('email').value = user.email;
+            document.getElementById('dob').value = user.dob;
+            document.getElementById('gender').value = user.gender;
+            document.getElementById('roleName').value = user.roleName;
+            
+            // SET PASSWORD FIELD FOR UPDATE
+            const passwordField = document.getElementById('password');
+            passwordField.value = '';                    // Clear any typed text
+            passwordField.required = false;              // Optional for updates
+            passwordField.placeholder = 'Leave blank to keep current';
+            
+            document.getElementById('modalTitle').textContent = 'Update Staff Member';
+            document.getElementById('submitBtn').textContent = 'Update Details';
+            document.getElementById('staffModal').classList.remove('hidden');
+            const isUserActive = user.active !== undefined ? user.active : user.isActive;
+            document.getElementById('userStatus').value = isUserActive.toString();
+        }
+    } catch (err) { console.error("Edit fetch error:", err); }
+}
+
+    function closeStaffModal() {
+        document.getElementById('staffModal').classList.add('hidden');
+    }
+
+  async function saveStaff(event) {
+    event.preventDefault();
+    const id = document.getElementById('staffId').value;
+    const passwordValue = document.getElementById('password').value;
+    const statusValue = document.getElementById('userStatus').value === "true";
+
+    // Build the payload
+    const payload = {
+        fullName: document.getElementById('fullName').value,
+        email: document.getElementById('email').value,
+        dob: document.getElementById('dob').value,
+        gender: document.getElementById('gender').value,
+        roleName: document.getElementById('roleName').value,
+        active: statusValue // Matches 'private Boolean active'
+    };
+
+    // Only add password if it's not empty
+    if (passwordValue.trim() !== "") {
+        payload.password = passwordValue;
+    } else if (!id) {
+        // If it's a NEW user and password is empty, stop here
+        alert("Password is required for new members.");
+        return;
+    }
+
+    const url = id ? `/api/users/${id}` : '/api/users';
+    const method = id ? 'PUT' : 'POST';
+
+    try {
+        const res = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            closeStaffModal();
+            loadStaffTable();
+            alert(id ? 'Details updated!' : 'Staff registered!');
+        } else {
+            // Detailed error logging
+            const errorData = await res.json();
+            console.error("Server Error:", errorData);
+            alert("Error: " + (errorData.message || "Check console for details"));
+        }
+    } catch (err) {
+        console.error("Network Error:", err);
+    }
+}
+    async function deleteUser(id) {
+        if(confirm('Are you sure you want to remove this staff member?')) {
+            try {
+                const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+                if(res.ok) loadStaffTable();
+            } catch (err) { console.error("Delete error:", err); }
+        }
+    }
+    </script>
+</body>
+</html>
