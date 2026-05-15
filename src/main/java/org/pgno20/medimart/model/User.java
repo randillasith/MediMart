@@ -20,8 +20,8 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String password; // Will be hashed
+    @Column(nullable = false) // Keep this, but we will handle the "blank" update in the Controller
+    private String password; 
 
     @Column(nullable = false)
     private LocalDate dob;
@@ -30,8 +30,8 @@ public class User {
     private String gender;
 
     @Column(name = "role_name", nullable = false)
-    private String role = "ROLE_USER"; // Default role
+    private String roleName;
 
-    @Column(nullable = false)
-    private Boolean active = true; // For soft delete
+    @Column(name = "is_active", nullable = false)
+    private Boolean active = true;
 }
