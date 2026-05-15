@@ -44,7 +44,7 @@ public class UserService {
         user.setGender(dto.getGender());
         // Store password as SHA-256 hash
         user.setPassword(hashPassword(dto.getPassword())); 
-        user.setRole("ROLE_USER");
+        user.setRoleName("ROLE_USER");
         user.setActive(true);
 
         return userRepository.save(user);
@@ -98,7 +98,7 @@ public class UserService {
             throw new IllegalArgumentException("Invalid role. Must be ROLE_USER or ROLE_ADMIN");
         }
         User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        user.setRole(newRole);
+        user.setRoleName(newRole);
         return userRepository.save(user);
     }
 

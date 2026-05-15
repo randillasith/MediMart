@@ -6,6 +6,7 @@
     <title>MediMart | Clinical Sophistication &amp; Care</title>
     <link rel="icon" href="/logo.png" type="image/png"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script id="tailwind-config">
@@ -78,6 +79,15 @@
           }
         }
     </script>
+    <script>
+    // Clears the browser history so they can't click "Back" into the dashboard
+    window.onload = function() {
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    }
+</script>
+    
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -118,6 +128,7 @@
         </div>
     </div>
 </div>
+
 <!-- TopNavBar -->
 <header class="bg-[#F2F3FB] dark:bg-slate-900 sticky w-full top-0 z-50 shadow-sm">
     <nav class="flex justify-between items-center w-full px-8 py-4 max-w-full mx-auto">
