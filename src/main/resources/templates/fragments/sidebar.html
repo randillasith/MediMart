@@ -29,13 +29,13 @@
                 <span class="text-sm font-semibold">Inventory</span>
             </a>
 
-            <div th:if="${session.userRole == 'ROLE_ADMIN'}">
+            <div>
                 <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 mt-6">Personnel</p>
-                <a th:href="@{/users-portal}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-primary transition-all">
+                <a th:href="@{/users-portal}" onclick="return checkSidebarAccess(event, 'ROLE_ADMIN')" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-primary transition-all">
                     <span class="material-symbols-outlined">group</span>
                     <span class="text-sm font-semibold">Staff Management</span>
                 </a>
-                <a th:href="@{/addmindetails}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-primary transition-all">
+                <a th:href="@{/addmindetails}" onclick="return checkSidebarAccess(event, 'ROLE_ADMIN')" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-primary transition-all">
                     <span class="material-symbols-outlined">admin_panel_settings</span>
                     <span class="text-sm font-semibold">Add Admin</span>
                 </a>
@@ -57,5 +57,21 @@
                 </a>
         </div>
     </aside>
+
+    <script th:inline="javascript">
+        function checkSidebarAccess(event, requiredRole) {
+            const userRole = /*[[${session.userRole}]]*/ 'ROLE_USER';
+            if (requiredRole === 'ROLE_ADMIN' && userRole !== 'ROLE_ADMIN') {
+                event.preventDefault();
+                if(typeof showToast === 'function') {
+                    showToast('Access Denied: You do not have permission to view this section.', true);
+                } else {
+                    alert('Access Denied: You do not have permission to view this section.');
+                }
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>
