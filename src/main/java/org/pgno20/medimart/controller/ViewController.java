@@ -42,4 +42,9 @@ public String logout(HttpSession session) {
         // This looks for src/main/resources/templates/index.html
         return "index"; 
     }
+
+    @GetMapping("/supplier-details")
+    public String supplierDetails() {
+        return "suppliers";
+    }
 }
