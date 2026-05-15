@@ -1,0 +1,972 @@
+{
+	"info": {
+		"name": "MediMart API Collection",
+		"description": "Complete API test collection for MediMart - covers Auth, Users, Medicines, Categories, Stock Batches, and Suppliers",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "medicineId",
+			"value": "1"
+		},
+		{
+			"key": "userId",
+			"value": "1"
+		},
+		{
+			"key": "batchId",
+			"value": "1"
+		},
+		{
+			"key": "categoryId",
+			"value": "1"
+		},
+		{
+			"key": "supplierId",
+			"value": "SUP001"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Auth",
+			"item": [
+				{
+					"name": "1.1 Register User",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/auth/register",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\",\n  \"confirmPassword\": \"Test1234\",\n  \"dob\": \"1995-06-15\",\n  \"gender\": \"Male\"\n}"
+						}
+					}
+				},
+				{
+					"name": "1.2 Register (Duplicate Email - Should Fail)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/auth/register",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"John Copy\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\",\n  \"confirmPassword\": \"Test1234\",\n  \"dob\": \"1990-01-01\",\n  \"gender\": \"Male\"\n}"
+						}
+					}
+				},
+				{
+					"name": "1.3 Register (Weak Password - Should Fail)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/auth/register",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Weak User\",\n  \"email\": \"weak@example.com\",\n  \"password\": \"123\",\n  \"confirmPassword\": \"123\",\n  \"dob\": \"2000-01-01\",\n  \"gender\": \"Female\"\n}"
+						}
+					}
+				},
+				{
+					"name": "1.4 Register (Mismatch Password - Should Fail)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/auth/register",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Mismatch User\",\n  \"email\": \"mismatch@example.com\",\n  \"password\": \"Test1234\",\n  \"confirmPassword\": \"Test5678\",\n  \"dob\": \"2000-01-01\",\n  \"gender\": \"Male\"\n}"
+						}
+					}
+				},
+				{
+					"name": "1.5 Register Second User",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/auth/register",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Secure99\",\n  \"confirmPassword\": \"Secure99\",\n  \"dob\": \"1998-03-22\",\n  \"gender\": \"Female\"\n}"
+						}
+					}
+				},
+				{
+					"name": "1.6 Login",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/auth/login",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\",\n  \"rememberMe\": false\n}"
+						}
+					}
+				},
+				{
+					"name": "1.7 Login (Wrong Password - Should Fail)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/auth/login",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"WrongPass1\",\n  \"rememberMe\": false\n}"
+						}
+					}
+				},
+				{
+					"name": "1.8 Login with Remember Me",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/auth/login",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Test1234\",\n  \"rememberMe\": true\n}"
+						}
+					}
+				},
+				{
+					"name": "1.9 Get Current User (me)",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/auth/me"
+					}
+				},
+				{
+					"name": "1.10 Update Profile",
+					"request": {
+						"method": "PUT",
+						"url": "{{baseUrl}}/api/auth/me",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"John Updated\",\n  \"dob\": \"1995-06-20\",\n  \"gender\": \"Male\"\n}"
+						}
+					}
+				},
+				{
+					"name": "1.11 Update Password",
+					"request": {
+						"method": "PUT",
+						"url": "{{baseUrl}}/api/auth/me/password",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"Test1234\",\n  \"newPassword\": \"NewPass99\",\n  \"confirmNewPassword\": \"NewPass99\"\n}"
+						}
+					}
+				},
+				{
+					"name": "1.12 Delete Account (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/api/auth/me"
+					}
+				},
+				{
+					"name": "1.13 Logout",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/auth/logout"
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Categories",
+			"item": [
+				{
+					"name": "2.1 Create Category - Pain Relief",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/categories",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Pain Relief\"\n}"
+						}
+					}
+				},
+				{
+					"name": "2.2 Create Category - Antibiotics",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/categories",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Antibiotics\"\n}"
+						}
+					}
+				},
+				{
+					"name": "2.3 Create Category - Vitamins",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/categories",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Vitamins & Supplements\"\n}"
+						}
+					}
+				},
+				{
+					"name": "2.4 Create Category (Duplicate - Should Fail)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/categories",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Pain Relief\"\n}"
+						}
+					}
+				},
+				{
+					"name": "2.5 List All Categories",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Medicines",
+			"item": [
+				{
+					"name": "3.1 Create OTC Medicine - Paracetamol",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"OTC\",\n  \"name\": \"Paracetamol\",\n  \"brand\": \"Panadol\",\n  \"formType\": \"TABLET\",\n  \"dosage\": \"500\",\n  \"price\": 5.99,\n  \"stockQty\": 500,\n  \"expiryDate\": \"2027-12-31\",\n  \"categoryId\": 1,\n  \"supplierId\": \"SUP001\"\n}"
+						}
+					}
+				},
+				{
+					"name": "3.2 Create Prescription Medicine - Amoxicillin",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"PRESCRIPTION\",\n  \"name\": \"Amoxicillin\",\n  \"brand\": \"Amoxil\",\n  \"formType\": \"CAPSULE\",\n  \"dosage\": \"250mg\",\n  \"price\": 12.50,\n  \"stockQty\": 200,\n  \"expiryDate\": \"2027-06-30\",\n  \"categoryId\": 2\n}"
+						}
+					}
+				},
+				{
+					"name": "3.3 Create OTC - Vitamin C Syrup",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"OTC\",\n  \"name\": \"Vitamin C\",\n  \"brand\": \"Cevital\",\n  \"formType\": \"SYRUP\",\n  \"dosage\": \"100mg/5ml\",\n  \"price\": 8.75,\n  \"stockQty\": 150,\n  \"expiryDate\": \"2027-09-15\",\n  \"categoryId\": 3\n}"
+						}
+					}
+				},
+				{
+					"name": "3.4 Create OTC - Burn Cream",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"OTC\",\n  \"name\": \"Burnol\",\n  \"brand\": \"Burnol\",\n  \"formType\": \"CREAM\",\n  \"dosage\": \"20g tube\",\n  \"price\": 3.50,\n  \"stockQty\": 80,\n  \"expiryDate\": \"2028-01-01\",\n  \"categoryId\": 1\n}"
+						}
+					}
+				},
+				{
+					"name": "3.5 Create (Duplicate - Should Fail)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"OTC\",\n  \"name\": \"Paracetamol\",\n  \"brand\": \"Panadol\",\n  \"formType\": \"TABLET\",\n  \"dosage\": \"500\",\n  \"price\": 5.99,\n  \"stockQty\": 100,\n  \"expiryDate\": \"2027-12-31\",\n  \"categoryId\": 1\n}"
+						}
+					}
+				},
+				{
+					"name": "3.6 Create (Expired - Should Fail)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"OTC\",\n  \"name\": \"Expired Med\",\n  \"brand\": \"Test\",\n  \"formType\": \"TABLET\",\n  \"dosage\": \"100mg\",\n  \"price\": 2.00,\n  \"stockQty\": 10,\n  \"expiryDate\": \"2025-01-01\",\n  \"categoryId\": 1\n}"
+						}
+					}
+				},
+				{
+					"name": "3.7 List All Medicines",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines?page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "3.8 Search by Name",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines?name=para&page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "para"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "3.9 Search by Brand",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines?brand=panadol&page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines"
+							],
+							"query": [
+								{
+									"key": "brand",
+									"value": "panadol"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "3.10 Filter by Category",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines?categoryId={{categoryId}}&page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines"
+							],
+							"query": [
+								{
+									"key": "categoryId",
+									"value": "{{categoryId}}"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "3.11 Filter by Status (LOW_STOCK)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines?status=LOW_STOCK&page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "LOW_STOCK"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "3.12 Get Single Medicine",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}"
+					}
+				},
+				{
+					"name": "3.13 Update Medicine",
+					"request": {
+						"method": "PUT",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Paracetamol Extra\",\n  \"brand\": \"Panadol\",\n  \"formType\": \"TABLET\",\n  \"dosage\": \"650mg\",\n  \"price\": 7.99,\n  \"stockQty\": 500,\n  \"expiryDate\": \"2027-12-31\",\n  \"categoryId\": 1,\n  \"status\": \"\"\n}"
+						}
+					}
+				},
+				{
+					"name": "3.14 Discontinue Medicine (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}"
+					}
+				},
+				{
+					"name": "3.15 Get Stats",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/medicines/stats"
+					}
+				},
+				{
+					"name": "3.16 Storefront - All",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines/storefront?page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines",
+								"storefront"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "3.17 Storefront - Search",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/medicines/storefront?search=vitamin&page=0&size=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicines",
+								"storefront"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "vitamin"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "3.18 Upload Image",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}/image",
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "",
+									"description": "Select an image file"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Stock Batches",
+			"item": [
+				{
+					"name": "4.1 Add Batch (Restock Paracetamol)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}/batches",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 300,\n  \"expiryDate\": \"2028-06-30\",\n  \"purchasePrice\": 4.50,\n  \"supplierId\": \"SUP001\"\n}"
+						}
+					}
+				},
+				{
+					"name": "4.2 Add Another Batch",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}/batches",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 100,\n  \"expiryDate\": \"2027-03-15\",\n  \"purchasePrice\": 5.25\n}"
+						}
+					}
+				},
+				{
+					"name": "4.3 Add Batch (Expired - Should Mark EXPIRED)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}/batches",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 50,\n  \"expiryDate\": \"2025-01-01\",\n  \"purchasePrice\": 3.00\n}"
+						}
+					}
+				},
+				{
+					"name": "4.4 List Batches for Medicine",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}/batches"
+					}
+				},
+				{
+					"name": "4.5 Update Batch Quantity",
+					"request": {
+						"method": "PUT",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}/batches/{{batchId}}",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 250,\n  \"expiryDate\": \"2028-06-30\",\n  \"purchasePrice\": 4.50,\n  \"supplierId\": \"SUP001\"\n}"
+						}
+					}
+				},
+				{
+					"name": "4.6 Deplete Batch (qty=0)",
+					"request": {
+						"method": "PUT",
+						"url": "{{baseUrl}}/api/medicines/{{medicineId}}/batches/{{batchId}}",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 0,\n  \"expiryDate\": \"2028-06-30\",\n  \"purchasePrice\": 4.50\n}"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Admin - User Management",
+			"item": [
+				{
+					"name": "5.1 Get All Staff (excludes ADMIN)",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/users"
+					}
+				},
+				{
+					"name": "5.2 Get All Admins",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/users/admins"
+					}
+				},
+				{
+					"name": "5.3 Create Staff Member",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/users",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Staff Member One\",\n  \"email\": \"staff1@medimart.com\",\n  \"password\": \"StaffPass1\",\n  \"dob\": \"1992-08-10\",\n  \"gender\": \"Male\",\n  \"roleName\": \"STAFF\",\n  \"active\": true\n}"
+						}
+					}
+				},
+				{
+					"name": "5.4 Create Staff (No Password - Should Fail)",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/users",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"No Pass Staff\",\n  \"email\": \"nopass@medimart.com\",\n  \"password\": \"\",\n  \"dob\": \"1990-01-01\",\n  \"gender\": \"Female\",\n  \"roleName\": \"STAFF\",\n  \"active\": true\n}"
+						}
+					}
+				},
+				{
+					"name": "5.5 Update Staff Member",
+					"request": {
+						"method": "PUT",
+						"url": "{{baseUrl}}/api/users/{{userId}}",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Staff Updated Name\",\n  \"email\": \"staff1@medimart.com\",\n  \"dob\": \"1992-08-10\",\n  \"gender\": \"Male\",\n  \"roleName\": \"STAFF\",\n  \"active\": true\n}"
+						}
+					}
+				},
+				{
+					"name": "5.6 Deactivate Staff",
+					"request": {
+						"method": "PUT",
+						"url": "{{baseUrl}}/api/users/{{userId}}",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Staff Updated Name\",\n  \"email\": \"staff1@medimart.com\",\n  \"dob\": \"1992-08-10\",\n  \"gender\": \"Male\",\n  \"roleName\": \"STAFF\",\n  \"active\": false\n}"
+						}
+					}
+				},
+				{
+					"name": "5.7 Delete Staff (Hard Delete)",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/api/users/{{userId}}"
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Suppliers",
+			"item": [
+				{
+					"name": "6.1 Create Supplier",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/api/suppliers",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Global Pharma Inc\",\n  \"type\": \"IMPORTED\",\n  \"contact\": \"+1-555-0198\",\n  \"email\": \"sales@globalpharma.com\",\n  \"address\": \"123 Health Ave, NY\"\n}"
+						}
+					}
+				},
+				{
+					"name": "6.2 Get All Suppliers",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/suppliers"
+					}
+				},
+				{
+					"name": "6.3 Get Supplier By ID",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/suppliers/{{supplierId}}"
+					}
+				},
+				{
+					"name": "6.4 Update Supplier",
+					"request": {
+						"method": "PUT",
+						"url": "{{baseUrl}}/api/suppliers/{{supplierId}}",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Global Pharma Inc Updated\",\n  \"type\": \"IMPORTED\",\n  \"contact\": \"+1-555-0199\",\n  \"email\": \"sales2@globalpharma.com\",\n  \"address\": \"124 Health Ave, NY\"\n}"
+						}
+					}
+				},
+				{
+					"name": "6.5 Search Suppliers by Name",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/suppliers/search/name?q=Global",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"suppliers",
+								"search",
+								"name"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "Global"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "6.6 Delete Supplier",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/api/suppliers/{{supplierId}}"
+					}
+				}
+			]
+		}
+	]
+}
