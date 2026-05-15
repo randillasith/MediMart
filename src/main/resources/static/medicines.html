@@ -430,6 +430,12 @@
                         <input type="file" id="imageFile" accept="image/*"
                             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Supplier (Optional)</label>
+                        <select id="supplierSelect" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
+                            <option value="">Select Supplier</option>
+                        </select>
+                    </div>
                     <div id="statusGroup" class="hidden">
                         <label
                             class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Status</label>
@@ -903,7 +909,8 @@
                     price: parseFloat(document.getElementById('price').value),
                     stockQty: parseInt(document.getElementById('stockQty').value, 10),
                     expiryDate: document.getElementById('expiryDate').value || null,
-                    categoryId: parseInt(document.getElementById('categorySelect').value, 10)
+                    categoryId: parseInt(document.getElementById('categorySelect').value, 10),
+                    supplierId: document.getElementById('supplierSelect').value || null
                 };
 
                 let savedId = id;
@@ -1102,7 +1109,8 @@
                 const payload = {
                     quantity: parseInt(document.getElementById('restockQty').value, 10),
                     expiryDate: document.getElementById('restockExpiry').value || null,
-                    purchasePrice: document.getElementById('restockPrice').value ? parseFloat(document.getElementById('restockPrice').value) : null
+                    purchasePrice: document.getElementById('restockPrice').value ? parseFloat(document.getElementById('restockPrice').value) : null,
+                    supplierId: document.getElementById('restockSupplier').value || null
                 };
 
                 await apiCall(`/api/medicines/${medicineId}/batches`, 'POST', payload);
@@ -1160,8 +1168,25 @@
             document.getElementById('batchViewModal').classList.add('hidden');
         }
 
+        async function loadSuppliers() {
+            try {
+                const data = await apiCall('/api/suppliers');
+                const suppliers = data.content || data;
+                const selMed = document.getElementById('supplierSelect');
+                const selRestock = document.getElementById('restockSupplier');
+                
+                const optHtml = '<option value="">Select Supplier</option>' + 
+                    suppliers.map(s => `<option value="${s.id}">${s.name} (${s.id})</option>`).join('');
+                    
+                if (selMed) selMed.innerHTML = optHtml;
+                if (selRestock) selRestock.innerHTML = optHtml;
+            } catch (e) {
+                console.error('Failed to load suppliers', e);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
-            loadCategories().then(() => loadMedicines(0));
+            Promise.all([loadCategories(), loadSuppliers()]).then(() => loadMedicines(0));
         });
     </script>
 
@@ -1430,6 +1455,12 @@
                         <input type="number" step="0.01" id="restockPrice"
                             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-200 focus:border-green-500 outline-none transition-all"
                             placeholder="Leave blank to use current selling price">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Supplier (Optional)</label>
+                        <select id="restockSupplier" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-200 focus:border-green-500 outline-none transition-all">
+                            <option value="">Select Supplier</option>
+                        </select>
                     </div>
                 </form>
             </div>
