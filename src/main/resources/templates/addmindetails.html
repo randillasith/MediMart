@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <title>Admin Management | MediMart</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        .cta-gradient { background: linear-gradient(135deg, #00478D 0%, #005EB8 100%); }
+    </style>
+</head>
+<body class="bg-slate-50 flex min-h-screen">
+
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar :: medimart-sidebar}"></div>
+
+    <div class="flex-1 md:ml-72 p-8">
+        <!-- Header -->
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-4xl font-extrabold text-primary">Admin Management</h2>
+                <p class="text-slate-500 font-medium">Manage system administrators and root access levels.</p>
+            </div>
+            <button onclick="openAdminModal()" class="cta-gradient text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg">
+                <span class="material-symbols-outlined">shield_person</span>
+                Add New Admin
+            </button>
+        </div>
+
+        <!-- Admin Table -->
+        <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100">
+                        <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-500">Administrator</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-500">Email</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-500">Status</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-500 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody" class="divide-y divide-slate-50">
+                    <!-- Data loaded via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="adminModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="px-8 py-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-xl font-black text-primary">Register Admin</h3>
+                <button onclick="closeAdminModal()" class="text-slate-400">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form id="adminForm" onsubmit="saveAdmin(event)" class="p-8 space-y-4">
+                <input type="hidden" id="adminId">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Full Name</label>
+                    <input type="text" id="fullName" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Email</label>
+                    <input type="email" id="email" required class="w-full bg-slate-50 border-none rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Password</label>
+                    <input type="password" id="password" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Status</label>
+                    <select id="userStatus" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="button" onclick="closeAdminModal()" class="flex-1 py-3 bg-slate-100 font-bold rounded-xl">Cancel</button>
+                    <button type="submit" id="submitBtn" class="flex-[2] py-3 cta-gradient text-white font-bold rounded-xl">Save Admin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadAdminTable);
+
+        async function loadAdminTable() {
+            try {
+                // Call the specific Admin endpoint
+                const res = await fetch('/api/users/admins');
+                const admins = await res.json();
+                const tableBody = document.getElementById('adminTableBody');
+                tableBody.innerHTML = '';
+
+                admins.forEach(admin => {
+                    const row = `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                        ${admin.fullName.charAt(0)}
+                                    </div>
+                                    <p class="text-sm font-bold text-on-surface">${admin.fullName}</p>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-600">${admin.email}</td>
+                            <td class="px-6 py-4">
+                                <span class="flex items-center gap-2 text-xs font-bold ${admin.active ? 'text-secondary' : 'text-slate-400'}">
+                                    <span class="h-2 w-2 rounded-full ${admin.active ? 'bg-secondary' : 'bg-slate-300'}"></span>
+                                    ${admin.active ? 'Active' : 'Inactive'}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button onclick="editAdmin(${admin.id})" class="p-2 text-slate-400 hover:text-primary"><span class="material-symbols-outlined">edit_square</span></button>
+                                    <button onclick="deleteAdmin(${admin.id})" class="p-2 text-slate-400 hover:text-error"><span class="material-symbols-outlined">delete</span></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    tableBody.insertAdjacentHTML('beforeend', row);
+                });
+            } catch (err) { console.error("Load error:", err); }
+        }
+
+        function openAdminModal() {
+            document.getElementById('adminForm').reset();
+            document.getElementById('adminId').value = '';
+            document.getElementById('modalTitle').textContent = 'Register Admin';
+            document.getElementById('password').required = true;
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        async function editAdmin(id) {
+            const res = await fetch('/api/users/admins');
+            const admins = await res.json();
+            const admin = admins.find(a => a.id == id);
+            if (admin) {
+                document.getElementById('adminId').value = admin.id;
+                document.getElementById('fullName').value = admin.fullName;
+                document.getElementById('email').value = admin.email;
+                document.getElementById('userStatus').value = admin.active.toString();
+                
+                document.getElementById('modalTitle').textContent = 'Update Admin';
+                document.getElementById('password').required = false;
+                document.getElementById('password').placeholder = 'Leave blank to keep current';
+                document.getElementById('adminModal').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
+
+        async function saveAdmin(event) {
+            event.preventDefault();
+            const id = document.getElementById('adminId').value;
+            const passwordValue = document.getElementById('password').value;
+            
+            const payload = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                roleName: 'ADMIN', // Hardcoded as this is the Admin page
+                active: document.getElementById('userStatus').value === "true",
+                dob: '2000-01-01', // Placeholder if needed, or add a field
+                gender: 'NOT_SPECIFIED' 
+            };
+
+            if (passwordValue.trim() !== "") payload.password = passwordValue;
+
+            const url = id ? `/api/users/${id}` : '/api/users';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                closeAdminModal();
+                loadAdminTable();
+                alert('Success!');
+            } else {
+                const err = await res.json();
+                alert(err.message);
+            }
+        }
+
+        async function deleteAdmin(id) {
+            if (confirm('Remove Admin access?')) {
+                await fetch(`/api/users/${id}`, { method: 'DELETE' });
+                loadAdminTable();
+            }
+        }
+    </script>
+</body>
+</html>
