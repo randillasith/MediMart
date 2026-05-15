@@ -140,7 +140,7 @@
             <div class="hidden md:flex gap-6">
                 <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="/">Home</a>
                 <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/catalog">Catalog</a>
-                <a id="navDashboardLink" class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Portal Login</a>
+                <a id="navDashboardLink" class="hidden text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Portal Login</a>
                 <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="#">Help</a>
             </div>
         </div>
@@ -418,10 +418,15 @@
                 
                 const navLink = document.getElementById('navDashboardLink');
                 if (navLink) {
-                    if (data.user && data.user.roleName === 'ROLE_ADMIN') {
-                        navLink.textContent = 'Admin Dashboard';
+                    if (data.user && data.user.roleName && data.user.roleName !== 'ROLE_USER') {
+                        navLink.classList.remove('hidden');
+                        if (data.user.roleName === 'ROLE_ADMIN') {
+                            navLink.textContent = 'Admin Dashboard';
+                        } else {
+                            navLink.textContent = 'Staff Dashboard';
+                        }
                     } else {
-                        navLink.textContent = 'Staff Dashboard';
+                        navLink.classList.add('hidden');
                     }
                 }
             }
