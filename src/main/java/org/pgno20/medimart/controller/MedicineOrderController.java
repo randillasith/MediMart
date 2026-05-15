@@ -27,7 +27,12 @@ public class MedicineOrderController {
     public ResponseEntity<MedicineOrder> placeOrder(@RequestBody Map<String, Object> body) {
         String supplierId = (String) body.get("supplierId");
         String medicineName = (String) body.get("medicineName");
-        int quantity = (Integer) body.get("quantity");
+
+        if (supplierId == null || medicineName == null || body.get("quantity") == null || body.get("unitPrice") == null) {
+            throw new IllegalArgumentException("Missing required fields: supplierId, medicineName, quantity, unitPrice");
+        }
+
+        int quantity = Integer.parseInt(body.get("quantity").toString());
         double unitPrice = Double.parseDouble(body.get("unitPrice").toString());
 
         MedicineOrder order = orderService.placeOrder(supplierId, medicineName, quantity, unitPrice);
