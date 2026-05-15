@@ -16,6 +16,8 @@ public class StockBatchRequest {
     @DecimalMin("0.01")
     private BigDecimal purchasePrice;
 
+    private String supplierId;
+
     // Getters & Setters
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
@@ -25,4 +27,7 @@ public class StockBatchRequest {
 
     public BigDecimal getPurchasePrice() { return purchasePrice; }
     public void setPurchasePrice(BigDecimal purchasePrice) { this.purchasePrice = purchasePrice; }
+
+    public String getSupplierId() { return supplierId; }
+    public void setSupplierId(String supplierId) { this.supplierId = supplierId; }
 }

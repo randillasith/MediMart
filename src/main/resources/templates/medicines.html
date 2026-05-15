@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Inventory Management | MediMart</title>
-    <link rel="icon" href="/logo.png" type="image/png"/>
+    <link rel="icon" href="/logo.png" type="image/png" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
@@ -116,9 +116,14 @@
                     <span class="text-xs font-semibold">Dashboard</span>
                 </a>
                 <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-800 font-bold border-r-4 border-blue-700 bg-blue-50/50 transition-all"
-                    href="/medicines">
+                    href="/medicines.html">
                     <span class="material-symbols-outlined">inventory_2</span>
                     <span class="text-xs font-semibold">Inventory</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                    href="/suppliers.html">
+                    <span class="material-symbols-outlined">local_shipping</span>
+                    <span class="text-xs font-semibold">Suppliers</span>
                 </a>
             </nav>
         </div>
@@ -252,8 +257,8 @@
                             <option value="OUT_OF_STOCK">Out of Stock</option>
                             <option value="DISCONTINUED">Discontinued</option>
                         </select>
-<!--                        <span-->
-<!--                            class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">filter_list</span>-->
+                        <!--                        <span-->
+                        <!--                            class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">filter_list</span>-->
                     </div>
                 </div>
             </section>
@@ -344,24 +349,32 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5 p-4 bg-slate-100 rounded-xl">
+                    <div
+                        class="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5 p-4 bg-slate-100 rounded-xl">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Medication Form</label>
-                            <select id="medForm" onchange="toggleDosageFields()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
+                            <label
+                                class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Medication
+                                Form</label>
+                            <select id="medForm" onchange="toggleDosageFields()"
+                                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
                                 <option value="TABLET">Tablet/Capsule/Pill</option>
                                 <option value="SYRUP">Syrup/Liquid</option>
                                 <option value="CREAM">Cream/Ointment</option>
                                 <option value="OTHER">Other/Custom</option>
                             </select>
                         </div>
-                        
+
                         <!-- Tablet Fields -->
                         <div id="tabletFields" class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Strength</label>
+                                <label
+                                    class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Strength</label>
                                 <div class="flex">
-                                    <input type="number" id="tabStrength" class="w-2/3 bg-white border border-slate-200 rounded-l-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" placeholder="e.g. 500">
-                                    <select id="tabUnit" class="w-1/3 bg-white border border-slate-200 border-l-0 rounded-r-lg px-2 text-xs outline-none">
+                                    <input type="number" id="tabStrength"
+                                        class="w-2/3 bg-white border border-slate-200 rounded-l-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                                        placeholder="e.g. 500">
+                                    <select id="tabUnit"
+                                        class="w-1/3 bg-white border border-slate-200 border-l-0 rounded-r-lg px-2 text-xs outline-none">
                                         <option value="mg">mg</option>
                                         <option value="g">g</option>
                                         <option value="mcg">mcg</option>
@@ -369,33 +382,48 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Pack Size (Pills)</label>
-                                <input type="number" id="tabCount" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" placeholder="e.g. 10">
+                                <label
+                                    class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Pack
+                                    Size (Pills)</label>
+                                <input type="number" id="tabCount"
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                                    placeholder="e.g. 10">
                             </div>
                         </div>
 
                         <!-- Syrup Fields -->
                         <div id="syrupFields" class="hidden grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Volume</label>
+                                <label
+                                    class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Volume</label>
                                 <div class="flex">
-                                    <input type="number" id="syrVolume" class="w-2/3 bg-white border border-slate-200 rounded-l-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" placeholder="e.g. 150">
-                                    <select id="syrUnit" class="w-1/3 bg-white border border-slate-200 border-l-0 rounded-r-lg px-2 text-xs outline-none">
+                                    <input type="number" id="syrVolume"
+                                        class="w-2/3 bg-white border border-slate-200 rounded-l-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                                        placeholder="e.g. 150">
+                                    <select id="syrUnit"
+                                        class="w-1/3 bg-white border border-slate-200 border-l-0 rounded-r-lg px-2 text-xs outline-none">
                                         <option value="ml">ml</option>
                                         <option value="L">L</option>
                                     </select>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Strength (Opt)</label>
-                                <input type="text" id="syrStrength" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" placeholder="e.g. 10mg/5ml">
+                                <label
+                                    class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Strength
+                                    (Opt)</label>
+                                <input type="text" id="syrStrength"
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                                    placeholder="e.g. 10mg/5ml">
                             </div>
                         </div>
 
                         <!-- Other Fields -->
                         <div id="otherFields" class="hidden">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Custom Dosage Text</label>
-                            <input type="text" id="customDosage" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" placeholder="e.g. 1 Inhaler (200 doses)">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Custom
+                                Dosage Text</label>
+                            <input type="text" id="customDosage"
+                                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                                placeholder="e.g. 1 Inhaler (200 doses)">
                         </div>
                     </div>
                     <div>
@@ -426,9 +454,16 @@
                             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Product Image</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Product
+                            Image</label>
                         <input type="file" id="imageFile" accept="image/*"
                             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Supplier (Optional)</label>
+                        <select id="supplierSelect" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
+                            <option value="">Select Supplier</option>
+                        </select>
                     </div>
                     <div id="statusGroup" class="hidden">
                         <label
@@ -841,7 +876,7 @@
             document.getElementById('modalTitle').textContent = 'Add New Product';
             document.getElementById('statusGroup').classList.add('hidden');
             document.getElementById('medicineModal').classList.remove('hidden');
-            
+
             parseDosageToUI('', 'TABLET'); // Reset dynamic fields
 
             const saveBtn = document.getElementById('saveBtn');
@@ -862,7 +897,7 @@
             document.getElementById('expiryDate').value = med.expiryDate || '';
             document.getElementById('type').value = med.prescriptionRequired ? 'PRESCRIPTION' : 'OTC';
             document.getElementById('categorySelect').value = med.categoryId || '';
-            
+
             parseDosageToUI(med.dosage || '', med.formType);
 
             document.getElementById('status').value = med.status || 'AVAILABLE';
@@ -903,7 +938,8 @@
                     price: parseFloat(document.getElementById('price').value),
                     stockQty: parseInt(document.getElementById('stockQty').value, 10),
                     expiryDate: document.getElementById('expiryDate').value || null,
-                    categoryId: parseInt(document.getElementById('categorySelect').value, 10)
+                    categoryId: parseInt(document.getElementById('categorySelect').value, 10),
+                    supplierId: document.getElementById('supplierSelect').value || null
                 };
 
                 let savedId = id;
@@ -998,7 +1034,7 @@
                         body: formData
                     });
                     if (!res.ok) throw new Error("Product saved, but image upload failed.");
-                } catch(e) {
+                } catch (e) {
                     throw new Error("Product saved, but image optimization/upload failed: " + e.message);
                 }
             }
@@ -1102,7 +1138,8 @@
                 const payload = {
                     quantity: parseInt(document.getElementById('restockQty').value, 10),
                     expiryDate: document.getElementById('restockExpiry').value || null,
-                    purchasePrice: document.getElementById('restockPrice').value ? parseFloat(document.getElementById('restockPrice').value) : null
+                    purchasePrice: document.getElementById('restockPrice').value ? parseFloat(document.getElementById('restockPrice').value) : null,
+                    supplierId: document.getElementById('restockSupplier').value || null
                 };
 
                 await apiCall(`/api/medicines/${medicineId}/batches`, 'POST', payload);
@@ -1135,9 +1172,9 @@
                 tbody.innerHTML = '';
                 batches.forEach(b => {
                     const statusClass = b.status === 'ACTIVE' ? 'bg-teal-100 text-teal-700' :
-                                        b.status === 'DEPLETED' ? 'bg-red-100 text-red-700' :
-                                        'bg-slate-200 text-slate-600';
-                    const addedStr = b.addedDate ? new Date(b.addedDate).toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'}) : '-';
+                        b.status === 'DEPLETED' ? 'bg-red-100 text-red-700' :
+                            'bg-slate-200 text-slate-600';
+                    const addedStr = b.addedDate ? new Date(b.addedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
                     const expiryStr = b.expiryDate || '-';
                     const row = document.createElement('tr');
                     row.className = 'hover:bg-blue-50/30 transition-colors';
@@ -1160,8 +1197,25 @@
             document.getElementById('batchViewModal').classList.add('hidden');
         }
 
+        async function loadSuppliers() {
+            try {
+                const data = await apiCall('/api/suppliers');
+                const suppliers = data.content || data;
+                const selMed = document.getElementById('supplierSelect');
+                const selRestock = document.getElementById('restockSupplier');
+                
+                const optHtml = '<option value="">Select Supplier</option>' + 
+                    suppliers.map(s => `<option value="${s.id}">${s.name} (${s.id})</option>`).join('');
+                    
+                if (selMed) selMed.innerHTML = optHtml;
+                if (selRestock) selRestock.innerHTML = optHtml;
+            } catch (e) {
+                console.error('Failed to load suppliers', e);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
-            loadCategories().then(() => loadMedicines(0));
+            Promise.all([loadCategories(), loadSuppliers()]).then(() => loadMedicines(0));
         });
     </script>
 
@@ -1415,21 +1469,30 @@
                 <form id="restockForm" onsubmit="saveRestock(event)" class="space-y-4">
                     <input type="hidden" id="restockMedId">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Quantity *</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Quantity
+                            *</label>
                         <input type="number" id="restockQty" required min="1"
                             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-200 focus:border-green-500 outline-none transition-all"
                             placeholder="e.g. 200">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Expiry Date</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Expiry
+                            Date</label>
                         <input type="date" id="restockExpiry"
                             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-200 focus:border-green-500 outline-none transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Purchase Price (Rs.)</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Purchase
+                            Price (Rs.)</label>
                         <input type="number" step="0.01" id="restockPrice"
                             class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-200 focus:border-green-500 outline-none transition-all"
                             placeholder="Leave blank to use current selling price">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Supplier (Optional)</label>
+                        <select id="restockSupplier" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-200 focus:border-green-500 outline-none transition-all">
+                            <option value="">Select Supplier</option>
+                        </select>
                     </div>
                 </form>
             </div>
@@ -1437,7 +1500,8 @@
                 <button type="button" onclick="closeRestockModal()"
                     class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
                 <button type="submit" form="restockForm" id="restockSaveBtn"
-                    class="px-4 py-2 text-sm font-bold bg-green-600 text-white hover:bg-green-700 rounded-lg shadow transition-colors">Add Stock Batch</button>
+                    class="px-4 py-2 text-sm font-bold bg-green-600 text-white hover:bg-green-700 rounded-lg shadow transition-colors">Add
+                    Stock Batch</button>
             </div>
         </div>
     </div>
@@ -1463,12 +1527,18 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-100 bg-slate-50/50">
-                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Batch #</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Quantity</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Purchase Price</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Expiry Date</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Added Date</th>
-                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Batch #
+                            </th>
+                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                Quantity</th>
+                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                Purchase Price</th>
+                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Expiry
+                                Date</th>
+                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Added
+                                Date</th>
+                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="batchViewRows" class="divide-y divide-slate-50">
