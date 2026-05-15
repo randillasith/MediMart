@@ -44,7 +44,7 @@ public class AuthController {
             // Create session
             HttpSession session = request.getSession();
             session.setAttribute("userId", user.getId());
-            session.setAttribute("userRole", user.getRole());
+            session.setAttribute("userRole", user.getRoleName());
             
             // Remember Me: extend session to 30 days, else default 30 minutes
             if (dto.isRememberMe()) {
