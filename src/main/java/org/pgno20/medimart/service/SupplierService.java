@@ -40,6 +40,7 @@ public class SupplierService {
 
         existing.setName(updated.getName());
         existing.setType(updated.getType());
+
         existing.setContact(updated.getContact());
         existing.setEmail(updated.getEmail());
         existing.setAddress(updated.getAddress());
