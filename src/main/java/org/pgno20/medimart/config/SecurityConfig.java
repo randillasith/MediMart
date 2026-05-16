@@ -120,6 +120,9 @@ public class SecurityConfig {
                     "/login.html",
                     "/register.html",
                     "/catalog.html",
+                    "/checkout.html",
+                    "/order-success.html",
+                    "/prescription.html",
                     "/profile.html",
                     "/catalog",
                     "/home"
@@ -178,6 +181,9 @@ public class SecurityConfig {
                 // ── Admin-only API — users, suppliers, orders, categories ──
                 .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/suppliers/**").hasAuthority("ROLE_ADMIN")
+                // POST /api/orders is allowed for any customer (even guests)
+                .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
+                // GET/PUT/DELETE orders are admin-only
                 .requestMatchers("/api/orders/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.POST,   "/api/categories").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAuthority("ROLE_ADMIN")
