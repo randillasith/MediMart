@@ -1,53 +1,51 @@
 package org.pgno20.medimart.controller;
 
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import jakarta.servlet.http.HttpSession;
-
+/**
+ * Serves Thymeleaf admin page templates.
+ *
+ * Authorization is now enforced entirely by Spring Security (SecurityConfig).
+ * Unauthenticated or unauthorized requests are intercepted at the filter level
+ * before this controller is ever reached — no manual session checks needed.
+ */
 @Controller
 public class ViewController {
 
+    /** Admin: staff / user management page */
     @GetMapping("/users-portal")
-    public String users(HttpSession session) {
-        if (session.getAttribute("userId") == null) return "redirect:/login.html";
-        if (!"ROLE_ADMIN".equals(session.getAttribute("userRole"))) return "redirect:/medicines";
-        return "staffdetails"; 
+    public String users() {
+        return "staffdetails";
     }
 
-    @GetMapping("/medicines") 
-    public String medicines(HttpSession session) {
-        if (session.getAttribute("userId") == null) return "redirect:/login.html";
-        return "medicines"; 
+    /** Admin + Staff: main inventory / medicines dashboard */
+    @GetMapping("/medicines")
+    public String medicines() {
+        return "medicines";
     }
 
-    @GetMapping("/addmindetails") 
-    public String addmindetails(HttpSession session) {
-        if (session.getAttribute("userId") == null) return "redirect:/login.html";
-        if (!"ROLE_ADMIN".equals(session.getAttribute("userRole"))) return "redirect:/medicines";
-        return "addmindetails"; 
+    /** Admin: admin profile / details page */
+    @GetMapping("/addmindetails")
+    public String addmindetails() {
+        return "addmindetails";
     }
 
-   @GetMapping("/logout")
-public String logout(HttpSession session) {
-    session.invalidate(); // Clears admin data
-    
-    // Use "redirect:" to the actual filename since it's in the static folder
-    return "redirect:/index.html"; 
-}
+    /** Admin: supplier management page */
+    @GetMapping("/supplier-details")
+    public String supplierDetails() {
+        return "suppliers";
+    }
 
+    /** Public: logout redirect (session cleared via POST /api/auth/logout) */
+    @GetMapping("/logout")
+    public String logout() {
+        return "redirect:/index.html";
+    }
 
-
+    /** Public: home page alias */
     @GetMapping("/home")
     public String homePage() {
-        // This looks for src/main/resources/templates/index.html
-        return "index"; 
-    }
-
-    @GetMapping("/supplier-details")
-    public String supplierDetails(HttpSession session) {
-        if (session.getAttribute("userId") == null) return "redirect:/login.html";
-        return "suppliers";
+        return "forward:/index.html";
     }
 }
