@@ -166,6 +166,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    /** Saves the shipping address entered during checkout to the user's profile. */
+    public void updateShippingAddress(Long id, String address) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setShippingAddress(address);
+        userRepository.save(user);
+    }
+
     /**
      * Update a user's role (admin use).
      * Valid roles: ROLE_USER, ROLE_ADMIN

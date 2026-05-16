@@ -77,4 +77,8 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     @Query("SELECT COALESCE(SUM(m.price * m.stockQty), 0) FROM Medicine m WHERE m.status <> 'DISCONTINUED'")
     BigDecimal sumTotalValue();
+
+    /** Used by OrderService after FEFO deduction to sync medicine.stockQty by name. */
+    java.util.List<Medicine> findByNameIgnoreCase(String name);
 }
+
