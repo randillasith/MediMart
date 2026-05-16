@@ -129,6 +129,7 @@ let subtotal = 0;
 let addressSaved = false;
 let paymentSaved = false;
 let savedAddress = null;
+let loggedInUserEmail = '';  // captured from /api/auth/me for order linking
 
 async function initCheckout() {
     const storedCart = localStorage.getItem('medimart_cart');
@@ -136,19 +137,44 @@ async function initCheckout() {
     if (cart.length === 0) { window.location.href = '/catalog.html'; return; }
 
     renderCartItems();
-    renderShippingSection();
     renderPaymentSection();
 
+    // Load user profile and pre-fill from saved address
     try {
         const res = await fetch('/api/auth/me');
         if (res.ok) {
             const data = await res.json();
-            if (data.loggedIn !== false && data.fullName) {
-                document.getElementById('ship-name').value = data.fullName;
+            if (data.loggedIn && data.user) {
+                const u = data.user;
+                if (u.fullName) document.getElementById('ship-name').value = u.fullName;
+                if (u.email) loggedInUserEmail = u.email;  // store for order submission
+
+                // If user has a saved shipping address, auto-populate and mark saved
+                if (u.shippingAddress && u.shippingAddress.trim() !== '') {
+                    // Parse "Street, City, State ZIP" back into fields best-effort
+                    const parts = u.shippingAddress.split(',').map(s => s.trim());
+                    if (parts.length >= 1) document.getElementById('ship-street').value = parts[0] || '';
+                    if (parts.length >= 2) document.getElementById('ship-city').value = parts[1] || '';
+                    if (parts.length >= 3) {
+                        const stateZip = parts[2].trim().split(' ');
+                        document.getElementById('ship-state').value = stateZip[0] || '';
+                        document.getElementById('ship-zip').value = stateZip[1] || '';
+                    }
+                    savedAddress = {
+                        name: u.fullName || '',
+                        street: parts[0] || '',
+                        cityStateZip: parts.slice(1).join(', '),
+                        phone: ''
+                    };
+                    addressSaved = true;
+                }
             }
         }
-    } catch (e) { console.error("Failed to fetch user profile", e); }
+    } catch (e) { console.error('Failed to fetch user profile', e); }
+
+    renderShippingSection();
 }
+
 
 function renderCartItems() {
     const container = document.getElementById('checkout-cart-items');
@@ -225,11 +251,21 @@ function saveShippingAddress() {
     var zip = document.getElementById('ship-zip').value;
     var phone = document.getElementById('ship-phone').value;
 
+    var addressStr = street + (suite ? ', ' + suite : '') + ', ' + city + ', ' + state + ' ' + zip;
     savedAddress = { name: name, street: street + (suite ? ', ' + suite : ''), cityStateZip: city + ', ' + state + ' ' + zip, phone: phone };
     addressSaved = true;
+
+    // Persist address to user profile in DB (silently skips for guests)
+    fetch('/api/auth/me/address', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: addressStr })
+    }).catch(function() { /* guest – ignore */ });
+
     renderShippingSection();
     closeShippingModal();
 }
+
 
 /* ===== PAYMENT ===== */
 function renderPaymentSection() {
@@ -274,10 +310,13 @@ async function placeOrder() {
     var orderData = {
         orderId: 'ORD-' + Date.now(),
         customerName: savedAddress.name,
+        customerEmail: loggedInUserEmail,
         medicineDetails: cart.map(function(item) { return item.name + ' (x' + item.cartQty + ')'; }).join(', '),
         quantity: cart.reduce(function(acc, item) { return acc + item.cartQty; }, 0),
-        totalPrice: subtotal,
-        status: 'PENDING'
+        totalPrice: parseFloat(subtotal.toFixed(2)),
+        status: 'PENDING',
+        shippingAddress: savedAddress.street + ', ' + savedAddress.cityStateZip,
+        prescriptionSubmitted: sessionStorage.getItem('prescription_verified') === 'true'
     };
 
     var btn = document.querySelector('button[onclick="placeOrder()"]');
