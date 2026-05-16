@@ -143,6 +143,9 @@ public class SecurityConfig {
                 // for anonymous visitors (used by the frontend to detect session)
                 .requestMatchers(HttpMethod.GET, "/api/auth/me").permitAll()
 
+                // PUT /api/auth/me/address is for logged-in customers (session-checked in controller)
+                .requestMatchers(HttpMethod.PUT, "/api/auth/me/address").permitAll()
+
                 // ── Public storefront — read-only medicine / category data ─
                 .requestMatchers(HttpMethod.GET,
                     "/api/medicines",
@@ -183,7 +186,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/suppliers/**").hasAuthority("ROLE_ADMIN")
                 // POST /api/orders is allowed for any customer (even guests)
                 .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
-                // GET/PUT/DELETE orders are admin-only
+                // GET /api/orders is allowed for any session (profile page filters by customerName)
+                .requestMatchers(HttpMethod.GET, "/api/orders").permitAll()
+                // PUT/DELETE orders are admin-only
                 .requestMatchers("/api/orders/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.POST,   "/api/categories").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAuthority("ROLE_ADMIN")
