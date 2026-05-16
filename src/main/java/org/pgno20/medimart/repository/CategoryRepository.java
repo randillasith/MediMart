@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findByNameIgnoreCase(String name);
+    org.springframework.data.domain.Page<Category> findByStatus(String status, org.springframework.data.domain.Pageable pageable);
 }

@@ -3,6 +3,8 @@ package org.pgno20.medimart.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "medicines")
@@ -24,7 +26,10 @@ public abstract class Medicine {
     private String brand;
 
     @Column(length=50)
-    private String dosage; // e.g. 500mg
+    private String dosage; // e.g. 500mg (Pack of 10)
+
+    @Column(length=30)
+    private String formType; // TABLET, CAPSULE, PILL, CREAM, SYRUP, LIQUID, OTHER
 
     @Column(nullable=false, precision=10, scale=2)
     private BigDecimal price;
@@ -40,14 +45,22 @@ public abstract class Medicine {
     @Column(nullable=false, length=30)
     private String status = "AVAILABLE"; // AVAILABLE / OUT_OF_STOCK / DISCONTINUED
 
+    @Column(length=255)
+    private String imageUrl;
+
     @ManyToOne(optional=false)
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @OneToMany(mappedBy = "medicine", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("expiryDate ASC")
+    private List<StockBatch> stockBatches = new ArrayList<>();
+
     protected Medicine() {}
 
-    // Polymorphism example: subclasses can change label
+    // Polymorphism example: subclasses can change label and calculate price differently
     public abstract String getTypeLabel();
+    public abstract BigDecimal getFinalPrice();
 
     // Common helpers
     public boolean isExpired() {
@@ -55,8 +68,11 @@ public abstract class Medicine {
     }
 
     public void normalizeStatusFromStock() {
+        if ("DISCONTINUED".equals(status)) return;
+        
         if (stockQty != null && stockQty <= 0) status = "OUT_OF_STOCK";
-        else if (!"DISCONTINUED".equals(status)) status = "AVAILABLE";
+        else if (stockQty != null && stockQty <= 100) status = "LOW_STOCK";
+        else status = "AVAILABLE";
     }
 
     // getters/setters
@@ -65,22 +81,28 @@ public abstract class Medicine {
     public String getName() { return name; }
     public String getBrand() { return brand; }
     public String getDosage() { return dosage; }
+    public String getFormType() { return formType; }
     public BigDecimal getPrice() { return price; }
     public Integer getStockQty() { return stockQty; }
     public LocalDate getExpiryDate() { return expiryDate; }
     public Boolean getPrescriptionRequired() { return prescriptionRequired; }
     public String getStatus() { return status; }
+    public String getImageUrl() { return imageUrl; }
     public Category getCategory() { return category; }
+    public List<StockBatch> getStockBatches() { return stockBatches; }
+    public void setStockBatches(List<StockBatch> stockBatches) { this.stockBatches = stockBatches; }
 
     public void setId(Long id) { this.id = id; }
     public void setSku(String sku) { this.sku = sku; }
     public void setName(String name) { this.name = name; }
     public void setBrand(String brand) { this.brand = brand; }
     public void setDosage(String dosage) { this.dosage = dosage; }
+    public void setFormType(String formType) { this.formType = formType; }
     public void setPrice(BigDecimal price) { this.price = price; }
     public void setStockQty(Integer stockQty) { this.stockQty = stockQty; }
     public void setExpiryDate(LocalDate expiryDate) { this.expiryDate = expiryDate; }
     public void setPrescriptionRequired(Boolean prescriptionRequired) { this.prescriptionRequired = prescriptionRequired; }
     public void setStatus(String status) { this.status = status; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public void setCategory(Category category) { this.category = category; }
 }

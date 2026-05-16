@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MediMart | Product Catalog</title>
+<link rel="icon" href="/logo.png" type="image/png"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "inverse-on-surface": "#eff0f8",
+                    "surface-dim": "#d8dae2",
+                    "surface-container-low": "#f2f3fb",
+                    "inverse-primary": "#a9c7ff",
+                    "primary": "#00478d",
+                    "on-tertiary-fixed": "#341100",
+                    "tertiary": "#793100",
+                    "on-surface": "#191c21",
+                    "primary-fixed": "#d6e3ff",
+                    "tertiary-fixed-dim": "#ffb691",
+                    "on-primary-fixed-variant": "#00468c",
+                    "background": "#f9f9ff",
+                    "tertiary-container": "#9f4300",
+                    "on-background": "#191c21",
+                    "outline": "#727783",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#e7e8f0",
+                    "primary-container": "#005eb8",
+                    "on-primary-fixed": "#001b3d",
+                    "surface-container-highest": "#e1e2ea",
+                    "on-tertiary-fixed-variant": "#793100",
+                    "on-error": "#ffffff",
+                    "secondary-fixed-dim": "#5dd8e2",
+                    "surface-variant": "#e1e2ea",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#ecedf6",
+                    "secondary-fixed": "#7df4ff",
+                    "primary-fixed-dim": "#a9c7ff",
+                    "on-surface-variant": "#424752",
+                    "on-primary": "#ffffff",
+                    "on-secondary-container": "#006e75",
+                    "tertiary-fixed": "#ffdbcb",
+                    "on-secondary-fixed-variant": "#004f54",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#f9f9ff",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "secondary": "#006970",
+                    "outline-variant": "#c2c6d4",
+                    "on-secondary-fixed": "#002022",
+                    "inverse-surface": "#2e3037",
+                    "surface": "#f9f9ff",
+                    "on-tertiary-container": "#ffcfb9",
+                    "error": "#ba1a1a",
+                    "secondary-container": "#7af1fc",
+                    "surface-tint": "#005db6",
+                    "on-primary-container": "#c8daff"
+                },
+                "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+                },
+                "fontFamily": {
+                    "headline": ["Manrope"],
+                    "display": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+                }
+            },
+        },
+    }
+</script>
+<style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-headline { font-family: 'Manrope', sans-serif; }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #c2c6d4; border-radius: 10px; }
+
+    @keyframes slideIn {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+    }
+    .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
+</style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+
+<!-- TopNavBar -->
+<header class="bg-[#F2F3FB] dark:bg-slate-900 sticky top-0 z-50 shadow-sm">
+    <nav class="flex justify-between items-center w-full px-8 py-4 max-w-full mx-auto">
+        <div class="flex items-center gap-8">
+            <a href="/" class="flex items-center gap-2">
+                <img src="/logo.png" alt="MediMart Logo" class="h-8 w-auto">
+                <span class="text-2xl font-bold tracking-tighter text-[#00478D] dark:text-blue-400 hidden sm:block">MediMart</span>
+            </a>
+            <div class="hidden md:flex gap-6">
+                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/">Home</a>
+                <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="/catalog">Catalog</a>
+                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Admin Panel</a>
+                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="#">Help</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative hidden sm:block">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                <input id="navSearchInput" class="bg-surface-container-low border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all w-64" placeholder="Search catalog..." type="text"/>
+            </div>
+            <button onclick="toggleCartDrawer()" class="relative text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
+                <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                <span id="navCartBadgeDesktop" class="absolute -top-1 -right-1 w-4 h-4 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+            <button id="userAccountBtn" onclick="window.location.href='/login.html'" class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
+                <span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+            </button>
+        </div>
+    </nav>
+</header>
+
+<div class="flex-1">
+    <!-- CATALOG VIEW -->
+    <main id="catalogView" class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+        <!-- Search Results Header -->
+        <div class="mb-12">
+            <span class="text-secondary font-semibold tracking-wide uppercase text-xs mb-2 block">Catalog Search</span>
+            <h1 id="searchTitle" class="text-5xl font-extrabold tracking-tight text-primary mb-4">All Products</h1>
+            <p id="searchSubtitle" class="text-on-surface-variant max-w-2xl font-body text-sm leading-relaxed">
+                Browse our complete collection of clinical-grade medications. Please ensure you have a valid prescription for regulated medications.
+            </p>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-12">
+            <!-- Filter Sidebar -->
+            <aside class="w-full md:w-64 space-y-8 shrink-0">
+                <div class="bg-surface-container-low p-6 rounded-3xl">
+                    <h3 class="font-headline font-bold text-lg text-primary mb-6">Refine Results</h3>
+                    
+                    <!-- Category -->
+                    <div class="mb-8">
+                        <label class="font-label text-xs font-bold uppercase tracking-widest text-outline mb-4 block">Category</label>
+                        <div id="categoryFilterList" class="space-y-3">
+                            <label class="flex items-center gap-3 cursor-pointer group">
+                                <input name="category" value="" type="radio" checked class="rounded-full border-outline-variant text-primary focus:ring-primary w-4 h-4"/>
+                                <span class="text-sm font-medium text-on-surface-variant group-hover:text-primary">All Categories</span>
+                            </label>
+                            <!-- Dynamic Categories -->
+                        </div>
+                    </div>
+                    
+                    <!-- Medication Type -->
+                    <div class="mb-8">
+                        <label class="font-label text-xs font-bold uppercase tracking-widest text-outline mb-4 block">Medication Type</label>
+                        <div class="flex flex-col gap-2">
+                            <button id="typeAllBtn" onclick="setRxFilter(null)" class="text-left px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold transition-all">All Items</button>
+                            <button id="typeRxBtn" onclick="setRxFilter(true)" class="text-left px-4 py-2 rounded-xl hover:bg-surface-container-high transition-all text-sm font-medium">Prescription (RX)</button>
+                            <button id="typeOtcBtn" onclick="setRxFilter(false)" class="text-left px-4 py-2 rounded-xl hover:bg-surface-container-high transition-all text-sm font-medium">Over-the-Counter</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Assistance Card -->
+                <div class="bg-secondary-container/20 p-6 rounded-3xl border border-secondary-container/30">
+                    <span class="material-symbols-outlined text-secondary mb-3" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+                    <h4 class="font-headline font-bold text-secondary mb-2">Need Help?</h4>
+                    <p class="text-xs text-on-secondary-container mb-4">Our licensed pharmacists are online for a free consultation regarding your dosage.</p>
+                    <button class="w-full bg-secondary text-white py-2 rounded-xl text-xs font-bold hover:opacity-90 transition-opacity">Chat Now</button>
+                </div>
+            </aside>
+
+            <!-- Product List Area -->
+            <div class="flex-1">
+                <div id="productGrid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-16">
+                    <!-- Products injected here -->
+                </div>
+
+                <!-- Load More Section -->
+                <div id="loadMoreSection" class="mt-20 flex flex-col items-center hidden">
+                    <p id="viewingStats" class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-6">Viewing 0 of 0 items</p>
+                    <div class="w-64 h-1 bg-surface-container-high rounded-full overflow-hidden mb-8">
+                        <div id="loadProgress" class="h-full bg-primary transition-all w-0"></div>
+                    </div>
+                    <button id="loadMoreBtn" onclick="loadMore()" class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-12 py-4 rounded-xl font-bold tracking-tight shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all">
+                        Load More Results
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PRODUCT DETAIL VIEW (hidden initially) -->
+    <main id="detailView" class="pt-12 pb-32 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto hidden">
+        <!-- Breadcrumbs -->
+        <nav class="mb-8 flex items-center space-x-2 text-on-surface-variant text-sm">
+            <a href="javascript:showCatalog()" class="hover:text-primary cursor-pointer font-semibold">Catalog</a>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+            <span id="breadCat">Category</span>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+            <span id="breadProduct" class="text-primary font-semibold">Product</span>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20">
+            <!-- Left: Image -->
+            <div class="lg:col-span-7">
+                <div class="bg-white rounded-3xl overflow-hidden p-12 aspect-[4/3] flex items-center justify-center relative shadow-sm border border-surface-container">
+                    <div id="detailBadge" class="absolute top-8 left-8 bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase"></div>
+                    <img id="detailImg" class="w-full h-full object-contain mix-blend-multiply" src="" alt="Product"/>
+                </div>
+            </div>
+            <!-- Right: Info -->
+            <div class="lg:col-span-5 flex flex-col">
+                <div class="mb-4">
+                    <span id="detailCatLabel" class="text-secondary font-semibold tracking-widest text-xs uppercase"></span>
+                    <h1 id="detailTitle" class="text-4xl md:text-5xl font-extrabold tracking-tight text-primary mt-2"></h1>
+                    <p id="detailBrand" class="text-on-surface-variant mt-2 text-lg"></p>
+                </div>
+                
+                <div class="bg-surface-container-low p-8 rounded-3xl mt-8 border border-surface-container">
+                    <div class="flex items-end justify-between mb-8">
+                        <div>
+                            <span class="text-on-surface-variant text-sm font-semibold uppercase tracking-wider block mb-1">Price</span>
+                            <span id="detailPrice" class="text-4xl font-bold text-primary"></span>
+                        </div>
+                        <div id="detailStockBadge" class="flex flex-col items-end"></div>
+                    </div>
+                    <button id="addToCartBtn" class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl font-bold text-lg transition-transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 shadow-md">
+                        <span class="material-symbols-outlined">add_shopping_cart</span> Add to Cart
+                    </button>
+                </div>
+                
+                <!-- Trust Indicators -->
+                <div class="grid grid-cols-2 gap-4 mt-8">
+                    <div class="flex items-center space-x-3 p-4 rounded-2xl bg-surface-container-lowest border border-surface-container">
+                        <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">verified</span>
+                        <div><p class="font-bold text-sm text-primary">Clinical Grade</p><p class="text-xs text-on-surface-variant">FDA Approved</p></div>
+                    </div>
+                    <div class="flex items-center space-x-3 p-4 rounded-2xl bg-surface-container-lowest border border-surface-container">
+                        <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">local_shipping</span>
+                        <div><p class="font-bold text-sm text-primary">Fast Delivery</p><p class="text-xs text-on-surface-variant">Same Day Dispatch</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-surface-container-lowest border border-surface-container p-8 rounded-3xl lg:col-span-2">
+                <div class="flex items-center space-x-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                    <h2 class="text-xl font-bold text-primary">Product Information</h2>
+                </div>
+                <p id="detailDescription" class="text-on-surface-variant mb-6 leading-relaxed"></p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-surface-container-low p-4 rounded-2xl"><span class="text-[10px] text-on-surface-variant block uppercase font-bold tracking-widest mb-1">Category</span><span id="detailCatInfo" class="text-primary font-bold text-sm"></span></div>
+                    <div class="bg-surface-container-low p-4 rounded-2xl"><span class="text-[10px] text-on-surface-variant block uppercase font-bold tracking-widest mb-1">Brand</span><span id="detailBrandInfo" class="text-primary font-bold text-sm"></span></div>
+                    <div class="bg-surface-container-low p-4 rounded-2xl"><span class="text-[10px] text-on-surface-variant block uppercase font-bold tracking-widest mb-1">Dosage</span><span id="detailDosageInfo" class="text-primary font-bold text-sm"></span></div>
+                    <div class="bg-surface-container-low p-4 rounded-2xl"><span class="text-[10px] text-on-surface-variant block uppercase font-bold tracking-widest mb-1">Expiry Date</span><span id="detailExpiryInfo" class="text-primary font-bold text-sm"></span></div>
+                </div>
+            </div>
+            <div class="bg-secondary-container/30 border border-secondary-container/50 p-8 rounded-3xl flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-3 mb-6"><span class="material-symbols-outlined text-secondary">medication</span><h2 class="text-xl font-bold text-secondary">Pharmacist Note</h2></div>
+                    <p class="text-on-secondary-container text-sm italic leading-relaxed">"Always follow the prescribed dosage and complete the full course of treatment. Consult your pharmacist if you experience any adverse effects."</p>
+                </div>
+                <div class="flex items-center mt-6 space-x-3 bg-white/60 p-4 rounded-2xl">
+                    <div class="w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-sm">person</span></div>
+                    <div class="text-xs"><p class="font-bold text-secondary">Dr. Elena Vance</p><p class="text-on-surface-variant">Chief Pharmacist</p></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-12 text-center">
+            <button onclick="showCatalog()" class="inline-flex items-center gap-2 text-primary font-bold bg-surface-container-low px-6 py-3 rounded-xl hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined">arrow_back</span> Back to Catalog</button>
+        </div>
+    </main>
+</div>
+
+<!-- BottomNavBar Mobile -->
+<footer class="bg-white/90 dark:bg-slate-950/90 backdrop-blur-md md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 border-t border-[#C2C6D4]/15 shadow-[0_-12px_40px_rgba(25,28,33,0.06)]">
+    <a href="/" class="flex flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
+        <span class="material-symbols-outlined" data-icon="home">home</span>
+        <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Home</span>
+    </a>
+    <a href="/catalog" class="flex flex-col items-center justify-center bg-[#7AF1FC]/20 text-[#006970] rounded-xl px-4 py-2 scale-105 shadow-sm">
+        <span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+        <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Catalog</span>
+    </a>
+    <a href="javascript:toggleCartDrawer()" class="relative flex flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
+        <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+        <span id="navCartBadgeMobile" class="absolute top-1 right-2 w-4 h-4 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
+        <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Cart</span>
+    </a>
+    <a href="/medicines" class="flex flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
+        <span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+        <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Admin</span>
+    </a>
+</footer>
+
+<!-- Shopping Cart Sidebar Drawer Overlay -->
+<div id="cartDrawerOverlay" class="fixed inset-0 z-[100] bg-on-background/20 backdrop-blur-sm justify-end hidden">
+    <!-- Drawer Container -->
+    <div class="w-full max-w-md bg-surface-bright/95 h-full backdrop-blur-xl shadow-[-12px_0px_40px_rgba(25,28,33,0.08)] flex flex-col animate-slide-in relative ml-auto">
+        <!-- Drawer Header -->
+        <div class="px-8 py-8 flex justify-between items-center border-b border-outline-variant/10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+                </div>
+                <div>
+                    <h2 class="text-headline-sm font-headline font-bold text-primary tracking-tight">Your Cart</h2>
+                    <p id="cartItemCountText" class="text-label-sm text-on-surface-variant">0 items</p>
+                </div>
+            </div>
+            <button onclick="toggleCartDrawer()" class="w-10 h-10 rounded-full hover:bg-surface-container-high flex items-center justify-center transition-colors">
+                <span class="material-symbols-outlined text-on-surface-variant">close</span>
+            </button>
+        </div>
+        <!-- Drawer Content -->
+        <div id="cartItemsContainer" class="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar">
+            <!-- Items injected here -->
+        </div>
+        <!-- Prescription Notice -->
+        <div id="cartRxNotice" class="mx-8 mb-4 bg-secondary-container/10 border border-secondary/20 rounded-[1.5rem] p-4 flex gap-4 hidden">
+            <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">description</span>
+            <div class="text-xs text-on-secondary-container leading-relaxed">
+                <strong>Prescription Required:</strong> One or more items require a valid doctor's prescription. You can upload it during checkout.
+            </div>
+        </div>
+        <!-- Drawer Footer -->
+        <div class="px-8 py-8 bg-surface-container-low rounded-t-[3rem]">
+            <div class="flex flex-col gap-4 mb-8">
+                <div class="flex justify-between items-center text-on-surface-variant">
+                    <span class="text-sm">Subtotal</span>
+                    <span id="cartSubtotal" class="font-medium">Rs. 0.00</span>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-outline-variant/20">
+                    <span class="font-bold text-on-surface">Total Estimate</span>
+                    <span id="cartTotal" class="text-headline-sm font-bold text-primary tracking-tight">Rs. 0.00</span>
+                </div>
+            </div>
+            <div class="flex flex-col gap-3">
+                <button onclick="window.location.href='/checkout.html'" class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-5 rounded-full font-bold flex items-center justify-center gap-3 shadow-lg shadow-primary/10 active:scale-[0.98] transition-all">
+                    Proceed to Checkout
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+                <button onclick="toggleCartDrawer()" class="w-full py-4 text-secondary font-bold hover:text-on-secondary-container transition-colors flex items-center justify-center gap-2">
+                    Continue Shopping
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const PRODUCT_IMAGES = [
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuBCxKZWFCjZvZLTKlO8f0OPOI0HinW9IwEL_ODSnGqBOz7DKasf5GAA_0Fu_2td7OBiSwnge5IkMmLKjHNvNGT58sZAvLN3JKFsLm6AR0x5zciTwyABjNwbFUOEbOLjdpUTzpUByRnS8bQKV03pPIafTadUbTTKAAq9KmTaBkiJYid8uQisxJrdj9y6-aXF8EHYTOIUgj8D4BI4hxfS0Ve9oRthOMoQ9PUTY9LJ0vRHSriFRD-n4eAD3r5pnlJoSQx37WP_DpkRvrE",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCpiwEdKuP4EARdR6CvXd3dAvDAp_PG38ubLAU60YtVNVuKUaO2BipzsnIZsYbZHbNaFKUCxb9XVrEJQyGDEdKt7uHObKMaE1t2zKeL59YYpBoUGoz0ANJym4kT-R7g81-IDI28L5F_oSq2OgkFsbMd-CvctZj0rG8X-_BwwHJkzqT8WAuRtGCdvZ3TqMBk34Ew_zGCqeyn20urLj29Ivs4kYuNkvj-BQ_j5vee5rStpBkDgeyLVI0-5dd4Jl_9r58Imaig_jI6Ujs",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDiaCJOAxxvuBWSxMetepB_jSHAwZVje-nReckV_V8TIdEPJx5XqcWeipExMZKKZr_l68OzP7PbJHVur_UFtdrX2MH1cvxEfh7HPev5nK_VMPchjrtKu9lORIUJilvkmMlSJ-uLwtzsqfGFnNzh3_RyMOMvOty7lN8ivJYVekSJ20vJdf24IIGMv0uX913eFKUtpU2UvsxE001eOqQSdduwuz1maj-W7A-QjQMQ3uJaDY9BOoUVfFOzQ3Zgn3SvGsrM2aFHA99ZHLE",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCKTwlB_oDaogoPyl98tmEjX0_dzuEf_ME6M3suO5wTBaVGJDiqE8Hg33rZUzUA66KunmGX4nblRORSLTmJU28C0X9D8vHAlABNlFgiPQvZlssEuO9SfJ4DBqTpU-Y-gXekMSn9V4C4tAaYfp_N7-UKrgdUZEvJ9YlTHl4dfSRhg3d-PanvsZ3H1BM0q-CmtUQk6guRmord1pUd4rB7dVWwyetjQQRSp45M7QO2t1wBHDVKBjLYLLvzB9Ci802X4Dl5-rIZ7Iu5NNk",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCovq7GiHG-yeFAhJJlk4hfLhzIvBDG1ur9TpQ9tf35VkCYam_RbtQsNnh63-H2SxmtzYV9tS-mnC48VEffF8OskGySNpORJoM-AVUjwJxR2DHYGdoikDOa6V-m2mo_xH9ef86vDXCOtgixbHCdCnnTSyUYAlkq_8HarC5063uhlkkh1uz4La0kqlCM_5SAQ5Rq-FE95rJnbjcRSlIqtdnvEuHiQGEokFlUGeNV4ZrRxQCAlinK7FIBT5m6dyvRKAsEKiIgfHfe_Ak",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDgAr52ePArJZgVvP5BEAdBjzVOV2j5iGK9YuCwBofxtv624Oh5d11MnsYhRO8LZttV_9qIv7TkqxTiSKbQaQZaMEAynt131yyC685YJn6qplxgXu0Y9w_Izehav_xZjLN3OjHDo52nJwAEJQ1f4riWwN9il4U-UFlOVR1o1-dFf_DEMdHxPkIVJTLP4r9UzoM1TshVqcqFbKAv5tOKqaJk-UemDrbgAS-TFGlyOV1EivwwKfxf4UELBugTxwZ78u9DkqQY2NqTVQ0"
+    ];
+
+    let currentSearch = '';
+    let currentCategory = '';
+    let isRxFilter = null; // null = all, true = rx, false = otc
+    let currentPage = 0;
+    let loadedProducts = [];
+    let totalItems = 0;
+    const PAGE_SIZE = 6;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search);
+        
+        // Use query param OR local storage for the search
+        currentSearch = params.get('search') || localStorage.getItem('searchQuery') || '';
+        
+        // Clear local storage after reading
+        localStorage.removeItem('searchQuery');
+        
+        // Remove the query string from the URL if it exists, without reloading the page
+        if (window.history.replaceState && window.location.search) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        document.getElementById('navSearchInput').value = currentSearch;
+        
+        loadCategories();
+        fetchProducts(true);
+        checkAuthStatus();
+
+        // Search Input listener
+        let debounceTimer;
+        document.getElementById('navSearchInput').addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                currentSearch = e.target.value;
+                fetchProducts(true);
+            }, 300);
+        });
+        
+        initCart();
+    });
+
+    // Handle Category Loading
+    async function loadCategories() {
+        try {
+            const res = await fetch('/api/categories');
+            const data = await res.json();
+            const cats = data.content || data;
+            const container = document.getElementById('categoryFilterList');
+            cats.forEach(c => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-3 cursor-pointer group';
+                label.innerHTML = `
+                    <input type="radio" name="category" value="${c.name}" class="rounded-full border-outline-variant text-primary focus:ring-primary w-4 h-4"/>
+                    <span class="text-sm font-medium text-on-surface-variant group-hover:text-primary">${c.name}</span>
+                `;
+                label.querySelector('input').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        currentCategory = e.target.value;
+                        fetchProducts(true);
+                    }
+                });
+                container.appendChild(label);
+            });
+
+            // Listen to the 'All Categories' radio
+            container.querySelector('input[value=""]').addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    currentCategory = '';
+                    fetchProducts(true);
+                }
+            });
+        } catch(e) { console.error("Error loading categories", e); }
+    }
+
+    // Handle Type Filtering
+    function setRxFilter(val) {
+        isRxFilter = val;
+        // Update button styles
+        document.getElementById('typeAllBtn').className = val === null ? 'text-left px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold transition-all' : 'text-left px-4 py-2 rounded-xl hover:bg-surface-container-high transition-all text-sm font-medium text-on-surface';
+        document.getElementById('typeRxBtn').className = val === true ? 'text-left px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold transition-all' : 'text-left px-4 py-2 rounded-xl hover:bg-surface-container-high transition-all text-sm font-medium text-on-surface';
+        document.getElementById('typeOtcBtn').className = val === false ? 'text-left px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold transition-all' : 'text-left px-4 py-2 rounded-xl hover:bg-surface-container-high transition-all text-sm font-medium text-on-surface';
+        fetchProducts(true);
+    }
+
+    // Fetch API Data
+    async function fetchProducts(reset = false) {
+        if (reset) {
+            currentPage = 0;
+            loadedProducts = [];
+            document.getElementById('productGrid').innerHTML = '';
+        }
+
+        try {
+            let url = `/api/medicines/storefront?size=50`; // Fetch max and client-side filter for now
+            if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
+            
+            const res = await fetch(url);
+            const data = await res.json();
+            let allMatches = data.content || [];
+
+            // Apply client-side filters
+            if (currentCategory) {
+                allMatches = allMatches.filter(p => p.categoryName === currentCategory);
+            }
+            if (isRxFilter !== null) {
+                allMatches = allMatches.filter(p => p.prescriptionRequired === isRxFilter);
+            }
+
+            totalItems = allMatches.length;
+
+            // Update UI Header
+            if (currentSearch) {
+                document.getElementById('searchTitle').textContent = `Showing results for "${currentSearch}"`;
+                document.getElementById('searchSubtitle').innerHTML = `We found <span class="font-bold text-primary">${totalItems}</span> clinical matches for your search. Please ensure you have a valid prescription for regulated medications.`;
+            } else {
+                document.getElementById('searchTitle').textContent = 'All Products';
+                document.getElementById('searchSubtitle').innerHTML = `Browse our complete collection of <span class="font-bold text-primary">${totalItems}</span> clinical-grade medications.`;
+            }
+
+            // Client side pagination
+            const start = currentPage * PAGE_SIZE;
+            const pageData = allMatches.slice(start, start + PAGE_SIZE);
+            
+            if(reset && allMatches.length === 0) {
+                document.getElementById('productGrid').innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center py-24 bg-white rounded-3xl border border-surface-container">
+                        <span class="material-symbols-outlined text-6xl text-outline-variant mb-4">search_off</span>
+                        <h3 class="text-xl font-bold text-primary mb-2">No products found</h3>
+                        <p class="text-on-surface-variant">Try adjusting your filters or search terms.</p>
+                    </div>`;
+                document.getElementById('loadMoreSection').classList.add('hidden');
+                return;
+            }
+
+            pageData.forEach((p, idx) => {
+                const globalIndex = start + idx;
+                renderProductCard(p, globalIndex);
+                loadedProducts.push(p);
+            });
+
+            updateLoadMoreUI();
+
+        } catch (e) {
+            console.error("Error fetching products", e);
+        }
+    }
+
+    function renderProductCard(p, index) {
+        const grid = document.getElementById('productGrid');
+        let img = PRODUCT_IMAGES[index % PRODUCT_IMAGES.length];
+        if (p.imageUrl) {
+            img = `/uploads/${p.imageUrl}`;
+        } else if (p.formType) {
+            const formType = p.formType.toUpperCase();
+            if (formType === 'CREAM') img = '/images/cream.png';
+            else if (formType === 'SYRUP') img = '/images/Syrup_Liquid.png';
+            else if (formType === 'TABLET') img = '/images/Tablet_Capsule_Pill.png';
+            else img = '/images/other.png';
+        } else {
+            img = '/images/other.png';
+        }
+        
+        const title = p.name;
+        const price = p.finalPrice ? `Rs. ${Number(p.finalPrice).toFixed(2)}` : 'Rs. 0.00';
+        
+        let badgeHtml = '';
+        if (p.prescriptionRequired) {
+            badgeHtml = `<span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Prescription Required</span>`;
+        } else {
+            badgeHtml = `<span class="bg-surface-container-highest text-on-surface-variant text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Over-the-Counter</span>`;
+        }
+
+        const outOfStock = p.totalStock === 0;
+
+        const card = document.createElement('div');
+        card.className = 'flex flex-col group cursor-pointer';
+        card.onclick = (e) => {
+            // Prevent opening detail view if clicking add to cart
+            if(e.target.closest('button')) return;
+            showDetail(p, img);
+        };
+        
+        card.innerHTML = `
+            <div class="relative aspect-[4/5] bg-white rounded-[2rem] overflow-hidden mb-6 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-xl border border-surface-container">
+                <img class="w-full h-full object-cover p-4 mix-blend-multiply" src="${img}" alt="${title}"/>
+                <div class="absolute top-6 left-6">${badgeHtml}</div>
+                ${outOfStock ? '<div class="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center"><span class="bg-error text-white font-bold px-4 py-2 rounded-full text-sm">Out of Stock</span></div>' : ''}
+            </div>
+            <div class="px-2">
+                <div class="flex justify-between items-start mb-2 gap-4">
+                    <h3 class="font-headline font-bold text-xl text-primary leading-tight group-hover:text-secondary transition-colors">${title}</h3>
+                    <span class="font-headline font-bold text-lg text-on-surface whitespace-nowrap">${price}</span>
+                </div>
+                <p class="text-outline text-sm font-medium mb-6 line-clamp-1">${p.categoryName || 'General'} • ${p.dosage || 'Standard'} • ${p.brand || 'Generic'}</p>
+                <button ${outOfStock ? 'disabled' : ''} class="w-full ${outOfStock ? 'bg-surface-dim text-outline cursor-not-allowed' : 'bg-surface-container-high text-on-primary-fixed-variant hover:bg-primary hover:text-white'} py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm relative z-10">
+                    <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                    Add to Cart
+                </button>
+            </div>
+        `;
+        grid.appendChild(card);
+        
+        const addBtn = card.querySelector('button');
+        if (addBtn && !outOfStock) {
+            addBtn.onclick = (e) => {
+                e.stopPropagation(); // prevent card click
+                addToCartObj(p, img);
+            };
+        }
+    }
+
+    function updateLoadMoreUI() {
+        const section = document.getElementById('loadMoreSection');
+        if (totalItems <= loadedProducts.length) {
+            section.classList.add('hidden');
+        } else {
+            section.classList.remove('hidden');
+            document.getElementById('viewingStats').textContent = `Viewing ${loadedProducts.length} of ${totalItems} items`;
+            const pct = (loadedProducts.length / totalItems) * 100;
+            document.getElementById('loadProgress').style.width = `${pct}%`;
+        }
+    }
+
+    function loadMore() {
+        currentPage++;
+        fetchProducts(false);
+    }
+
+    function showDetail(product, imgSrc) {
+        document.getElementById('catalogView').classList.add('hidden');
+        document.getElementById('detailView').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const title = product.name;
+        document.getElementById('breadCat').textContent = product.categoryName || 'Category';
+        document.getElementById('breadProduct').textContent = title;
+        document.getElementById('detailTitle').textContent = title;
+        document.getElementById('detailCatLabel').textContent = product.categoryName || '';
+        document.getElementById('detailBrand').textContent = `by ${product.brand || 'Generic'}`;
+        document.getElementById('detailPrice').textContent = product.finalPrice ? `Rs. ${Number(product.finalPrice).toFixed(2)}` : 'Rs. 0.00';
+        document.getElementById('detailImg').src = imgSrc;
+        
+        document.getElementById('detailCatInfo').textContent = product.categoryName || '-';
+        document.getElementById('detailBrandInfo').textContent = product.brand || '-';
+        document.getElementById('detailDosageInfo').textContent = product.dosage || '-';
+        document.getElementById('detailExpiryInfo').textContent = product.earliestExpiry || '-';
+
+        // Badge
+        const badge = document.getElementById('detailBadge');
+        if (product.prescriptionRequired) { 
+            badge.textContent = 'Prescription Required'; 
+            badge.className = 'absolute top-8 left-8 bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm';
+        } else { 
+            badge.textContent = 'Over The Counter'; 
+            badge.className = 'absolute top-8 left-8 bg-surface-container-highest text-on-surface-variant px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm';
+        }
+
+        // Stock
+        const stockBadge = document.getElementById('detailStockBadge');
+        const cartBtn = document.getElementById('addToCartBtn');
+        if (product.totalStock === 0) { 
+            stockBadge.innerHTML = '<span class="text-error text-sm font-bold bg-error-container px-3 py-1 rounded-lg">Out of Stock</span>'; 
+            cartBtn.disabled = true; 
+            cartBtn.className = 'w-full py-4 bg-surface-dim text-outline rounded-xl font-bold text-lg cursor-not-allowed flex items-center justify-center gap-2'; 
+            cartBtn.onclick = null;
+        } else { 
+            stockBadge.innerHTML = `<span class="text-secondary text-sm font-bold flex items-center bg-secondary-container/30 px-3 py-1 rounded-lg"><span class="material-symbols-outlined text-sm mr-1">inventory_2</span>${product.totalStock} Available</span>`; 
+            cartBtn.disabled = false; 
+            cartBtn.className = 'w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl font-bold text-lg transition-transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 shadow-md cursor-pointer'; 
+            cartBtn.onclick = () => addToCartObj(product, imgSrc);
+        }
+
+        // Description
+        document.getElementById('detailDescription').textContent = `${title} is manufactured by ${product.brand || 'our trusted generic partners'}. Formulated as ${product.dosage || 'standard dosage'}. Part of our ${product.categoryName || ''} catalog.`;
+    }
+
+    function showCatalog() {
+        document.getElementById('detailView').classList.add('hidden');
+        document.getElementById('catalogView').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function checkAuthStatus() {
+        try {
+            const res = await fetch('/api/auth/me');
+            const data = await res.json();
+            if (data.loggedIn) {
+                const btn = document.getElementById('userAccountBtn');
+                if (btn) btn.onclick = () => window.location.href = '/profile.html';
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    // --- Cart Logic ---
+    let cart = [];
+
+    function initCart() {
+        const stored = localStorage.getItem('medimart_cart');
+        if (stored) {
+            cart = JSON.parse(stored);
+        }
+        updateCartUI();
+    }
+
+    function saveCart() {
+        localStorage.setItem('medimart_cart', JSON.stringify(cart));
+        updateCartUI();
+    }
+
+    function toggleCartDrawer() {
+        const overlay = document.getElementById('cartDrawerOverlay');
+        if (overlay.classList.contains('hidden')) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        } else {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
+    }
+
+    function addToCartObj(product, img) {
+        const cartId = btoa(unescape(encodeURIComponent((product.name||'') + '|' + (product.brand||'') + '|' + (product.dosage||''))));
+        const existing = cart.find(item => item.cartId === cartId);
+        if (existing) {
+            existing.cartQty += 1;
+        } else {
+            cart.push({
+                ...product,
+                cartId: cartId,
+                cartQty: 1,
+                cartImg: img
+            });
+        }
+        saveCart();
+        // Removed toggleCartDrawer() so it doesn't auto-open
+    }
+
+    function updateCartQuantity(cartId, delta) {
+        const item = cart.find(i => i.cartId === cartId);
+        if (item) {
+            item.cartQty += delta;
+            if (item.cartQty <= 0) {
+                cart = cart.filter(i => i.cartId !== cartId);
+            }
+            saveCart();
+        }
+    }
+
+    function removeFromCart(cartId) {
+        cart = cart.filter(i => i.cartId !== cartId);
+        saveCart();
+    }
+
+    function updateCartUI() {
+        const container = document.getElementById('cartItemsContainer');
+        const badgeDesktop = document.getElementById('navCartBadgeDesktop');
+        const badgeMobile = document.getElementById('navCartBadgeMobile');
+        const countText = document.getElementById('cartItemCountText');
+        
+        let totalItems = 0;
+        let subtotal = 0;
+        let requiresRx = false;
+
+        container.innerHTML = '';
+
+        if (cart.length === 0) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-on-surface-variant opacity-60">
+                    <span class="material-symbols-outlined text-6xl mb-4">shopping_cart</span>
+                    <p>Your cart is empty</p>
+                </div>
+            `;
+        }
+
+        cart.forEach(item => {
+            if (!item.cartId) {
+                item.cartId = btoa(unescape(encodeURIComponent((item.name||'') + '|' + (item.brand||'') + '|' + (item.dosage||''))));
+            }
+            totalItems += item.cartQty;
+            const itemPrice = item.finalPrice || 0;
+            subtotal += itemPrice * item.cartQty;
+            if (item.prescriptionRequired) requiresRx = true;
+
+            const div = document.createElement('div');
+            div.className = 'flex gap-4 p-4 bg-surface-container-lowest rounded-3xl mb-6 group transition-all duration-300 hover:shadow-lg hover:shadow-primary/5';
+            div.innerHTML = `
+                <div class="w-20 h-20 rounded-2xl bg-surface-container-low overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    <img class="w-16 h-auto mix-blend-multiply" src="${item.cartImg}" alt="${item.name}"/>
+                </div>
+                <div class="flex-1 flex flex-col justify-between">
+                    <div class="flex justify-between">
+                        <div>
+                            <h3 class="font-bold text-on-surface leading-tight">${item.name}</h3>
+                            <p class="text-xs text-on-surface-variant">${item.categoryName || 'General'} • ${item.brand || 'Generic'}</p>
+                        </div>
+                        <button onclick="removeFromCart('${item.cartId}')" class="text-on-surface-variant hover:text-error transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">delete_outline</span>
+                        </button>
+                    </div>
+                    <div class="flex justify-between items-end mt-2">
+                        <div class="flex items-center bg-surface-container rounded-full px-2 py-1">
+                            <button onclick="updateCartQuantity('${item.cartId}', -1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[16px]">remove</span></button>
+                            <span class="px-3 font-bold text-sm">${item.cartQty}</span>
+                            <button onclick="updateCartQuantity('${item.cartId}', 1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[16px]">add</span></button>
+                        </div>
+                        <span class="font-bold text-primary">Rs. ${(itemPrice * item.cartQty).toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        // Badges
+        if (totalItems > 0) {
+            badgeDesktop.textContent = totalItems;
+            if (badgeMobile) badgeMobile.textContent = totalItems;
+            badgeDesktop.classList.remove('hidden');
+            if (badgeMobile) badgeMobile.classList.remove('hidden');
+        } else {
+            badgeDesktop.classList.add('hidden');
+            if (badgeMobile) badgeMobile.classList.add('hidden');
+        }
+
+        countText.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
+        document.getElementById('cartSubtotal').textContent = `Rs. ${subtotal.toFixed(2)}`;
+        document.getElementById('cartTotal').textContent = `Rs. ${subtotal.toFixed(2)}`;
+
+        // RX Notice
+        const rxNotice = document.getElementById('cartRxNotice');
+        if (requiresRx) {
+            rxNotice.classList.remove('hidden');
+        } else {
+            rxNotice.classList.add('hidden');
+        }
+    }
+</script>
+</body>
+</html>

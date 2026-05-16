@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <aside th:fragment="medimart-sidebar" 
+           class="fixed left-0 top-0 h-screen w-72 bg-white border-r border-slate-200 flex flex-col z-50">
+        
+        <!-- Sidebar Header -->
+        <div class="p-6 border-b border-slate-50">
+            <div class="flex items-center gap-3 mb-2 cursor-pointer" onclick="window.location.href='/'">
+                <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg border border-slate-100 flex-shrink-0">
+                    <img src="/logo.png" alt="MediMart Logo" class="w-full h-full object-cover"/>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black text-blue-900 tracking-tight leading-none">MediMart</h1>
+                    <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mt-1">Clinical Systems</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
+            
+            <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 mt-4">Core</p>
+            <a th:href="@{/}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-primary transition-all">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="text-sm font-semibold">Dashboard</span>
+            </a>
+            
+            <a th:href="@{/medicines}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-primary transition-all">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span class="text-sm font-semibold">Inventory</span>
+            </a>
+
+            <div th:if="${session.userRole == 'ROLE_ADMIN'}">
+                <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 mt-6">Personnel</p>
+                <a th:href="@{/users-portal}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-primary transition-all">
+                    <span class="material-symbols-outlined">group</span>
+                    <span class="text-sm font-semibold">Staff Management</span>
+                </a>
+                <a th:href="@{/addmindetails}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-primary transition-all">
+                    <span class="material-symbols-outlined">admin_panel_settings</span>
+                    <span class="text-sm font-semibold">Add Admin</span>
+                </a>
+            </div>
+
+            <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 mt-6">Supply Chain</p>
+            <a th:href="@{/supplier-details}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-primary transition-all">
+                <span class="material-symbols-outlined">factory</span>
+                <span class="text-sm font-semibold">Supplier Details</span>
+            </a>
+        </nav>
+
+        <!-- Bottom Actions -->
+        <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+                <a th:href="@{/logout}" 
+                class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="text-sm">Sign Out</span>
+                </a>
+        </div>
+    </aside>
+
+</body>
+</html>
