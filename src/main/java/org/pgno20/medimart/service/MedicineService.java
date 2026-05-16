@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.math.BigDecimal;
 import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +31,7 @@ public class MedicineService {
     private final StockBatchService stockBatchService;
 
     public MedicineService(MedicineRepository medicineRepository, CategoryRepository categoryRepository,
-                           StockBatchRepository stockBatchRepository, StockBatchService stockBatchService) {
+            StockBatchRepository stockBatchRepository, StockBatchService stockBatchService) {
         this.medicineRepository = medicineRepository;
         this.categoryRepository = categoryRepository;
         this.stockBatchRepository = stockBatchRepository;
@@ -42,7 +41,6 @@ public class MedicineService {
     @Transactional
     public MedicineResponse create(MedicineCreateRequest req) {
 
-
         Category category = categoryRepository.findById(req.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
@@ -50,11 +48,12 @@ public class MedicineService {
 
         // Check for exact duplicates
         java.util.Optional<Medicine> duplicate = medicineRepository.findExactDuplicate(
-                req.getName(), req.getBrand(), formattedDosage, req.getFormType()
-        );
+                req.getName(), req.getBrand(), formattedDosage, req.getFormType());
 
         if (duplicate.isPresent()) {
-            throw new IllegalArgumentException("Duplicate item found! This medicine already exists. Please add your new stock to the existing item (" + duplicate.get().getSku() + ") instead of creating a new one.");
+            throw new IllegalArgumentException(
+                    "Duplicate item found! This medicine already exists. Please add your new stock to the existing item ("
+                            + duplicate.get().getSku() + ") instead of creating a new one.");
         }
 
         Medicine medicine = buildMedicineByType(req.getType());
@@ -76,14 +75,14 @@ public class MedicineService {
 
         // First save to generate the ID
         Medicine saved = medicineRepository.save(medicine);
-        
+
         // Update SKU with the MED001 format based on the generated ID
         saved.setSku(String.format("MED%03d", saved.getId()));
         saved = medicineRepository.save(saved);
 
         // Create the initial stock batch from the provided stockQty and expiryDate
         stockBatchService.createInitialBatch(saved, req.getStockQty(), req.getExpiryDate(), req.getSupplierId());
-        
+
         return toResponse(saved);
     }
 
@@ -95,7 +94,8 @@ public class MedicineService {
         return medicineRepository.getStorefrontMedicines(pageable).map(this::applyFinalPrice);
     }
 
-    public Page<org.pgno20.medimart.dto.StorefrontMedicineDTO> searchStorefrontMedicines(String search, Pageable pageable) {
+    public Page<org.pgno20.medimart.dto.StorefrontMedicineDTO> searchStorefrontMedicines(String search,
+            Pageable pageable) {
         return medicineRepository.searchStorefrontMedicines(search, pageable).map(this::applyFinalPrice);
     }
 
@@ -104,7 +104,8 @@ public class MedicineService {
      * OTC: base price + 10% tax
      * Prescription: base price + $5.00 dispensing fee
      */
-    private org.pgno20.medimart.dto.StorefrontMedicineDTO applyFinalPrice(org.pgno20.medimart.dto.StorefrontMedicineDTO dto) {
+    private org.pgno20.medimart.dto.StorefrontMedicineDTO applyFinalPrice(
+            org.pgno20.medimart.dto.StorefrontMedicineDTO dto) {
         if (dto.getMinPrice() != null) {
             if (Boolean.TRUE.equals(dto.getPrescriptionRequired())) {
                 dto.setFinalPrice(dto.getMinPrice().add(new java.math.BigDecimal("5.00")));
@@ -124,9 +125,9 @@ public class MedicineService {
     public Map<String, Object> getStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalProducts", medicineRepository.countAll());
-        stats.put("lowStock",      medicineRepository.countLowStock());
-        stats.put("outOfStock",    medicineRepository.countOutOfStock());
-        stats.put("totalValue",    medicineRepository.sumTotalValue());
+        stats.put("lowStock", medicineRepository.countLowStock());
+        stats.put("outOfStock", medicineRepository.countOutOfStock());
+        stats.put("totalValue", medicineRepository.sumTotalValue());
         return stats;
     }
 
@@ -140,7 +141,7 @@ public class MedicineService {
         String searchName = (name != null && !name.isBlank()) ? name : null;
         String searchBrand = (brand != null && !brand.isBlank()) ? brand : null;
         String searchStatus = (status != null && !status.isBlank()) ? status : null;
-        
+
         return medicineRepository.searchMedicines(searchName, searchBrand, categoryId, searchStatus, pageable)
                 .map(this::toResponse);
     }
@@ -201,7 +202,7 @@ public class MedicineService {
 
             String filename = medicine.getSku() + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
             Path uploadPath = Paths.get("uploads");
-            
+
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
@@ -219,7 +220,8 @@ public class MedicineService {
     }
 
     private Medicine buildMedicineByType(String type) {
-        if (type == null) throw new IllegalArgumentException("type is required");
+        if (type == null)
+            throw new IllegalArgumentException("type is required");
 
         return switch (type.trim().toUpperCase()) {
             case "OTC" -> new OTCMedicine();
@@ -253,10 +255,16 @@ public class MedicineService {
     private void assignDefaultImage(Medicine medicine) {
         String defaultName = "other.png";
         if (medicine.getFormType() != null) {
-            switch(medicine.getFormType().toUpperCase()) {
-                case "TABLET": defaultName = "Tablet_Capsule_Pill.png"; break;
-                case "SYRUP": defaultName = "Syrup_Liquid.png"; break;
-                case "CREAM": defaultName = "cream.png"; break;
+            switch (medicine.getFormType().toUpperCase()) {
+                case "TABLET":
+                    defaultName = "Tablet_Capsule_Pill.png";
+                    break;
+                case "SYRUP":
+                    defaultName = "Syrup_Liquid.png";
+                    break;
+                case "CREAM":
+                    defaultName = "cream.png";
+                    break;
             }
         }
         try {
@@ -268,7 +276,8 @@ public class MedicineService {
             Path dest = uploadPath.resolve(newFilename);
             if (!Files.exists(dest)) {
                 try (java.io.InputStream in = getClass().getResourceAsStream("/images/" + defaultName)) {
-                    if (in != null) Files.copy(in, dest);
+                    if (in != null)
+                        Files.copy(in, dest);
                 }
             }
             medicine.setImageUrl(newFilename);
