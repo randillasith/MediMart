@@ -69,6 +69,21 @@ public class AuthController {
             HttpSession session = request.getSession();
             session.setAttribute("userId",   user.getId());
             session.setAttribute("userRole", user.getRoleName());
+            session.setAttribute("userFullName", user.getFullName());
+            
+            String initials = "U";
+            if (user.getFullName() != null && !user.getFullName().isBlank()) {
+                String[] parts = user.getFullName().trim().split("\\s+");
+                if (parts.length >= 2) {
+                    initials = parts[0].substring(0, 1).toUpperCase() + parts[parts.length - 1].substring(0, 1).toUpperCase();
+                } else {
+                    initials = parts[0].substring(0, 1).toUpperCase();
+                    if (parts[0].length() > 1) {
+                        initials += parts[0].substring(1, 2).toUpperCase();
+                    }
+                }
+            }
+            session.setAttribute("userInitials", initials);
 
             // Remember Me: extend session lifetime
             if (dto.isRememberMe()) {
