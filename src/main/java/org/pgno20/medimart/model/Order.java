@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 @Table(name = "orders")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
-public abstract class Order {
+public class Order {
 
     @Id
     private String orderId;
@@ -46,8 +46,10 @@ public abstract class Order {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    // Polymorphism: Abstract method for different workflows
-    public abstract double calculateDiscount();
+    // Polymorphism: Default method for different workflows
+    public double calculateDiscount() {
+        return 0.0;
+    }
 }
 
 
