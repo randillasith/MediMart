@@ -8,6 +8,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -45,9 +46,18 @@ public class SecurityConfig {
     //  Beans
     // ──────────────────────────────────────────────
 
+    /**
+     * BCrypt is a salted, adaptive hashing algorithm.
+     * Strength 12 = ~250ms per hash (strong against brute-force).
+     * Each encoded password includes a random salt, so two identical
+     * passwords always produce different hashes — rainbow tables useless.
+     *
+     * ⚠ NOTE: Existing SHA-256 hashed passwords in the DB are now invalid.
+     * Users must reset their passwords, or the DB must be re-seeded.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new Sha256PasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 
     /**
