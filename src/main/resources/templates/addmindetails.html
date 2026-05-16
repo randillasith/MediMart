@@ -9,13 +9,45 @@
         .cta-gradient { background: linear-gradient(135deg, #00478D 0%, #005EB8 100%); }
     </style>
 </head>
-<body class="bg-slate-50 flex min-h-screen">
+<body class="bg-slate-50 flex min-h-screen overflow-hidden">
+    <!-- Global Preloader -->
+    <div id="medimart-preloader" class="fixed inset-0 z-[9999] bg-[#f9f9ff] flex flex-col items-center justify-center transition-opacity duration-700 ease-in-out overflow-hidden">
+        <div class="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[#00478D]/5 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#006970]/5 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="relative flex flex-col items-center z-10 bg-[#f2f3fb] p-12 rounded-[2rem] shadow-sm border border-white">
+            <div class="bg-white p-4 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-2">
+                <img src="/logo.png" alt="MediMart Logo" class="h-16 w-auto relative z-10 animate-pulse"/>
+            </div>
+            <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-[#00478D] font-headline">MediMart</h1>
+            <p class="text-slate-500 font-medium text-sm mt-1">Workspace initializing...</p>
+            <div class="mt-8 flex flex-col items-center gap-3">
+                <svg class="animate-spin h-6 w-6 text-[#005EB8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
 
     <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar :: medimart-sidebar}"></div>
 
-    <div class="flex-1 md:ml-72 p-8">
-        <!-- Header -->
+    <div class="flex-1 md:ml-72">
+        <!-- Top Navigation Bar -->
+        <header class="h-16 sticky top-0 bg-slate-50/80 backdrop-blur-xl z-40 flex justify-end items-center px-8 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs font-bold text-on-surface" th:text="${session.userFullName != null ? session.userFullName : 'Admin Portal'}">Admin Portal</p>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase" th:text="${session.userRole != null ? session.userRole.replace('ROLE_', '') : 'MANAGEMENT'}">Management</p>
+                </div>
+                <div class="h-10 w-10 rounded-full bg-[#00478D] flex items-center justify-center text-white font-bold text-lg border-2 border-white shadow-sm cursor-pointer" onclick="window.location.href='/profile.html'" th:text="${session.userInitials != null ? session.userInitials : 'AD'}">
+                    AD
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8">
+            <!-- Header -->
         <div class="flex justify-between items-end mb-8">
             <div>
                 <h2 class="text-4xl font-extrabold text-primary">Admin Management</h2>
@@ -42,6 +74,7 @@
                     <!-- Data loaded via JS -->
                 </tbody>
             </table>
+        </div>
         </div>
     </div>
 
@@ -85,7 +118,31 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', loadAdminTable);
+        document.addEventListener('DOMContentLoaded', () => {
+            Promise.all([
+                document.fonts.ready,
+                new Promise(resolve => {
+                    if (document.readyState === 'complete') {
+                        resolve();
+                    } else {
+                        window.addEventListener('load', resolve);
+                    }
+                })
+            ]).then(() => {
+                setTimeout(() => {
+                    const preloader = document.getElementById('medimart-preloader');
+                    if (preloader) {
+                        preloader.style.opacity = '0';
+                        setTimeout(() => {
+                            preloader.style.display = 'none';
+                            document.body.classList.remove('overflow-hidden');
+                        }, 700);
+                    }
+                }, 500);
+            });
+            
+            loadAdminTable();
+        });
 
         async function loadAdminTable() {
             try {
