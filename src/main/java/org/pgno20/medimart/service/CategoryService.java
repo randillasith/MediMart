@@ -10,9 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class CategoryService {
 
@@ -40,7 +37,7 @@ public class CategoryService {
 
     public CategoryResponse update(Long id, CategoryCreateRequest req) {
         Category category = categoryRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
         try {
             category.setName(req.getName());
             Category saved = categoryRepository.save(category);
@@ -52,7 +49,7 @@ public class CategoryService {
 
     public void delete(Long id) {
         Category category = categoryRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
         category.setStatus("INACTIVE");
         categoryRepository.save(category);
     }
