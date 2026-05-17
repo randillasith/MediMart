@@ -1,5 +1,7 @@
 package org.pgno20.medimart.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.pgno20.medimart.model.Prescription;
 import org.pgno20.medimart.service.PrescriptionService;
 import org.springframework.data.domain.Page;
@@ -63,11 +65,17 @@ public class PrescriptionController {
             @RequestParam("dosage")           String dosage,
             @RequestParam(value = "instructions", required = false) String instructions,
             @RequestParam("prescriptionDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate prescriptionDate,
-            @RequestParam(value = "file",     required = false) MultipartFile file) {
+            @RequestParam(value = "file",     required = false) MultipartFile file,
+            HttpServletRequest request) {
+
+        HttpSession session = requireSession(request);
+        String submittedByName = (String) session.getAttribute("userFullName");
+        String submittedByEmail = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null;
 
         Prescription created = prescriptionService.create(
                 patientName, doctorName, medicineDetails,
-                dosage, instructions, prescriptionDate, file
+                dosage, instructions, prescriptionDate, file,
+                submittedByName, submittedByEmail
         );
         return ResponseEntity.ok(created);
     }
@@ -85,6 +93,15 @@ public class PrescriptionController {
 
         Page<Prescription> result = prescriptionService.search(search, status, pageable);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<Page<Prescription>> mine(
+            @PageableDefault(size = 10) Pageable pageable,
+            HttpServletRequest request) {
+        requireSession(request);
+        String email = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null;
+        return ResponseEntity.ok(prescriptionService.findForMember(email, pageable));
     }
 
     // ─── READ ONE ─────────────────────────────────────────────────────────────
@@ -121,6 +138,25 @@ public class PrescriptionController {
         return ResponseEntity.ok(updated);
     }
 
+    @PutMapping("/{id}/review")
+    public ResponseEntity<Prescription> review(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body,
+            HttpServletRequest request) {
+        String reviewer = "Admin";
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("userFullName") != null) {
+            reviewer = (String) session.getAttribute("userFullName");
+        }
+        Prescription reviewed = prescriptionService.review(
+                id,
+                body.get("status"),
+                body.get("rejectionReason"),
+                reviewer
+        );
+        return ResponseEntity.ok(reviewed);
+    }
+
     // ─── DELETE ──────────────────────────────────────────────────────────────
     /**
      * DELETE /api/prescriptions/5
@@ -141,7 +177,17 @@ public class PrescriptionController {
     public ResponseEntity<Map<String, Object>> stats() {
         return ResponseEntity.ok(Map.of(
                 "total",  prescriptionService.countTotal(),
-                "active", prescriptionService.countActive()
+                "approved", prescriptionService.countActive(),
+                "pending", prescriptionService.countPending(),
+                "rejected", prescriptionService.countRejected()
         ));
+    }
+
+    private HttpSession requireSession(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            throw new IllegalArgumentException("You must log in before submitting prescriptions");
+        }
+        return session;
     }
 }
