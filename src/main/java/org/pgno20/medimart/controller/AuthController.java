@@ -144,13 +144,14 @@ public class AuthController {
                 User user = userOpt.get();
                 // Return only safe fields — never serialize the whole entity
                 Map<String, Object> safeUser = new HashMap<>();
-                safeUser.put("id",       user.getId());
-                safeUser.put("fullName", user.getFullName());
-                safeUser.put("email",    user.getEmail());
-                safeUser.put("dob",      user.getDob());
-                safeUser.put("gender",   user.getGender());
-                safeUser.put("roleName", user.getRoleName());
-                safeUser.put("active",   user.getActive());
+                safeUser.put("id",              user.getId());
+                safeUser.put("fullName",        user.getFullName());
+                safeUser.put("email",           user.getEmail());
+                safeUser.put("dob",             user.getDob());
+                safeUser.put("gender",          user.getGender());
+                safeUser.put("roleName",        user.getRoleName());
+                safeUser.put("active",          user.getActive());
+                safeUser.put("shippingAddress", user.getShippingAddress());
 
                 result.put("loggedIn", true);
                 result.put("user", safeUser);
@@ -216,6 +217,29 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(e.getMessage(), false));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse("An error occurred during account deletion", false));
+        }
+    }
+    /**
+     * PUT /api/auth/me/address — save the shipping address from checkout to the user profile.
+     * Called automatically when user saves an address on the checkout page.
+     */
+    @PutMapping("/me/address")
+    public ResponseEntity<AuthResponse> updateAddress(
+            @RequestBody Map<String, String> body,
+            HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new AuthResponse("Not logged in", false));
+        }
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            String address = body.get("address");
+            userService.updateShippingAddress(userId, address);
+            return ResponseEntity.ok(new AuthResponse("Address saved", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new AuthResponse("Could not save address", false));
         }
     }
 }
