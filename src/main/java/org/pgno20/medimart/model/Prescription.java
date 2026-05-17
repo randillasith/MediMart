@@ -2,6 +2,7 @@ package org.pgno20.medimart.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * PRESCRIPTION MODEL
@@ -45,7 +46,23 @@ public class Prescription {
     private String fileName;            // Uploaded prescription image filename
 
     @Column(nullable = false, length = 20)
-    private String status = "ACTIVE";   // ACTIVE / EXPIRED / CANCELLED
+    private String status = "PENDING";   // PENDING / APPROVED / REJECTED
+
+    @Column(length = 200)
+    private String submittedByName;
+
+    @Column(length = 200)
+    private String submittedByEmail;
+
+    @Column(length = 500)
+    private String rejectionReason;
+
+    @Column(length = 200)
+    private String reviewedBy;
+
+    private LocalDateTime submittedAt;
+
+    private LocalDateTime reviewedAt;
 
     // ─── Constructors ─────────────────────────────────────────────────
     // Required by JPA
@@ -77,10 +94,30 @@ public class Prescription {
      * Demonstrates abstraction — caller doesn't need to know the logic.
      */
     public String getStatusLabel() {
-        if (isExpired() && "ACTIVE".equals(status)) {
+        if (isExpired() && "APPROVED".equals(status)) {
             return "EXPIRED";
         }
         return status;
+    }
+
+    public void approve(String reviewer) {
+        this.status = "APPROVED";
+        this.rejectionReason = null;
+        this.reviewedBy = reviewer;
+        this.reviewedAt = LocalDateTime.now();
+    }
+
+    public void reject(String reason, String reviewer) {
+        this.status = "REJECTED";
+        this.rejectionReason = reason;
+        this.reviewedBy = reviewer;
+        this.reviewedAt = LocalDateTime.now();
+    }
+
+    @PrePersist
+    void prePersist() {
+        if (this.status == null || this.status.isBlank()) this.status = "PENDING";
+        if (this.submittedAt == null) this.submittedAt = LocalDateTime.now();
     }
 
     // ─── Getters (Encapsulation: controlled read access) ──────────────
@@ -94,6 +131,12 @@ public class Prescription {
     public LocalDate getPrescriptionDate(){ return prescriptionDate; }
     public String getFileName()          { return fileName; }
     public String getStatus()            { return status; }
+    public String getSubmittedByName()   { return submittedByName; }
+    public String getSubmittedByEmail()  { return submittedByEmail; }
+    public String getRejectionReason()   { return rejectionReason; }
+    public String getReviewedBy()        { return reviewedBy; }
+    public LocalDateTime getSubmittedAt(){ return submittedAt; }
+    public LocalDateTime getReviewedAt() { return reviewedAt; }
 
     // ─── Setters (Encapsulation: controlled write access) ─────────────
     public void setId(Long id)                      { this.id = id; }
@@ -106,4 +149,10 @@ public class Prescription {
     public void setPrescriptionDate(LocalDate prescriptionDate) { this.prescriptionDate = prescriptionDate; }
     public void setFileName(String fileName)        { this.fileName = fileName; }
     public void setStatus(String status)            { this.status = status; }
+    public void setSubmittedByName(String submittedByName) { this.submittedByName = submittedByName; }
+    public void setSubmittedByEmail(String submittedByEmail) { this.submittedByEmail = submittedByEmail; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+    public void setReviewedBy(String reviewedBy) { this.reviewedBy = reviewedBy; }
+    public void setSubmittedAt(LocalDateTime submittedAt) { this.submittedAt = submittedAt; }
+    public void setReviewedAt(LocalDateTime reviewedAt) { this.reviewedAt = reviewedAt; }
 }
