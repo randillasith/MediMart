@@ -33,6 +33,8 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     // Search by status
     Page<Prescription> findByStatus(String status, Pageable pageable);
 
+    Page<Prescription> findBySubmittedByEmailIgnoreCase(String submittedByEmail, Pageable pageable);
+
     // Combined search: patient name OR doctor name OR status
     @Query("SELECT p FROM Prescription p WHERE " +
            "(:search IS NULL OR LOWER(p.patientName) LIKE LOWER(CONCAT('%', :search, '%')) " +
@@ -46,4 +48,6 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     // Count how many prescriptions exist (for stats)
     @Query("SELECT COUNT(p) FROM Prescription p WHERE p.status = 'ACTIVE'")
     long countActive();
+
+    long countByStatus(String status);
 }
