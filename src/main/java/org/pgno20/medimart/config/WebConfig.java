@@ -16,14 +16,14 @@ public class WebConfig implements WebMvcConfigurer {
         // Expose the local uploads folder as /uploads/**
         Path uploadDir = Paths.get("uploads");
         String uploadUri = uploadDir.toUri().toString();
-        
+
         if (!uploadUri.endsWith("/")) {
             uploadUri += "/";
         }
-        
+
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(uploadUri);
-                
+
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/images/");
     }
@@ -32,5 +32,6 @@ public class WebConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("forward:/index.html");
         registry.addViewController("/catalog").setViewName("forward:/catalog.html");
+        // registry.addViewController("/medicines").setViewName("forward:/medicines.html");
     }
 }
