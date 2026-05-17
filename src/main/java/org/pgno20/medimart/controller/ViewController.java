@@ -37,6 +37,12 @@ public class ViewController {
         return "suppliers";
     }
 
+    /** Admin: prescription verification queue */
+    @GetMapping("/prescriptions")
+    public String prescriptions() {
+        return "prescriptions";
+    }
+
     /** Public: logout redirect (session cleared via POST /api/auth/logout) */
     @GetMapping("/logout")
     public String logout() {
