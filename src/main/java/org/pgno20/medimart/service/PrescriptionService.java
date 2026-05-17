@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -51,13 +52,18 @@ public class PrescriptionService {
     @Transactional
     public Prescription create(String patientName, String doctorName, String medicineDetails,
                                String dosage, String instructions, LocalDate prescriptionDate,
-                               MultipartFile file) {
+                               MultipartFile file, String submittedByName, String submittedByEmail) {
+        validatePrescription(patientName, doctorName, medicineDetails, dosage, prescriptionDate, file);
+
         // 1. Build the Prescription object
         Prescription prescription = new Prescription(
                 patientName, doctorName, medicineDetails,
                 dosage, instructions, prescriptionDate
         );
-        prescription.setStatus("ACTIVE");
+        prescription.setStatus("PENDING");
+        prescription.setSubmittedByName(submittedByName);
+        prescription.setSubmittedByEmail(submittedByEmail);
+        prescription.setPrescriptionId("RX-TEMP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
 
         // 2. Save first to get the auto-generated database ID
         Prescription saved = prescriptionRepository.save(prescription);
@@ -87,6 +93,13 @@ public class PrescriptionService {
         return prescriptionRepository.searchPrescriptions(cleanSearch, cleanStatus, pageable);
     }
 
+    public Page<Prescription> findForMember(String email, Pageable pageable) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Member email is required");
+        }
+        return prescriptionRepository.findBySubmittedByEmailIgnoreCase(email, pageable);
+    }
+
     public Prescription getById(Long id) {
         return prescriptionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found with id: " + id));
@@ -109,7 +122,7 @@ public class PrescriptionService {
         existing.setDosage(dosage);
         existing.setInstructions(instructions);
         existing.setPrescriptionDate(prescriptionDate);
-        if (status != null && !status.isBlank()) {
+        if (status != null && !status.isBlank() && isAllowedStatus(status)) {
             existing.setStatus(status);
         }
 
@@ -122,6 +135,22 @@ public class PrescriptionService {
             existing.setFileName(filename);
         }
 
+        return prescriptionRepository.save(existing);
+    }
+
+    @Transactional
+    public Prescription review(Long id, String status, String rejectionReason, String reviewer) {
+        Prescription existing = getById(id);
+        if ("APPROVED".equalsIgnoreCase(status)) {
+            existing.approve(reviewer);
+        } else if ("REJECTED".equalsIgnoreCase(status)) {
+            if (rejectionReason == null || rejectionReason.isBlank()) {
+                throw new IllegalArgumentException("Rejection reason is required");
+            }
+            existing.reject(rejectionReason.trim(), reviewer);
+        } else {
+            throw new IllegalArgumentException("Status must be APPROVED or REJECTED");
+        }
         return prescriptionRepository.save(existing);
     }
 
@@ -152,6 +181,7 @@ public class PrescriptionService {
      */
     private String saveFile(MultipartFile file, String prescriptionId) {
         try {
+            validateFile(file);
             // Get file extension
             String originalName = file.getOriginalFilename();
             String extension = "";
@@ -171,7 +201,7 @@ public class PrescriptionService {
 
             // Write file bytes to disk
             Path destination = uploadDir.resolve(filename);
-            Files.copy(file.getInputStream(), destination);
+            Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
 
             return filename;
 
@@ -198,10 +228,57 @@ public class PrescriptionService {
     // ─── Stats ────────────────────────────────────────────────────────
 
     public long countActive() {
-        return prescriptionRepository.countActive();
+        return prescriptionRepository.countByStatus("APPROVED");
     }
 
     public long countTotal() {
         return prescriptionRepository.count();
+    }
+
+    public long countPending() {
+        return prescriptionRepository.countByStatus("PENDING");
+    }
+
+    public long countRejected() {
+        return prescriptionRepository.countByStatus("REJECTED");
+    }
+
+    private void validatePrescription(String patientName, String doctorName, String medicineDetails,
+                                      String dosage, LocalDate prescriptionDate, MultipartFile file) {
+        if (isBlank(patientName) || isBlank(doctorName) || isBlank(medicineDetails) || isBlank(dosage)) {
+            throw new IllegalArgumentException("Patient, doctor, medicine and dosage are required");
+        }
+        if (prescriptionDate == null) {
+            throw new IllegalArgumentException("Prescription date is required");
+        }
+        if (prescriptionDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Prescription date cannot be in the future");
+        }
+        if (prescriptionDate.isBefore(LocalDate.now().minusMonths(6))) {
+            throw new IllegalArgumentException("Prescription must be issued within the last 6 months");
+        }
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Prescription file is required");
+        }
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file.getSize() > 10 * 1024 * 1024) {
+            throw new IllegalArgumentException("Prescription file must be 10MB or smaller");
+        }
+        String contentType = file.getContentType();
+        if (!("application/pdf".equals(contentType)
+                || "image/jpeg".equals(contentType)
+                || "image/png".equals(contentType))) {
+            throw new IllegalArgumentException("Only PDF, JPEG and PNG prescription files are allowed");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private boolean isAllowedStatus(String status) {
+        return "PENDING".equals(status) || "APPROVED".equals(status) || "REJECTED".equals(status);
     }
 }
