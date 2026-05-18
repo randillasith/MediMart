@@ -1,455 +1,519 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>MediMart | Clinical Sophistication &amp; Care</title>
-    <link rel="icon" href="/logo.png" type="image/png"/>
+    <link rel="icon" href="/logo.png" type="image/png" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
     <script id="tailwind-config">
         tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              "colors": {
-                      "inverse-on-surface": "#eff0f8",
-                      "surface-dim": "#d8dae2",
-                      "surface-container-low": "#f2f3fb",
-                      "inverse-primary": "#a9c7ff",
-                      "primary": "#00478d",
-                      "on-tertiary-fixed": "#341100",
-                      "tertiary": "#793100",
-                      "on-surface": "#191c21",
-                      "primary-fixed": "#d6e3ff",
-                      "tertiary-fixed-dim": "#ffb691",
-                      "on-primary-fixed-variant": "#00468c",
-                      "background": "#f9f9ff",
-                      "tertiary-container": "#9f4300",
-                      "on-background": "#191c21",
-                      "outline": "#727783",
-                      "error-container": "#ffdad6",
-                      "surface-container-high": "#e7e8f0",
-                      "primary-container": "#005eb8",
-                      "on-primary-fixed": "#001b3d",
-                      "surface-container-highest": "#e1e2ea",
-                      "on-tertiary-fixed-variant": "#793100",
-                      "on-error": "#ffffff",
-                      "secondary-fixed-dim": "#5dd8e2",
-                      "surface-variant": "#e1e2ea",
-                      "on-error-container": "#93000a",
-                      "surface-container": "#ecedf6",
-                      "secondary-fixed": "#7df4ff",
-                      "primary-fixed-dim": "#a9c7ff",
-                      "on-surface-variant": "#424752",
-                      "on-primary": "#ffffff",
-                      "on-secondary-container": "#006e75",
-                      "tertiary-fixed": "#ffdbcb",
-                      "on-secondary-fixed-variant": "#004f54",
-                      "surface-container-lowest": "#ffffff",
-                      "surface-bright": "#f9f9ff",
-                      "on-secondary": "#ffffff",
-                      "on-tertiary": "#ffffff",
-                      "secondary": "#006970",
-                      "outline-variant": "#c2c6d4",
-                      "on-secondary-fixed": "#002022",
-                      "inverse-surface": "#2e3037",
-                      "surface": "#f9f9ff",
-                      "on-tertiary-container": "#ffcfb9",
-                      "error": "#ba1a1a",
-                      "secondary-container": "#7af1fc",
-                      "surface-tint": "#005db6",
-                      "on-primary-container": "#c8daff"
-              },
-              "borderRadius": {
-                      "DEFAULT": "0.125rem",
-                      "lg": "0.25rem",
-                      "xl": "0.5rem",
-                      "full": "0.75rem"
-              },
-              "fontFamily": {
-                      "headline": ["Manrope"],
-                      "display": ["Manrope"],
-                      "body": ["Inter"],
-                      "label": ["Inter"]
-              }
-            },
-          }
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#eff0f8",
+                        "surface-dim": "#d8dae2",
+                        "surface-container-low": "#f2f3fb",
+                        "inverse-primary": "#a9c7ff",
+                        "primary": "#00478d",
+                        "on-tertiary-fixed": "#341100",
+                        "tertiary": "#793100",
+                        "on-surface": "#191c21",
+                        "primary-fixed": "#d6e3ff",
+                        "tertiary-fixed-dim": "#ffb691",
+                        "on-primary-fixed-variant": "#00468c",
+                        "background": "#f9f9ff",
+                        "tertiary-container": "#9f4300",
+                        "on-background": "#191c21",
+                        "outline": "#727783",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e7e8f0",
+                        "primary-container": "#005eb8",
+                        "on-primary-fixed": "#001b3d",
+                        "surface-container-highest": "#e1e2ea",
+                        "on-tertiary-fixed-variant": "#793100",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#5dd8e2",
+                        "surface-variant": "#e1e2ea",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#ecedf6",
+                        "secondary-fixed": "#7df4ff",
+                        "primary-fixed-dim": "#a9c7ff",
+                        "on-surface-variant": "#424752",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#006e75",
+                        "tertiary-fixed": "#ffdbcb",
+                        "on-secondary-fixed-variant": "#004f54",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#006970",
+                        "outline-variant": "#c2c6d4",
+                        "on-secondary-fixed": "#002022",
+                        "inverse-surface": "#2e3037",
+                        "surface": "#f9f9ff",
+                        "on-tertiary-container": "#ffcfb9",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#7af1fc",
+                        "surface-tint": "#005db6",
+                        "on-primary-container": "#c8daff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
         }
     </script>
     <script>
-    // Clears the browser history so they can't click "Back" into the dashboard
-    window.onload = function() {
-        if (window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.href);
+        // Clears the browser history so they can't click "Back" into the dashboard
+        window.onload = function () {
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
         }
-    }
-</script>
-    
+    </script>
+
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        body { font-family: 'Inter', sans-serif; background-color: #f9f9ff; }
-        h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9ff;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Manrope', sans-serif;
+        }
     </style>
 </head>
+
 <body class="bg-background text-on-surface overflow-hidden">
-<!-- Global Preloader -->
-<div id="medimart-preloader" class="fixed inset-0 z-[9999] bg-[#f9f9ff] flex flex-col items-center justify-center transition-opacity duration-700 ease-in-out overflow-hidden">
-    <!-- Lightweight Background Decorative Orbs -->
-    <div class="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[#00478D]/5 rounded-full blur-[100px] pointer-events-none"></div>
-    <div class="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#006970]/5 rounded-full blur-[100px] pointer-events-none"></div>
-    
-    <div class="relative flex flex-col items-center z-10 bg-[#f2f3fb] p-12 rounded-[2rem] shadow-sm border border-white">
-        <!-- Logo -->
-        <div class="bg-white p-4 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-2">
-            <img src="/logo.png" alt="MediMart Logo" class="h-16 w-auto relative z-10 animate-pulse"/>
+    <!-- Global Preloader -->
+    <div id="medimart-preloader"
+        class="fixed inset-0 z-[9999] bg-[#f9f9ff] flex flex-col items-center justify-center transition-opacity duration-700 ease-in-out overflow-hidden">
+        <!-- Lightweight Background Decorative Orbs -->
+        <div
+            class="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[#00478D]/5 rounded-full blur-[100px] pointer-events-none">
         </div>
-        
-        <!-- Brand Name -->
-        <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-[#00478D] font-headline">MediMart</h1>
-        <p class="text-slate-500 font-medium text-sm mt-1">Your Health, Digitally Refined.</p>
-        
-        <!-- Loading Text with Spinner -->
-        <div class="mt-8 flex flex-col items-center gap-3">
-            <svg class="animate-spin h-6 w-6 text-[#005EB8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span class="text-sm tracking-widest uppercase text-slate-500 font-bold bg-gradient-to-r from-[#00478D] to-[#006970] bg-clip-text text-transparent">
-                Preparing Your Catalog...
-            </span>
+        <div
+            class="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#006970]/5 rounded-full blur-[100px] pointer-events-none">
+        </div>
+
+        <div
+            class="relative flex flex-col items-center z-10 bg-[#f2f3fb] p-12 rounded-[2rem] shadow-sm border border-white">
+            <!-- Logo -->
+            <div class="bg-white p-4 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-2">
+                <img src="/logo.png" alt="MediMart Logo" class="h-16 w-auto relative z-10 animate-pulse" />
+            </div>
+
+            <!-- Brand Name -->
+            <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-[#00478D] font-headline">MediMart</h1>
+            <p class="text-slate-500 font-medium text-sm mt-1">Your Health, Digitally Refined.</p>
+
+            <!-- Loading Text with Spinner -->
+            <div class="mt-8 flex flex-col items-center gap-3">
+                <svg class="animate-spin h-6 w-6 text-[#005EB8]" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                <span
+                    class="text-sm tracking-widest uppercase text-slate-500 font-bold bg-gradient-to-r from-[#00478D] to-[#006970] bg-clip-text text-transparent">
+                    Preparing Your Catalog...
+                </span>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- TopNavBar -->
-<header class="bg-[#F2F3FB] dark:bg-slate-900 sticky w-full top-0 z-50 shadow-sm">
-    <nav class="flex justify-between items-center w-full px-8 py-4 max-w-full mx-auto">
-        <div class="flex items-center gap-8">
-            <a href="/" class="flex items-center gap-2">
-                <img src="/logo.png" alt="MediMart Logo" class="h-8 w-auto">
-                <span class="text-2xl font-bold tracking-tighter text-[#00478D] dark:text-blue-400 hidden sm:block">MediMart</span>
-            </a>
-            <div class="hidden md:flex gap-6">
-                <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="/">Home</a>
-                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/catalog">Catalog</a>
-                <a id="navDashboardLink" class="hidden text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Portal Login</a>
-                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="#">Help</a>
-            </div>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="relative hidden sm:block">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-                <input onkeypress="if(event.key === 'Enter') { localStorage.setItem('searchQuery', this.value.trim()); window.location.href='/catalog'; }" class="bg-surface-container-low border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all w-64" placeholder="Search catalog..." type="text"/>
-            </div>
-            <button class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
-                <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
-            </button>
-            <button id="userAccountBtn" onclick="window.location.href='/login.html'" class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
-                <span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
-            </button>
-        </div>
-    </nav>
-</header>
-<main class="pt-20 pb-24">
-    <!-- Hero Section -->
-    <section class="bg-surface-container-low py-20 px-8">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div class="space-y-8">
-                <h1 class="text-5xl lg:text-7xl font-bold tracking-tight text-primary leading-[1.1]">
-                    Healthcare <br/><span class="text-secondary">Refined.</span>
-                </h1>
-                <p class="text-lg text-on-surface-variant max-w-lg font-body">
-                    Experience a new standard in medical commerce. Expert-curated products, clinical precision, and pharmacy-grade care delivered directly to your door.
-                </p>
-                <form id="heroSearchForm" class="relative max-w-xl group" onsubmit="return doSearch()">
-                    <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-outline">
-                        <span class="material-symbols-outlined">search</span>
-                    </div>
-                    <input id="heroSearchInput" class="w-full pl-12 pr-6 py-5 bg-surface-container-lowest border-none rounded-full text-on-surface focus:ring-2 focus:ring-primary-container shadow-sm transition-all" placeholder="Search for medications, health products, or brands" type="text"/>
-                    <button type="submit" class="absolute right-2 top-2 bottom-2 px-6 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-full font-semibold text-sm hover:opacity-90 transition-opacity">
-                        Search
-                    </button>
-                </form>
-                <div class="flex items-center gap-6 pt-4">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
-                        <span class="text-sm font-semibold text-on-surface-variant uppercase tracking-wider">Verified Pharmacists</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
-                        <span class="text-sm font-semibold text-on-surface-variant uppercase tracking-wider">Secure Delivery</span>
-                    </div>
+    <!-- TopNavBar -->
+    <header class="bg-[#F2F3FB] dark:bg-slate-900 sticky w-full top-0 z-50 shadow-sm">
+        <nav class="flex justify-between items-center w-full px-8 py-4 max-w-full mx-auto">
+            <div class="flex items-center gap-8">
+                <a href="/" class="flex items-center gap-2">
+                    <img src="/logo.png" alt="MediMart Logo" class="h-8 w-auto">
+                    <span
+                        class="text-2xl font-bold tracking-tighter text-[#00478D] dark:text-blue-400 hidden sm:block">MediMart</span>
+                </a>
+                <div class="hidden md:flex gap-6">
+                    <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200"
+                        href="/">Home</a>
+                    <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors"
+                        href="/catalog">Catalog</a>
+                    <a id="navDashboardLink"
+                        class="hidden text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors"
+                        href="/medicines">Portal Login</a>
+                    <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors"
+                        href="#">Help</a>
                 </div>
             </div>
-            <div class="relative h-[500px] rounded-full overflow-hidden shadow-2xl">
-                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjZZTO1bgNCkuV7mUV0kQxCGAzDgLqxjAOc_KyIFYj_i-TQR03QORFC9TKtlt0lOyGHmR5GA52hMoqI-h407glMFzmjvwCIr4soh-P0iATHvsnLO6C1JaY2xIU1Nwjg--T4NK4kBIEDUF3XjKdUZXZO_2Vb31qHeb8o0VXkaajreRP72LLGazlNjgQIm2s9sxJ51TfG5Kjxeq7aHwomMFZ9bz6n-9P_ASSb9FvSOu43V9J8GH9pI7QzZq8PnP4jmCGdGYqDMlO7p8" />
-                <div class="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent"></div>
+            <div class="flex items-center gap-4">
+                <div class="relative hidden sm:block">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                    <input
+                        onkeypress="if(event.key === 'Enter') { localStorage.setItem('searchQuery', this.value.trim()); window.location.href='/catalog'; }"
+                        class="bg-surface-container-low border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all w-64"
+                        placeholder="Search catalog..." type="text" />
+                </div>
+                <button class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
+                    <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                </button>
+                <button id="userAccountBtn" onclick="window.location.href='/login.html'"
+                    class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
+                    <span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+                </button>
             </div>
-        </div>
-    </section>
+        </nav>
+    </header>
+    <main class="pt-20 pb-24">
+        <!-- Hero Section -->
+        <section class="bg-surface-container-low py-20 px-8">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <h1 class="text-5xl lg:text-7xl font-bold tracking-tight text-primary leading-[1.1]">
+                        Healthcare <br /><span class="text-secondary">Refined.</span>
+                    </h1>
+                    <p class="text-lg text-on-surface-variant max-w-lg font-body">
+                        Experience a new standard in medical commerce. Expert-curated products, clinical precision, and
+                        pharmacy-grade care delivered directly to your door.
+                    </p>
+                    <form id="heroSearchForm" class="relative max-w-xl group" onsubmit="return doSearch()">
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-outline">
+                            <span class="material-symbols-outlined">search</span>
+                        </div>
+                        <input id="heroSearchInput"
+                            class="w-full pl-12 pr-6 py-5 bg-surface-container-lowest border-none rounded-full text-on-surface focus:ring-2 focus:ring-primary-container shadow-sm transition-all"
+                            placeholder="Search for medications, health products, or brands" type="text" />
+                        <button type="submit"
+                            class="absolute right-2 top-2 bottom-2 px-6 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-full font-semibold text-sm hover:opacity-90 transition-opacity">
+                            Search
+                        </button>
+                    </form>
+                    <div class="flex items-center gap-6 pt-4">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary"
+                                style="font-variation-settings: 'FILL' 1;">verified_user</span>
+                            <span
+                                class="text-sm font-semibold text-on-surface-variant uppercase tracking-wider">Verified
+                                Pharmacists</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary"
+                                style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+                            <span class="text-sm font-semibold text-on-surface-variant uppercase tracking-wider">Secure
+                                Delivery</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative h-[500px] rounded-full overflow-hidden shadow-2xl">
+                    <img class="w-full h-full object-cover" src="/images/screen.png" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent"></div>
+                </div>
+            </div>
+        </section>
 
-    <!-- Health Category Highlights -->
-    <section class="max-w-7xl mx-auto px-8 py-24">
-        <div class="mb-16">
-            <h2 class="text-3xl font-bold tracking-tight text-primary">Specialized Care Categories</h2>
-            <p class="text-on-surface-variant mt-2">Targeted solutions for your health and wellness journey.</p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6 h-[600px]">
-            <!-- Card 1: Pain Relief (Large) -->
-            <div class="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
-                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="/images/Tablet_Capsule_Pill.png" />
-                <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                <div class="absolute bottom-10 left-10 text-white">
-                    <span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block">Essential</span>
-                    <h3 class="text-3xl font-bold">Pain Relief</h3>
-                    <p class="text-white/80 mt-2">Manage discomfort with clinical precision.</p>
+        <!-- Health Category Highlights -->
+        <section class="max-w-7xl mx-auto px-8 py-24">
+            <div class="mb-16">
+                <h2 class="text-3xl font-bold tracking-tight text-primary">Specialized Care Categories</h2>
+                <p class="text-on-surface-variant mt-2">Targeted solutions for your health and wellness journey.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6 h-[600px]">
+                <!-- Card 1: Pain Relief (Large) -->
+                <div
+                    class="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        src="/images/pain.png" />
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
+                    <div class="absolute bottom-10 left-10 text-white">
+                        <span
+                            class="bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block">Essential</span>
+                        <h3 class="text-3xl font-bold">Pain Relief</h3>
+                        <p class="text-white/80 mt-2">Manage discomfort with clinical precision.</p>
+                    </div>
+                </div>
+                <!-- Card 2: Skincare -->
+                <div class="relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        src="/images/Skincare.png" />
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors"></div>
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <h3 class="text-xl font-bold">Skincare</h3>
+                    </div>
+                </div>
+                <!-- Card 3: Cold & Flu -->
+                <div class="relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        src="/images/ColdFlu.png" />
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors"></div>
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <h3 class="text-xl font-bold">Cold &amp; Flu</h3>
+                    </div>
+                </div>
+                <!-- Card 4: Heart Health -->
+                <div class="relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        src="/images/HeartHealth.png" />
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors"></div>
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <h3 class="text-xl font-bold">Heart Health</h3>
+                    </div>
+                </div>
+                <!-- Card 5: Vitamins -->
+                <div class="relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        src="/images/vit.png" />
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors"></div>
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <h3 class="text-xl font-bold">Vitamins</h3>
+                    </div>
                 </div>
             </div>
-            <!-- Card 2: Skincare -->
-            <div class="relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
-                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="/images/cream.png" />
-                <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors"></div>
-                <div class="absolute bottom-6 left-6 text-white">
-                    <h3 class="text-xl font-bold">Skincare</h3>
-                </div>
-            </div>
-            <!-- Card 3: Cold & Flu -->
-            <div class="relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
-                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="/images/Syrup_Liquid.png" />
-                <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors"></div>
-                <div class="absolute bottom-6 left-6 text-white">
-                    <h3 class="text-xl font-bold">Cold &amp; Flu</h3>
-                </div>
-            </div>
-            <!-- Card 4: Heart Health -->
-            <div class="relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
-                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="/images/Tablet_Capsule_Pill.png" />
-                <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors"></div>
-                <div class="absolute bottom-6 left-6 text-white">
-                    <h3 class="text-xl font-bold">Heart Health</h3>
-                </div>
-            </div>
-            <!-- Card 5: Vitamins -->
-            <div class="relative group overflow-hidden rounded-full cursor-pointer bg-surface-container">
-                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="/images/other.png" />
-                <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors"></div>
-                <div class="absolute bottom-6 left-6 text-white">
-                    <h3 class="text-xl font-bold">Vitamins</h3>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Trending in Health Section -->
-    <section class="bg-surface py-24">
-        <div class="max-w-7xl mx-auto px-8">
+        <!-- Trending in Health Section -->
+        <section class="bg-surface py-24">
+            <div class="max-w-7xl mx-auto px-8">
+                <div class="flex justify-between items-end mb-12">
+                    <div>
+                        <h2 class="text-3xl font-bold tracking-tight text-primary">Trending in Health</h2>
+                        <p class="text-on-surface-variant mt-2">The most trusted OTC choices by our medical community.
+                        </p>
+                    </div>
+                    <a class="text-secondary font-bold hover:underline flex items-center gap-2" href="/catalog">
+                        View All Catalog <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </a>
+                </div>
+                <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Products will be injected here via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- New Arrivals Section -->
+        <section class="max-w-7xl mx-auto px-8 py-24">
             <div class="flex justify-between items-end mb-12">
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight text-primary">Trending in Health</h2>
-                    <p class="text-on-surface-variant mt-2">The most trusted OTC choices by our medical community.</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-primary">New Arrivals</h2>
+                    <p class="text-on-surface-variant mt-2">Recently added to our pharmacy catalog.</p>
                 </div>
                 <a class="text-secondary font-bold hover:underline flex items-center gap-2" href="/catalog">
-                    View All Catalog <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    Browse All <span class="material-symbols-outlined text-sm">arrow_forward</span>
                 </a>
             </div>
-            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Products will be injected here via JS -->
-            </div>
-        </div>
-    </section>
+            <div id="newArrivalsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+        </section>
 
-    <!-- New Arrivals Section -->
-    <section class="max-w-7xl mx-auto px-8 py-24">
-        <div class="flex justify-between items-end mb-12">
-            <div>
-                <h2 class="text-3xl font-bold tracking-tight text-primary">New Arrivals</h2>
-                <p class="text-on-surface-variant mt-2">Recently added to our pharmacy catalog.</p>
-            </div>
-            <a class="text-secondary font-bold hover:underline flex items-center gap-2" href="/catalog">
-                Browse All <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </a>
-        </div>
-        <div id="newArrivalsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
-    </section>
-
-    <!-- Trust Section -->
-    <section class="max-w-7xl mx-auto px-8 py-24">
-        <div class="bg-primary text-on-primary rounded-[2rem] p-12 flex flex-col md:flex-row items-center gap-12 overflow-hidden relative">
-            <div class="absolute -right-20 -top-20 w-80 h-80 bg-primary-container rounded-full opacity-20 blur-3xl"></div>
-            <div class="md:w-1/2 relative z-10">
-                <h2 class="text-4xl font-bold tracking-tight mb-6">Expertise you can trust. <br/>Delivery you can rely on.</h2>
-                <p class="text-primary-fixed-dim text-lg mb-8 max-w-md">Our network of licensed pharmacists reviews every prescription to ensure your safety and well-being.</p>
-                <div class="flex gap-4">
-                    <button class="bg-secondary-container text-on-secondary-container px-8 py-4 rounded-full font-bold hover:opacity-90 transition-opacity">Speak to a Pharmacist</button>
-                    <button class="bg-transparent border border-primary-container px-8 py-4 rounded-full font-bold text-white hover:bg-white/10 transition-colors">Learn More</button>
+        <!-- Trust Section -->
+        <section class="max-w-7xl mx-auto px-8 py-24">
+            <div
+                class="bg-primary text-on-primary rounded-[2rem] p-12 flex flex-col md:flex-row items-center gap-12 overflow-hidden relative">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-primary-container rounded-full opacity-20 blur-3xl">
                 </div>
-            </div>
-            <div class="md:w-1/2 grid grid-cols-2 gap-4 relative z-10">
-                <div class="bg-white/10 backdrop-blur-md p-8 rounded-full text-center">
-                    <span class="material-symbols-outlined text-4xl mb-4 text-secondary-container" style="font-variation-settings: 'FILL' 1;">health_and_safety</span>
-                    <h4 class="font-bold">100% Genuine</h4>
-                    <p class="text-xs text-white/60 mt-1">Directly sourced</p>
+                <div class="md:w-1/2 relative z-10">
+                    <h2 class="text-4xl font-bold tracking-tight mb-6">Expertise you can trust. <br />Delivery you can
+                        rely on.</h2>
+                    <p class="text-primary-fixed-dim text-lg mb-8 max-w-md">Our network of licensed pharmacists reviews
+                        every prescription to ensure your safety and well-being.</p>
+                    <div class="flex gap-4">
+                        <button
+                            class="bg-secondary-container text-on-secondary-container px-8 py-4 rounded-full font-bold hover:opacity-90 transition-opacity">Speak
+                            to a Pharmacist</button>
+                        <button
+                            class="bg-transparent border border-primary-container px-8 py-4 rounded-full font-bold text-white hover:bg-white/10 transition-colors">Learn
+                            More</button>
+                    </div>
                 </div>
-                <div class="bg-white/10 backdrop-blur-md p-8 rounded-full text-center">
-                    <span class="material-symbols-outlined text-4xl mb-4 text-secondary-container" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
-                    <h4 class="font-bold">Secured Path</h4>
-                    <p class="text-xs text-white/60 mt-1">Encrypted orders</p>
-                </div>
-                <div class="bg-white/10 backdrop-blur-md p-8 rounded-full text-center">
-                    <span class="material-symbols-outlined text-4xl mb-4 text-secondary-container" style="font-variation-settings: 'FILL' 1;">airport_shuttle</span>
-                    <h4 class="font-bold">24hr Shipping</h4>
-                    <p class="text-xs text-white/60 mt-1">Nationwide reach</p>
-                </div>
-                <div class="bg-white/10 backdrop-blur-md p-8 rounded-full text-center">
-                    <span class="material-symbols-outlined text-4xl mb-4 text-secondary-container" style="font-variation-settings: 'FILL' 1;">groups</span>
-                    <h4 class="font-bold">Expert Support</h4>
-                    <p class="text-xs text-white/60 mt-1">Always available</p>
+                <div class="md:w-1/2 grid grid-cols-2 gap-4 relative z-10">
+                    <div class="bg-white/10 backdrop-blur-md p-8 rounded-full text-center">
+                        <span class="material-symbols-outlined text-4xl mb-4 text-secondary-container"
+                            style="font-variation-settings: 'FILL' 1;">health_and_safety</span>
+                        <h4 class="font-bold">100% Genuine</h4>
+                        <p class="text-xs text-white/60 mt-1">Directly sourced</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md p-8 rounded-full text-center">
+                        <span class="material-symbols-outlined text-4xl mb-4 text-secondary-container"
+                            style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+                        <h4 class="font-bold">Secured Path</h4>
+                        <p class="text-xs text-white/60 mt-1">Encrypted orders</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md p-8 rounded-full text-center">
+                        <span class="material-symbols-outlined text-4xl mb-4 text-secondary-container"
+                            style="font-variation-settings: 'FILL' 1;">airport_shuttle</span>
+                        <h4 class="font-bold">24hr Shipping</h4>
+                        <p class="text-xs text-white/60 mt-1">Nationwide reach</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md p-8 rounded-full text-center">
+                        <span class="material-symbols-outlined text-4xl mb-4 text-secondary-container"
+                            style="font-variation-settings: 'FILL' 1;">groups</span>
+                        <h4 class="font-bold">Expert Support</h4>
+                        <p class="text-xs text-white/60 mt-1">Always available</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-</main>
+        </section>
+    </main>
 
-<script>
-    const IMAGES = [
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDESUdxMuNg_OrWhTrUE1qyCxVe_FReLWME7yHfRSEz2m1adqP5HfKfyqs6qpfm0K90NElyvzutwIDnfD0jBDdla417T_D0iW-vqSB8YLst-5tEImh5AkK4cFF7mWL3k9BFBkP9b-o0asb6ynXOU0eWaaPb3D2vNNWxTc290HCx0PeH844dzNtlUrxaK5_YgAk_1PrEZBmEiyHfJWF-M3GeyGNvMFEbg63IL_ae2rDalGRjXhFT9r74Z9KiBZfNRPL_IfDJ1bWHUOw",
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBl04ngxRQRqN1_5-ziME5I2nRq4ADEqfKC51bS0YM5V6rR3WPKR1wAoRva2IdZSzlAUvUQWlD5G5nN2Q8mZ6xbImdjsHHSIn3FzpSkakwPXoRvqxWU902M5-3ozTeEsVOexNSbz3Wv07JnqDScLMAV85S0XjjUqjU1Hnz-7LBF_R3WtyJmAkHHMMTUQHIoYTU0dRIIF0MhWyxnlPBJ_ZVClJZgEC6s0cGboePd3eR7ZnP6wgmOunFvlREFArypVOko0Ed_Cg8u6l0",
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDgpH3SapWDUh53sG0dg3FfW4Zy2z3ZHxw1HZGeWFPXRgvofZZ6OwU05DJAiD4P2wj8cLe-GSZnzZ6zvHsKIHsE6DdNPZvAke1pT1XnQ7D2tmToKlHmRUmZuz8wfcAZ_WiW-KMVDAwZ2x5l4KwfcXFsTuqvHLPbXhb4c2TlFZFnuKDalu-s_yz1bCbABuiuLjpZn3nYr4ANJW-JTj5Qyb36eYWGmJMfoe1zziMndqsHFh3vkZuLwP4QI_8wSDC20qhYLrBLCVT9WsA",
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBIcIFhIM6LdinKm5AMqdAIfWpkG-QhJXZ1Ei26nwrQPQWu8ro2DNqxck5kxeh01fXICMRroGvuz5GntUVh-zUQnaSMoVl4-FdH8_Sf6qon414rBIqg9aklQWOqhhhb1q4py-RJ63jYSQU2ie0C3uRN6ZLSH-jFjnto9IyEe3AEZ9fIsenj757rBHmv3srfMmM6rfftkjiSxEksL9JFik4VQ-HTgFZYl8EP05kXM_sMDQuYhIZexYlgh_sqgxWScsRlmzS-WAvm-5U"
-    ];
+    <script>
+        const IMAGES = [
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuDESUdxMuNg_OrWhTrUE1qyCxVe_FReLWME7yHfRSEz2m1adqP5HfKfyqs6qpfm0K90NElyvzutwIDnfD0jBDdla417T_D0iW-vqSB8YLst-5tEImh5AkK4cFF7mWL3k9BFBkP9b-o0asb6ynXOU0eWaaPb3D2vNNWxTc290HCx0PeH844dzNtlUrxaK5_YgAk_1PrEZBmEiyHfJWF-M3GeyGNvMFEbg63IL_ae2rDalGRjXhFT9r74Z9KiBZfNRPL_IfDJ1bWHUOw",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBl04ngxRQRqN1_5-ziME5I2nRq4ADEqfKC51bS0YM5V6rR3WPKR1wAoRva2IdZSzlAUvUQWlD5G5nN2Q8mZ6xbImdjsHHSIn3FzpSkakwPXoRvqxWU902M5-3ozTeEsVOexNSbz3Wv07JnqDScLMAV85S0XjjUqjU1Hnz-7LBF_R3WtyJmAkHHMMTUQHIoYTU0dRIIF0MhWyxnlPBJ_ZVClJZgEC6s0cGboePd3eR7ZnP6wgmOunFvlREFArypVOko0Ed_Cg8u6l0",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuDgpH3SapWDUh53sG0dg3FfW4Zy2z3ZHxw1HZGeWFPXRgvofZZ6OwU05DJAiD4P2wj8cLe-GSZnzZ6zvHsKIHsE6DdNPZvAke1pT1XnQ7D2tmToKlHmRUmZuz8wfcAZ_WiW-KMVDAwZ2x5l4KwfcXFsTuqvHLPbXhb4c2TlFZFnuKDalu-s_yz1bCbABuiuLjpZn3nYr4ANJW-JTj5Qyb36eYWGmJMfoe1zziMndqsHFh3vkZuLwP4QI_8wSDC20qhYLrBLCVT9WsA",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBIcIFhIM6LdinKm5AMqdAIfWpkG-QhJXZ1Ei26nwrQPQWu8ro2DNqxck5kxeh01fXICMRroGvuz5GntUVh-zUQnaSMoVl4-FdH8_Sf6qon414rBIqg9aklQWOqhhhb1q4py-RJ63jYSQU2ie0C3uRN6ZLSH-jFjnto9IyEe3AEZ9fIsenj757rBHmv3srfMmM6rfftkjiSxEksL9JFik4VQ-HTgFZYl8EP05kXM_sMDQuYhIZexYlgh_sqgxWScsRlmzS-WAvm-5U"
+        ];
 
-    document.addEventListener('DOMContentLoaded', () => {
-        Promise.all([
-            loadStorefrontProducts(),
-            loadNewArrivals(),
-            checkAuthStatus()
-        ]).then(() => {
-            // Once products are loaded, wait for fonts and window to be fully ready
+        document.addEventListener('DOMContentLoaded', () => {
             Promise.all([
-                document.fonts.ready,
-                new Promise(resolve => {
-                    if (document.readyState === 'complete') {
-                        resolve();
-                    } else {
-                        window.addEventListener('load', resolve);
-                    }
-                })
+                loadStorefrontProducts(),
+                loadNewArrivals(),
+                checkAuthStatus()
             ]).then(() => {
-                removePreloader();
-            });
-        }).catch((err) => {
-            console.error("Failed to load products:", err);
-            removePreloader(); // remove it anyway so the site isn't blocked
-        });
-    });
-
-    function removePreloader() {
-        // Enforce a minimum display time for a smooth premium feel
-        setTimeout(() => {
-            const preloader = document.getElementById('medimart-preloader');
-            if (preloader) {
-                preloader.style.opacity = '0';
-                setTimeout(() => {
-                    preloader.style.display = 'none';
-                    document.body.classList.remove('overflow-hidden');
-                }, 700); // Wait for the opacity transition to finish
-            }
-        }, 500); 
-    }
-
-    function doSearch() {
-        const q = document.getElementById('heroSearchInput').value.trim();
-        if (q) {
-            localStorage.setItem('searchQuery', q);
-            window.location.href = '/catalog';
-        }
-        return false;
-    }
-
-    function renderCard(p, index, tag) {
-        const title = p.dosage ? `${p.name} ${p.dosage}` : p.name;
-        const price = p.minPrice ? `Rs. ${Number(p.minPrice).toFixed(2)}` : 'Rs. 0.00';
-        
-        let img = IMAGES[index % IMAGES.length];
-        if (p.imageUrl) {
-            img = `/uploads/${p.imageUrl}`;
-        } else if (p.formType) {
-            const formType = p.formType.toUpperCase();
-            if (formType === 'CREAM') img = '/images/cream.png';
-            else if (formType === 'SYRUP') img = '/images/Syrup_Liquid.png';
-            else if (formType === 'TABLET') img = '/images/Tablet_Capsule_Pill.png';
-            else img = '/images/other.png';
-        } else {
-            img = '/images/other.png';
-        }
-        
-        let stock = '';
-        if (p.totalStock === 0) stock = '<p class="text-xs text-error font-bold mb-4">Out of Stock</p>';
-        else if (p.totalStock < 50) stock = `<p class="text-xs text-orange-500 font-bold mb-4">Only ${p.totalStock} left</p>`;
-        else stock = '<p class="text-xs text-secondary font-bold mb-4">In Stock</p>';
-        let tagHtml = tag ? `<div class="absolute top-6 left-6"><span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">${tag}</span></div>` : '';
-        const card = document.createElement('div');
-        card.className = 'group cursor-pointer';
-        card.onclick = () => { localStorage.setItem('searchQuery', p.name); window.location.href = '/catalog'; };
-        card.innerHTML = `<div class="aspect-square bg-surface-container-lowest rounded-3xl overflow-hidden mb-6 transition-shadow group-hover:shadow-xl p-8 relative">${tagHtml}<img class="w-full h-full object-contain" src="${img}"/></div><h4 class="text-lg font-bold text-on-surface mb-1">${title}</h4><p class="text-on-surface-variant text-sm">${p.brand || p.categoryName || 'Generic'}</p>${stock}<div class="flex items-center justify-between"><span class="text-xl font-bold text-primary">${price}</span><button ${p.totalStock===0?'disabled':''} class="bg-surface-container-high text-on-primary-fixed-variant px-4 py-2 rounded-full font-bold text-sm hover:bg-secondary hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">Add to Cart</button></div>`;
-        return card;
-    }
-
-    async function loadStorefrontProducts() {
-        try {
-            const res = await fetch('/api/medicines/storefront?size=4');
-            const data = await res.json();
-            const products = data.content || [];
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = '';
-            const tags = ['Top Seller', '', 'Popular', ''];
-            products.forEach((p, i) => grid.appendChild(renderCard(p, i, tags[i])));
-        } catch(e) { console.error(e); }
-    }
-
-    async function checkAuthStatus() {
-        try {
-            const res = await fetch('/api/auth/me');
-            const data = await res.json();
-            if (data.loggedIn) {
-                const btn = document.getElementById('userAccountBtn');
-                if (btn) btn.onclick = () => window.location.href = '/profile.html';
-                
-                const navLink = document.getElementById('navDashboardLink');
-                if (navLink) {
-                    if (data.user && data.user.roleName && data.user.roleName !== 'ROLE_USER') {
-                        navLink.classList.remove('hidden');
-                        if (data.user.roleName === 'ROLE_ADMIN') {
-                            navLink.textContent = 'Admin Dashboard';
+                // Once products are loaded, wait for fonts and window to be fully ready
+                Promise.all([
+                    document.fonts.ready,
+                    new Promise(resolve => {
+                        if (document.readyState === 'complete') {
+                            resolve();
                         } else {
-                            navLink.textContent = 'Staff Dashboard';
+                            window.addEventListener('load', resolve);
                         }
-                    } else {
-                        navLink.classList.add('hidden');
+                    })
+                ]).then(() => {
+                    removePreloader();
+                });
+            }).catch((err) => {
+                console.error("Failed to load products:", err);
+                removePreloader(); // remove it anyway so the site isn't blocked
+            });
+        });
+
+        function removePreloader() {
+            // Enforce a minimum display time for a smooth premium feel
+            setTimeout(() => {
+                const preloader = document.getElementById('medimart-preloader');
+                if (preloader) {
+                    preloader.style.opacity = '0';
+                    setTimeout(() => {
+                        preloader.style.display = 'none';
+                        document.body.classList.remove('overflow-hidden');
+                    }, 700); // Wait for the opacity transition to finish
+                }
+            }, 500);
+        }
+
+        function doSearch() {
+            const q = document.getElementById('heroSearchInput').value.trim();
+            if (q) {
+                localStorage.setItem('searchQuery', q);
+                window.location.href = '/catalog';
+            }
+            return false;
+        }
+
+        function renderCard(p, index, tag) {
+            const title = p.dosage ? `${p.name} ${p.dosage}` : p.name;
+            const price = p.minPrice ? `Rs. ${Number(p.minPrice).toFixed(2)}` : 'Rs. 0.00';
+
+            let img = IMAGES[index % IMAGES.length];
+            if (p.imageUrl) {
+                img = `/uploads/${p.imageUrl}`;
+            } else if (p.formType && p.formType.toUpperCase() !== 'OTHER') {
+                const formType = p.formType.toUpperCase();
+                img = `/images/${formType}.png`;
+            } else {
+                img = '/images/logo.png';
+            }
+
+            let stock = '';
+            if (p.totalStock === 0) stock = '<p class="text-xs text-error font-bold mb-4">Out of Stock</p>';
+            else if (p.totalStock < 50) stock = `<p class="text-xs text-orange-500 font-bold mb-4">Only ${p.totalStock} left</p>`;
+            else stock = '<p class="text-xs text-secondary font-bold mb-4">In Stock</p>';
+            let tagHtml = tag ? `<div class="absolute top-6 left-6"><span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">${tag}</span></div>` : '';
+            const card = document.createElement('div');
+            card.className = 'group cursor-pointer';
+            card.onclick = () => { localStorage.setItem('searchQuery', p.name); window.location.href = '/catalog'; };
+            card.innerHTML = `<div class="aspect-square bg-surface-container-lowest rounded-3xl overflow-hidden mb-6 transition-shadow group-hover:shadow-xl p-8 relative">${tagHtml}<img class="w-full h-full object-contain" src="${img}" onerror="this.onerror=null; this.src='/images/logo.png';"/></div><h4 class="text-lg font-bold text-on-surface mb-1">${title}</h4><p class="text-on-surface-variant text-sm">${p.brand || p.categoryName || 'Generic'}</p>${stock}<div class="flex items-center justify-between"><span class="text-xl font-bold text-primary">${price}</span><button ${p.totalStock === 0 ? 'disabled' : ''} class="bg-surface-container-high text-on-primary-fixed-variant px-4 py-2 rounded-full font-bold text-sm hover:bg-secondary hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">Add to Cart</button></div>`;
+            return card;
+        }
+
+        async function loadStorefrontProducts() {
+            try {
+                const res = await fetch('/api/medicines/storefront?size=4');
+                const data = await res.json();
+                const products = data.content || [];
+                const grid = document.getElementById('productGrid');
+                grid.innerHTML = '';
+                const tags = ['Top Seller', '', 'Popular', ''];
+                products.forEach((p, i) => grid.appendChild(renderCard(p, i, tags[i])));
+            } catch (e) { console.error(e); }
+        }
+
+        async function checkAuthStatus() {
+            try {
+                const res = await fetch('/api/auth/me');
+                const data = await res.json();
+                if (data.loggedIn) {
+                    const btn = document.getElementById('userAccountBtn');
+                    if (btn) btn.onclick = () => window.location.href = '/profile.html';
+
+                    const navLink = document.getElementById('navDashboardLink');
+                    if (navLink) {
+                        if (data.user && data.user.roleName && data.user.roleName !== 'ROLE_USER') {
+                            navLink.classList.remove('hidden');
+                            if (data.user.roleName === 'ROLE_ADMIN') {
+                                navLink.textContent = 'Admin Dashboard';
+                            } else {
+                                navLink.textContent = 'Staff Dashboard';
+                            }
+                        } else {
+                            navLink.classList.add('hidden');
+                        }
                     }
                 }
-            }
-        } catch(e) { console.error(e); }
-    }
+            } catch (e) { console.error(e); }
+        }
 
-    async function loadNewArrivals() {
-        try {
-            const res = await fetch('/api/medicines?size=4&sort=id,desc&status=AVAILABLE');
-            const data = await res.json();
-            const products = data.content || [];
-            const grid = document.getElementById('newArrivalsGrid');
-            grid.innerHTML = '';
-            products.forEach((p, i) => {
-                const dto = { name: p.name, brand: p.brand, dosage: p.dosage, minPrice: p.price, totalStock: p.stockQty, categoryName: p.categoryName, imageUrl: p.imageUrl, formType: p.formType };
-                grid.appendChild(renderCard(dto, i + 2, i === 0 ? 'New' : ''));
-            });
-        } catch(e) { console.error(e); }
-    }
-</script>
+        async function loadNewArrivals() {
+            try {
+                const res = await fetch('/api/medicines?size=4&sort=id,desc&status=AVAILABLE');
+                const data = await res.json();
+                const products = data.content || [];
+                const grid = document.getElementById('newArrivalsGrid');
+                grid.innerHTML = '';
+                products.forEach((p, i) => {
+                    const dto = { name: p.name, brand: p.brand, dosage: p.dosage, minPrice: p.price, totalStock: p.stockQty, categoryName: p.categoryName, imageUrl: p.imageUrl, formType: p.formType };
+                    grid.appendChild(renderCard(dto, i + 2, i === 0 ? 'New' : ''));
+                });
+            } catch (e) { console.error(e); }
+        }
+    </script>
 </body>
+
 </html>

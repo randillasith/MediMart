@@ -277,19 +277,9 @@ public class MedicineService {
     }
 
     private void assignDefaultImage(Medicine medicine) {
-        String defaultName = "other.png";
-        if (medicine.getFormType() != null) {
-            switch (medicine.getFormType().toUpperCase()) {
-                case "TABLET":
-                    defaultName = "Tablet_Capsule_Pill.png";
-                    break;
-                case "SYRUP":
-                    defaultName = "Syrup_Liquid.png";
-                    break;
-                case "CREAM":
-                    defaultName = "cream.png";
-                    break;
-            }
+        String defaultName = "logo.png";
+        if (medicine.getFormType() != null && !medicine.getFormType().equalsIgnoreCase("OTHER")) {
+            defaultName = medicine.getFormType().toUpperCase() + ".png";
         }
         try {
             Path uploadPath = Paths.get("uploads");
@@ -300,8 +290,14 @@ public class MedicineService {
             Path dest = uploadPath.resolve(newFilename);
             if (!Files.exists(dest)) {
                 try (java.io.InputStream in = getClass().getResourceAsStream("/images/" + defaultName)) {
-                    if (in != null)
+                    if (in != null) {
                         Files.copy(in, dest);
+                    } else {
+                        // Fallback to logo.png if the specific image doesn't exist
+                        try (java.io.InputStream fallbackIn = getClass().getResourceAsStream("/images/logo.png")) {
+                            if (fallbackIn != null) Files.copy(fallbackIn, dest);
+                        }
+                    }
                 }
             }
             medicine.setImageUrl(newFilename);
