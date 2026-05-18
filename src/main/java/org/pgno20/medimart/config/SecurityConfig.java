@@ -132,7 +132,8 @@ public class SecurityConfig {
                     "/uploads/**",
                     "/images/**",
                     "/error/**",
-                    "/favicon.ico"
+                    "/favicon.ico",
+                    "/*.png"
                 ).permitAll()
 
                 // ── Auth API — register & login are always public ─────────
