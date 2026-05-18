@@ -103,12 +103,9 @@
     <div class="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[#00478D]/5 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#006970]/5 rounded-full blur-[100px] pointer-events-none"></div>
     
-    <div class="relative flex flex-col items-center z-10">
-        <!-- Subtle Pulse Ring -->
-        <div class="absolute inset-0 bg-[#00478D]/10 rounded-full animate-ping" style="animation-duration: 3s; margin: -25px;"></div>
-        
+    <div class="relative flex flex-col items-center z-10 bg-[#f2f3fb] p-12 rounded-[2rem] shadow-sm border border-white">
         <!-- Logo -->
-        <div class="bg-white p-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-2">
+        <div class="bg-white p-4 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-2">
             <img src="/logo.png" alt="MediMart Logo" class="h-16 w-auto relative z-10 animate-pulse"/>
         </div>
         
@@ -140,7 +137,7 @@
             <div class="hidden md:flex gap-6">
                 <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="/">Home</a>
                 <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/catalog">Catalog</a>
-                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Admin Panel</a>
+                <a id="navDashboardLink" class="hidden text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Portal Login</a>
                 <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="#">Help</a>
             </div>
         </div>
@@ -332,12 +329,19 @@
             loadNewArrivals(),
             checkAuthStatus()
         ]).then(() => {
-            // Once products are loaded, wait for images and window to be fully ready
-            if (document.readyState === 'complete') {
+            // Once products are loaded, wait for fonts and window to be fully ready
+            Promise.all([
+                document.fonts.ready,
+                new Promise(resolve => {
+                    if (document.readyState === 'complete') {
+                        resolve();
+                    } else {
+                        window.addEventListener('load', resolve);
+                    }
+                })
+            ]).then(() => {
                 removePreloader();
-            } else {
-                window.addEventListener('load', removePreloader);
-            }
+            });
         }).catch((err) => {
             console.error("Failed to load products:", err);
             removePreloader(); // remove it anyway so the site isn't blocked
@@ -415,6 +419,20 @@
             if (data.loggedIn) {
                 const btn = document.getElementById('userAccountBtn');
                 if (btn) btn.onclick = () => window.location.href = '/profile.html';
+                
+                const navLink = document.getElementById('navDashboardLink');
+                if (navLink) {
+                    if (data.user && data.user.roleName && data.user.roleName !== 'ROLE_USER') {
+                        navLink.classList.remove('hidden');
+                        if (data.user.roleName === 'ROLE_ADMIN') {
+                            navLink.textContent = 'Admin Dashboard';
+                        } else {
+                            navLink.textContent = 'Staff Dashboard';
+                        }
+                    } else {
+                        navLink.classList.add('hidden');
+                    }
+                }
             }
         } catch(e) { console.error(e); }
     }
