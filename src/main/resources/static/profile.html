@@ -301,6 +301,7 @@
 
 <script>
     let currentUser = {};
+    let deliveryFee = 0;
 
     document.addEventListener('DOMContentLoaded', async () => {
         try {
@@ -312,6 +313,13 @@
             }
             currentUser = data.user;
             populateProfile();
+
+            // Fetch delivery fee
+            const settingsRes = await fetch('/api/settings/public');
+            if (settingsRes.ok) {
+                const settings = await settingsRes.json();
+                deliveryFee = parseFloat(settings.standardDeliveryFee) || 0;
+            }
         } catch (e) {
             console.error('Error fetching profile:', e);
             window.location.href = '/login.html';
@@ -341,7 +349,7 @@
                 const dashLink = document.createElement('a');
                 dashLink.id = 'adminDashLink';
                 dashLink.className = 'text-on-surface-variant hover:text-primary transition-colors font-body text-body-md font-medium';
-                dashLink.href = '/medicines';
+                dashLink.href = '/dashboard';
                 dashLink.textContent = currentUser.roleName === 'ROLE_ADMIN' ? 'Admin Dashboard' : 'Staff Dashboard';
                 // Insert it before the "Members" link (which is the last one)
                 nav.insertBefore(dashLink, nav.lastElementChild);
@@ -594,7 +602,8 @@
                 </div>
                 <div class="text-right flex-shrink-0">
                     <p class="font-headline font-black text-primary text-xl">${price}</p>
-                    <p class="text-xs text-on-surface-variant">Qty: ${order.quantity}</p>
+                    <p class="text-[10px] text-on-surface-variant mb-1">Incl. LKR ${deliveryFee.toFixed(2)} delivery</p>
+                    <p class="text-xs text-on-surface-variant font-bold">Qty: ${order.quantity}</p>
                 </div>
             </div>`;
         }).join('');

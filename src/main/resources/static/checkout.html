@@ -103,7 +103,7 @@ h1,h2,h3,.font-headline{font-family:'Manrope',sans-serif}
 <h2 class="text-xl font-headline font-bold mb-6 text-on-surface">Order Summary</h2>
 <div class="space-y-4 mb-8">
 <div class="flex justify-between text-body-md text-on-surface-variant"><span id="summary-items-count">Subtotal (0 items)</span><span id="summary-subtotal">Rs. 0.00</span></div>
-<div class="flex justify-between text-body-md text-on-surface-variant"><span>Clinical Shipping</span><span class="text-secondary font-medium">FREE</span></div>
+<div class="flex justify-between text-body-md text-on-surface-variant"><span>Clinical Shipping</span><span class="text-secondary font-medium" id="summary-shipping">FREE</span></div>
 <div class="pt-4 mt-4 border-t border-outline-variant/20 flex justify-between items-end"><span class="font-headline font-bold text-on-surface">Total</span><span id="summary-total" class="text-2xl font-headline font-extrabold text-primary">Rs. 0.00</span></div>
 </div>
 <button onclick="placeOrder()" class="cta-gradient w-full py-4 px-6 rounded-xl text-on-primary font-headline font-bold text-lg shadow-lg hover:opacity-90 active:scale-95 transition-all mb-6 flex items-center justify-center gap-2"><span>Place Your Order</span><span class="material-symbols-outlined" id="order-icon">lock</span><span class="material-symbols-outlined hidden animate-spin" id="order-spinner">refresh</span></button>
@@ -126,6 +126,7 @@ h1,h2,h3,.font-headline{font-family:'Manrope',sans-serif}
 <script>
 let cart = [];
 let subtotal = 0;
+let deliveryFee = 0;
 let addressSaved = false;
 let paymentSaved = false;
 let savedAddress = null;
@@ -135,6 +136,15 @@ async function initCheckout() {
     const storedCart = localStorage.getItem('medimart_cart');
     if (storedCart) cart = JSON.parse(storedCart);
     if (cart.length === 0) { window.location.href = '/catalog.html'; return; }
+
+    // Load system settings to get live delivery fee (public endpoint, no auth needed)
+    try {
+        const settingsRes = await fetch('/api/settings/public');
+        if (settingsRes.ok) {
+            const settings = await settingsRes.json();
+            deliveryFee = parseFloat(settings.standardDeliveryFee) || 0;
+        }
+    } catch(e) { /* use 0 if not available */ }
 
     renderCartItems();
     renderPaymentSection();
@@ -203,8 +213,17 @@ function renderCartItems() {
     });
 
     document.getElementById('summary-items-count').innerText = 'Subtotal (' + totalItems + ' items)';
-    document.getElementById('summary-subtotal').innerText = 'Rs. ' + subtotal.toFixed(2);
-    document.getElementById('summary-total').innerText = 'Rs. ' + subtotal.toFixed(2);
+    document.getElementById('summary-subtotal').innerText = 'LKR ' + subtotal.toFixed(2);
+
+    // Apply delivery fee from settings
+    const total = subtotal + deliveryFee;
+    const shippingEl = document.getElementById('summary-shipping');
+    if (shippingEl) {
+        shippingEl.innerText = deliveryFee > 0 ? 'LKR ' + deliveryFee.toFixed(2) : 'FREE';
+    }
+    document.getElementById('summary-total').innerText = 'LKR ' + total.toFixed(2);
+    // Store total (with delivery) for order submission
+    subtotal = total;
 }
 
 function removeFromCart(cartId) {

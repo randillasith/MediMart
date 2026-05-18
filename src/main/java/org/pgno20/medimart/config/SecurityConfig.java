@@ -143,7 +143,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/auth/me").permitAll()
 
                 // PUT /api/auth/me/address is for logged-in customers (session-checked in controller)
-                .requestMatchers(HttpMethod.PUT, "/api/auth/me/address").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/auth/me/address").authenticated()
 
                 // ── Public storefront — read-only medicine / category data ─
                 .requestMatchers(HttpMethod.GET,
@@ -162,6 +162,7 @@ public class SecurityConfig {
 
                 // ── Admin-only pages (Thymeleaf templates) ────────────────
                 .requestMatchers(
+                    "/dashboard",
                     "/medicines",
                     "/supplier-details",
                     "/users-portal",
@@ -170,7 +171,8 @@ public class SecurityConfig {
                     "/prescriptions",
                     "/prescriptions.html",
                     "/prescription-add.html",
-                    "/prescription-edit.html"
+                    "/prescription-edit.html",
+                    "/settings"
                 ).hasAuthority("ROLE_ADMIN")
 
                 // ── Admin-only API — write operations on medicines ─────────
@@ -190,8 +192,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/suppliers/**").hasAuthority("ROLE_ADMIN")
                 // POST /api/orders is allowed for any customer (even guests)
                 .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
-                // GET /api/orders is allowed for any session (profile page filters by customerName)
-                .requestMatchers(HttpMethod.GET, "/api/orders").permitAll()
+                // GET /api/orders requires at least being logged in — customers see own orders, admins see all
+                .requestMatchers(HttpMethod.GET, "/api/orders").authenticated()
                 // PUT/DELETE orders are admin-only
                 .requestMatchers("/api/orders/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.POST,   "/api/categories").hasAuthority("ROLE_ADMIN")
@@ -204,6 +206,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/prescriptions", "/api/prescriptions/*", "/api/prescriptions/stats").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/prescriptions/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/prescriptions/**").hasAuthority("ROLE_ADMIN")
+                // ── Admin-only API — system settings ──────────────────────
+                // /api/settings/public is open (customer-facing tax/fee data)
+                .requestMatchers(HttpMethod.GET, "/api/settings/public").permitAll()
+                // All other /api/settings/** require ADMIN
+                .requestMatchers("/api/settings", "/api/settings/**").hasAuthority("ROLE_ADMIN")
 
                 // ── Anything else requires at least a valid session ────────
                 .anyRequest().authenticated()
