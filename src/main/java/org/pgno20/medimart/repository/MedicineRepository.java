@@ -72,6 +72,9 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
     @Query("SELECT COUNT(m) FROM Medicine m WHERE m.stockQty > 0 AND m.stockQty <= 100 AND m.status <> 'DISCONTINUED'")
     long countLowStock();
 
+    @Query("SELECT m FROM Medicine m WHERE m.stockQty <= 20 AND m.status <> 'DISCONTINUED'")
+    java.util.List<Medicine> findLowStockItems();
+
     @Query("SELECT COUNT(m) FROM Medicine m WHERE m.stockQty = 0 AND m.status <> 'DISCONTINUED'")
     long countOutOfStock();
 
