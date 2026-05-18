@@ -16,6 +16,8 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     BigDecimal calculateTotalRevenue();
 
     long countByStatus(String status);
+    
+    long countByStatusNot(String status);
 
     List<Order> findTop10ByOrderByCreatedAtDesc();
 
