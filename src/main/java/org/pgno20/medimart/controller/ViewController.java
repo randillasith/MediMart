@@ -13,6 +13,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ViewController {
 
+    /** Admin: main dashboard overview */
+    @GetMapping({"/", "/dashboard"})
+    public String dashboard() {
+        return "dashboard";
+    }
+
     /** Admin: staff / user management page */
     @GetMapping("/users-portal")
     public String users() {
