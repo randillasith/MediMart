@@ -311,7 +311,13 @@ async function placeOrder() {
         orderId: 'ORD-' + Date.now(),
         customerName: savedAddress.name,
         customerEmail: loggedInUserEmail,
-        medicineDetails: cart.map(function(item) { return item.name + ' (x' + item.cartQty + ')'; }).join(', '),
+        items: cart.map(function(item) { 
+            return { 
+                medicineId: item.id || null, 
+                medicineName: item.name,
+                quantity: item.cartQty 
+            }; 
+        }),
         quantity: cart.reduce(function(acc, item) { return acc + item.cartQty; }, 0),
         totalPrice: parseFloat(subtotal.toFixed(2)),
         status: 'PENDING',
