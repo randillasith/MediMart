@@ -32,5 +32,7 @@ public class OrderController {
     public String deleteOrder(@PathVariable String id) {
         orderService.cancelOrder(id);
         return "Order " + id + " deleted successfully.";
-    }
+
 }
+
+        }
