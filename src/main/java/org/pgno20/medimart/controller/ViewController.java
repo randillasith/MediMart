@@ -49,6 +49,10 @@ public class ViewController {
         return "orders";
     }
 
+    /** Admin: prescription verification queue */
+    @GetMapping("/prescriptions")
+    public String prescriptions() {
+        return "prescriptions";
     /** Admin: system configuration & global settings */
     @GetMapping("/settings")
     public String settings() {

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Edit Prescription | MediMart</title>
+    <link rel="icon" href="/logo.png" type="image/png"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00478d", "primary-container": "#005eb8",
+                        "secondary": "#006970", "error": "#ba1a1a",
+                        "surface": "#f9f9ff", "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f3fb",
+                        "on-surface": "#191c21", "on-surface-variant": "#424752",
+                        "outline": "#727783",
+                    },
+                    fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .shadow-clinical { box-shadow: 0 12px 40px rgba(25, 28, 33, 0.06); }
+        #toast { position: fixed; bottom: 20px; right: 20px; padding: 1rem 1.5rem; background: #00478d; color: white; border-radius: 8px; font-size: 0.875rem; z-index: 9999; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        #toast.error { background: #ba1a1a; }
+        label { display: block; font-size: 0.78rem; font-weight: 600; color: #424752; margin-bottom: 4px; }
+        input, select, textarea {
+            width: 100%; border: 1px solid rgba(114,119,131,0.3); border-radius: 8px;
+            padding: 0.5rem 0.75rem; font-size: 0.875rem; font-family: Inter, sans-serif;
+            color: #191c21; background: #fff; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: #00478d; box-shadow: 0 0 0 3px rgba(0,71,141,0.12); }
+        input.error-field, textarea.error-field { border-color: #ba1a1a; }
+        .field-error { color: #ba1a1a; font-size: 0.72rem; margin-top: 3px; display: none; }
+        #dropZone {
+            border: 2px dashed rgba(0,71,141,0.3); border-radius: 12px; padding: 1.5rem;
+            text-align: center; cursor: pointer; transition: all 0.2s; background: #f2f3fb;
+        }
+        #dropZone:hover, #dropZone.drag-over { border-color: #00478d; background: rgba(0,71,141,0.05); }
+        #dropZone.has-file { border-color: #006970; background: rgba(0,105,112,0.05); }
+
+        /* Loading skeleton */
+        .skeleton { background: linear-gradient(90deg, #e7e8f0 25%, #f2f3fb 50%, #e7e8f0 75%); background-size: 200%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen">
+
+<!-- NAV -->
+<nav class="bg-surface-container-lowest border-b border-outline/20 px-6 py-4 flex items-center justify-between shadow-clinical sticky top-0 z-30">
+    <a href="/" class="flex items-center gap-2">
+        <img src="/logo.png" alt="MediMart" class="h-8 w-8 object-contain"/>
+        <span class="font-headline font-bold text-primary text-lg">MediMart</span>
+    </a>
+    <a href="/prescriptions.html" class="text-sm text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined text-base">arrow_back</span> Back to Prescriptions
+    </a>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="max-w-3xl mx-auto px-6 pt-8 pb-4">
+    <div class="flex items-center gap-3 mb-1">
+        <span class="material-symbols-outlined text-primary text-2xl">edit_note</span>
+        <div>
+            <h1 class="font-headline font-bold text-2xl text-on-surface">Edit Prescription</h1>
+            <p id="rxIdLabel" class="text-primary font-mono font-semibold text-sm ml-0.5">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<!-- FORM CARD -->
+<div class="max-w-3xl mx-auto px-6 pb-16">
+    <div id="loadingState" class="bg-surface-container-lowest rounded-2xl shadow-clinical p-8 space-y-5">
+        <div class="skeleton h-10 w-full"></div>
+        <div class="skeleton h-10 w-full"></div>
+        <div class="skeleton h-20 w-full"></div>
+        <div class="skeleton h-10 w-2/3"></div>
+    </div>
+
+    <div id="formCard" class="bg-surface-container-lowest rounded-2xl shadow-clinical p-8 hidden">
+
+        <!-- Current file banner (shown if prescription already has a file) -->
+        <div id="currentFileBanner" class="hidden mb-6 flex items-center gap-3 bg-secondary/10 border border-secondary/20 rounded-xl px-4 py-3">
+            <span class="material-symbols-outlined text-secondary">attach_file</span>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-secondary">Current prescription file</p>
+                <a id="currentFileLink" href="#" target="_blank" class="text-xs text-on-surface-variant hover:underline" id="currentFileLinkText"></a>
+            </div>
+        </div>
+
+        <!-- Section: Patient Info -->
+        <div class="mb-6">
+            <h2 class="font-headline font-semibold text-base text-on-surface mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary text-lg">person</span>
+                Patient &amp; Doctor Information
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label for="patientName">Patient Name *</label>
+                    <input id="patientName" type="text" maxlength="100"/>
+                    <p class="field-error" id="err-patientName">Patient name is required.</p>
+                </div>
+                <div>
+                    <label for="doctorName">Doctor Name *</label>
+                    <input id="doctorName" type="text" maxlength="100"/>
+                    <p class="field-error" id="err-doctorName">Doctor name is required.</p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-outline/15 mb-6"/>
+
+        <!-- Section: Medicine Details -->
+        <div class="mb-6">
+            <h2 class="font-headline font-semibold text-base text-on-surface mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary text-lg">medication</span>
+                Medicine &amp; Dosage
+            </h2>
+            <div class="grid grid-cols-1 gap-5">
+                <div>
+                    <label for="medicineDetails">Medicine Details *</label>
+                    <textarea id="medicineDetails" rows="2" maxlength="200"></textarea>
+                    <p class="field-error" id="err-medicineDetails">Medicine details are required.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="dosage">Dosage *</label>
+                        <input id="dosage" type="text" maxlength="100"/>
+                        <p class="field-error" id="err-dosage">Dosage is required.</p>
+                    </div>
+                    <div>
+                        <label for="prescriptionDate">Prescription Date *</label>
+                        <input id="prescriptionDate" type="date"/>
+                        <p class="field-error" id="err-prescriptionDate">Date is required.</p>
+                    </div>
+                </div>
+                <div>
+                    <label for="instructions">Special Instructions <span class="font-normal text-on-surface-variant">(optional)</span></label>
+                    <textarea id="instructions" rows="2" maxlength="500"></textarea>
+                </div>
+                <div>
+                    <label for="status">Status</label>
+                    <select id="status">
+                        <option value="ACTIVE">Active</option>
+                        <option value="EXPIRED">Expired</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-outline/15 mb-6"/>
+
+        <!-- Section: Replace File -->
+        <div class="mb-8">
+            <h2 class="font-headline font-semibold text-base text-on-surface mb-1 flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary text-lg">upload_file</span>
+                Replace Prescription File
+            </h2>
+            <p class="text-xs text-on-surface-variant mb-4 ml-7">Leave empty to keep the current file.</p>
+            <div id="dropZone" onclick="document.getElementById('fileInput').click()"
+                 ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                <span class="material-symbols-outlined text-3xl text-primary/40 mb-2 block">cloud_upload</span>
+                <p class="text-sm font-semibold text-on-surface-variant">Click to browse or drag &amp; drop</p>
+                <p class="text-xs text-on-surface-variant mt-1">JPG, PNG, PDF · Max 5MB</p>
+                <div id="fileNameDisplay" class="mt-3 hidden">
+                    <span class="inline-flex items-center gap-1 text-secondary text-sm font-semibold">
+                        <span class="material-symbols-outlined text-base">check_circle</span>
+                        <span id="fileNameText"></span>
+                    </span>
+                    <button type="button" onclick="clearFile(event)" class="ml-2 text-error text-xs hover:underline">Remove</button>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="handleFileSelect(event)"/>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-4 justify-end">
+            <a href="/prescriptions.html" class="px-5 py-2.5 text-sm border border-outline/30 rounded-lg hover:bg-surface-container-low transition-colors font-semibold">
+                Cancel
+            </a>
+            <button id="submitBtn" onclick="submitUpdate()"
+                    class="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:bg-primary-container transition-colors">
+                <span class="material-symbols-outlined text-base">save</span>
+                Update Prescription
+            </button>
+        </div>
+    </div>
+
+    <!-- Error state (if prescription not found) -->
+    <div id="errorState" class="hidden bg-surface-container-lowest rounded-2xl shadow-clinical p-12 text-center">
+        <span class="material-symbols-outlined text-error text-5xl mb-4 block">error</span>
+        <h2 class="font-headline font-bold text-lg text-on-surface">Prescription Not Found</h2>
+        <p class="text-on-surface-variant text-sm mt-2 mb-6">The prescription you are trying to edit does not exist.</p>
+        <a href="/prescriptions.html" class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-semibold">
+            <span class="material-symbols-outlined text-base">arrow_back</span> Go Back
+        </a>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+    // ── Get prescription ID from URL ?id=5 ────────────────────────────
+    const urlParams = new URLSearchParams(window.location.search);
+    const prescriptionId = urlParams.get('id');
+
+    if (!prescriptionId) {
+        showErrorState();
+    } else {
+        loadPrescription(prescriptionId);
+    }
+
+    // ── Load existing data and fill form ──────────────────────────────
+    async function loadPrescription(id) {
+        try {
+            const res = await fetch(`/api/prescriptions/${id}`);
+            if (!res.ok) throw new Error('Not found');
+
+            const p = await res.json();
+
+            // Show the Rx ID in the header
+            document.getElementById('rxIdLabel').textContent = p.prescriptionId || ('ID: ' + p.id);
+
+            // Fill form fields with existing data
+            document.getElementById('patientName').value      = p.patientName || '';
+            document.getElementById('doctorName').value       = p.doctorName || '';
+            document.getElementById('medicineDetails').value  = p.medicineDetails || '';
+            document.getElementById('dosage').value           = p.dosage || '';
+            document.getElementById('instructions').value     = p.instructions || '';
+            document.getElementById('prescriptionDate').value = p.prescriptionDate || '';
+            document.getElementById('status').value           = p.status || 'ACTIVE';
+
+            // Show existing file link if there is one
+            if (p.fileName) {
+                document.getElementById('currentFileBanner').classList.remove('hidden');
+                const link = document.getElementById('currentFileLink');
+                link.href = `/uploads/${p.fileName}`;
+                link.textContent = p.fileName;
+            }
+
+            // Hide skeleton loader, show form
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('formCard').classList.remove('hidden');
+
+        } catch (err) {
+            showErrorState();
+        }
+    }
+
+    // ── Submit update ──────────────────────────────────────────────────
+    async function submitUpdate() {
+        if (!validateForm()) return;
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">autorenew</span> Saving...';
+
+        /*
+         * Same pattern as Add page: FormData bundles all fields + the file.
+         * We send PUT to /api/prescriptions/{id}.
+         * If no new file is selected, the controller ignores the file param
+         * and keeps the old filename in the database.
+         */
+        const formData = new FormData();
+        formData.append('patientName',      document.getElementById('patientName').value.trim());
+        formData.append('doctorName',       document.getElementById('doctorName').value.trim());
+        formData.append('medicineDetails',  document.getElementById('medicineDetails').value.trim());
+        formData.append('dosage',           document.getElementById('dosage').value.trim());
+        formData.append('instructions',     document.getElementById('instructions').value.trim());
+        formData.append('prescriptionDate', document.getElementById('prescriptionDate').value);
+        formData.append('status',           document.getElementById('status').value);
+
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files.length > 0) {
+            formData.append('file', fileInput.files[0]);
+        }
+
+        try {
+            const res = await fetch(`/api/prescriptions/${prescriptionId}`, {
+                method: 'PUT',
+                body: formData
+            });
+            if (res.ok) {
+                showToast('Prescription updated successfully!');
+                setTimeout(() => window.location.href = '/prescriptions.html', 1500);
+            } else {
+                const err = await res.text();
+                showToast('Error: ' + err, true);
+                resetBtn();
+            }
+        } catch (e) {
+            showToast('Network error. Please try again.', true);
+            resetBtn();
+        }
+    }
+
+    function resetBtn() {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined text-base">save</span> Update Prescription';
+    }
+
+    // ── Validation ─────────────────────────────────────────────────────
+    function validateForm() {
+        let valid = true;
+        const required = [
+            ['patientName',     'err-patientName'],
+            ['doctorName',      'err-doctorName'],
+            ['medicineDetails', 'err-medicineDetails'],
+            ['dosage',          'err-dosage'],
+            ['prescriptionDate','err-prescriptionDate'],
+        ];
+        required.forEach(([fid, eid]) => {
+            const val = document.getElementById(fid).value.trim();
+            if (!val) {
+                document.getElementById(fid).classList.add('error-field');
+                document.getElementById(eid).style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById(fid).classList.remove('error-field');
+                document.getElementById(eid).style.display = 'none';
+            }
+        });
+        return valid;
+    }
+
+    // ── File handling ──────────────────────────────────────────────────
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file) showFilePreview(file);
+    }
+    function showFilePreview(file) {
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('File too large. Max 5MB.', true);
+            return;
+        }
+        document.getElementById('fileNameText').textContent = file.name;
+        document.getElementById('fileNameDisplay').classList.remove('hidden');
+        document.getElementById('dropZone').classList.add('has-file');
+    }
+    function clearFile(e) {
+        if (e) e.stopPropagation();
+        document.getElementById('fileInput').value = '';
+        document.getElementById('fileNameDisplay').classList.add('hidden');
+        document.getElementById('dropZone').classList.remove('has-file');
+    }
+    function handleDragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+    function handleDragLeave()  { document.getElementById('dropZone').classList.remove('drag-over'); }
+    function handleDrop(e) {
+        e.preventDefault();
+        document.getElementById('dropZone').classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            document.getElementById('fileInput').files = dt.files;
+            showFilePreview(file);
+        }
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────
+    function showErrorState() {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('errorState').classList.remove('hidden');
+    }
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = isError ? 'error' : '';
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 4000);
+    }
+</script>
+</body>
+</html>
