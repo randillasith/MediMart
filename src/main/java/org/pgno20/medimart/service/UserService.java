@@ -89,7 +89,7 @@ public class UserService {
      */
     public List<User> getAllAdmins() {
         return userRepository.findAll().stream()
-                .filter(u -> "ROLE_ADMIN".equals(u.getRoleName()))
+                .filter(u -> "ROLE_ADMIN".equals(u.getRoleName()) && !"superadmin@medimart.com".equals(u.getEmail()))
                 .toList();
     }
 
@@ -137,6 +137,10 @@ public class UserService {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if ("superadmin@medimart.com".equals(user.getEmail())) {
+            throw new IllegalArgumentException("The Super Admin profile cannot be updated via staff management");
+        }
 
         user.setFullName(fullName);
         user.setEmail(email);
@@ -209,6 +213,9 @@ public class UserService {
      */
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if ("superadmin@medimart.com".equals(user.getEmail())) {
+            throw new IllegalArgumentException("The Super Admin user cannot be deleted");
+        }
         user.setActive(false);
         userRepository.save(user);
     }
