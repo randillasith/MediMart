@@ -53,13 +53,13 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     // --- Storefront queries (groups batches together for customer view) ---
 
-    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired, m.imageUrl, m.formType) " +
+    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(MIN(m.id), m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired, m.imageUrl, m.formType) " +
            "FROM Medicine m " +
            "WHERE m.status <> 'DISCONTINUED' " +
            "GROUP BY m.name, m.brand, m.dosage, m.category.name, m.prescriptionRequired, m.imageUrl, m.formType")
     Page<StorefrontMedicineDTO> getStorefrontMedicines(Pageable pageable);
 
-    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired, m.imageUrl, m.formType) " +
+    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(MIN(m.id), m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired, m.imageUrl, m.formType) " +
            "FROM Medicine m " +
            "WHERE m.status <> 'DISCONTINUED' AND LOWER(m.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "GROUP BY m.name, m.brand, m.dosage, m.category.name, m.prescriptionRequired, m.imageUrl, m.formType")

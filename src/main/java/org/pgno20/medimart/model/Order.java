@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Represents a customer order placed through the MediMart storefront.
@@ -58,6 +59,9 @@ public class Order {
     @Column
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<OrderItem> items = new java.util.ArrayList<>();
+
     @PrePersist
     void prePersist() {
         if (this.createdAt == null) this.createdAt = LocalDateTime.now();
@@ -109,6 +113,19 @@ public class Order {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public List<OrderItem> getItems() { return items; }
+    public void setItems(List<OrderItem> items) {
+        this.items.clear();
+        if (items != null) {
+            items.forEach(this::addItem);
+        }
+    }
+
+    public void addItem(OrderItem item) {
+        items.add(item);
+        item.setOrder(this);
+    }
 
     public String getShippingAddress() { return shippingAddress; }
     public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }
