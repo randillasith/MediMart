@@ -37,6 +37,12 @@ public class ViewController {
         return "suppliers";
     }
 
+    /** Admin: orders management page */
+    @GetMapping("/orders-management")
+    public String ordersManagement() {
+        return "orders";
+    }
+
     /** Public: logout redirect (session cleared via POST /api/auth/logout) */
     @GetMapping("/logout")
     public String logout() {

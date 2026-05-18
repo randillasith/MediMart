@@ -166,7 +166,8 @@ public class SecurityConfig {
                     "/medicines",
                     "/supplier-details",
                     "/users-portal",
-                    "/addmindetails"
+                    "/addmindetails",
+                    "/orders-management"
                 ).hasAuthority("ROLE_ADMIN")
 
                 // ── Admin-only API — write operations on medicines ─────────

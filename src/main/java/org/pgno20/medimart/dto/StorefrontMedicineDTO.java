@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class StorefrontMedicineDTO {
+    private Long id;
     private String name;
     private String brand;
     private String dosage;
@@ -19,8 +20,9 @@ public class StorefrontMedicineDTO {
 
     public StorefrontMedicineDTO() {}
 
-    // Constructor used by the GROUP BY storefront query (7 args)
-    public StorefrontMedicineDTO(String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry) {
+    // Constructor used by the GROUP BY storefront query (8 args)
+    public StorefrontMedicineDTO(Long id, String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry) {
+        this.id = id;
         this.name = name;
         this.brand = brand;
         this.dosage = dosage;
@@ -31,12 +33,15 @@ public class StorefrontMedicineDTO {
     }
 
     // Constructor including prescriptionRequired, imageUrl, and formType
-    public StorefrontMedicineDTO(String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry, Boolean prescriptionRequired, String imageUrl, String formType) {
-        this(name, brand, dosage, minPrice, totalStock, categoryName, earliestExpiry);
+    public StorefrontMedicineDTO(Long id, String name, String brand, String dosage, BigDecimal minPrice, Long totalStock, String categoryName, LocalDate earliestExpiry, Boolean prescriptionRequired, String imageUrl, String formType) {
+        this(id, name, brand, dosage, minPrice, totalStock, categoryName, earliestExpiry);
         this.prescriptionRequired = prescriptionRequired;
         this.imageUrl = imageUrl;
         this.formType = formType;
     }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

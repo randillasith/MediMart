@@ -41,5 +41,15 @@ public interface StockBatchRepository extends JpaRepository<StockBatch, Long> {
            "AND LOWER(sb.medicine.name) = LOWER(:medicineName) " +
            "ORDER BY sb.expiryDate ASC NULLS LAST")
     List<StockBatch> findActiveBatchesByMedicineNameFEFO(@Param("medicineName") String medicineName);
+
+    /**
+     * Stock restore query: returns all batches (ACTIVE or DEPLETED) for a medicine
+     * by name, ordered by addedDate descending (most recent first).
+     * Used by OrderService to restore stock when an order is cancelled.
+     */
+    @Query("SELECT sb FROM StockBatch sb " +
+           "WHERE LOWER(sb.medicine.name) = LOWER(:medicineName) " +
+           "ORDER BY sb.addedDate DESC")
+    List<StockBatch> findAllBatchesByMedicineNameLatestFirst(@Param("medicineName") String medicineName);
 }
 
