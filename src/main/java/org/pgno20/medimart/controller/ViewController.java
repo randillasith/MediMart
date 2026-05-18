@@ -37,6 +37,10 @@ public class ViewController {
         return "suppliers";
     }
 
+    /** Admin: orders management page */
+    @GetMapping("/orders-management")
+    public String ordersManagement() {
+        return "orders";
     /** Admin: prescription verification queue */
     @GetMapping("/prescriptions")
     public String prescriptions() {
