@@ -37,7 +37,7 @@ public class DashboardController {
     public DashboardMetricsDTO getMetrics() {
         BigDecimal totalRevenue = orderRepository.calculateTotalRevenue();
         if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
-        long totalOrders = orderRepository.count();
+        long totalOrders = orderRepository.countByStatusNot("CANCELLED");
         long pendingOrders = orderRepository.countByStatus("PENDING");
         long processingOrders = orderRepository.countByStatus("PROCESSING");
         long totalUsers = userRepository.count();
