@@ -41,6 +41,21 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"secondary-fixed-dim":"
 <p class="text-body-md text-on-surface-variant leading-relaxed max-w-2xl">To fulfill your order for clinical medications, we are legally required to verify a valid prescription from a registered medical practitioner.</p>
 </section>
 
+<!-- Prescription Details -->
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_12px_40px_rgba(25,28,33,0.05)] ghost-border">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">clinical_notes</span>
+<h3 class="text-xl font-headline font-bold text-on-surface">Prescription Details</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<label class="space-y-2"><span class="text-sm font-bold text-on-surface-variant">Patient Name</span><input id="patientName" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" placeholder="Full name on prescription" required/></label>
+<label class="space-y-2"><span class="text-sm font-bold text-on-surface-variant">Doctor Name</span><input id="doctorName" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" placeholder="Prescribing doctor's name" required/></label>
+<label class="space-y-2"><span class="text-sm font-bold text-on-surface-variant">Prescription Date</span><input id="prescriptionDate" type="date" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" required/></label>
+<label class="space-y-2"><span class="text-sm font-bold text-on-surface-variant">Dosage Instructions</span><input id="dosage" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" placeholder="Example: 1 tablet twice daily" required/></label>
+</div>
+<label class="block space-y-2 mt-5"><span class="text-sm font-bold text-on-surface-variant">Additional Notes</span><textarea id="instructions" rows="3" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" placeholder="Optional notes visible to the pharmacist"></textarea></label>
+</section>
+
 <!-- Upload Area -->
 <div class="relative group">
 <div class="absolute -inset-1 bg-gradient-to-r from-secondary-container to-primary-container rounded-xl blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
@@ -108,6 +123,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"secondary-fixed-dim":"
 var cart = [];
 var rxItems = [];
 var fileUploaded = false;
+var selectedFile = null;
 
 function init() {
     var stored = localStorage.getItem('medimart_cart');
@@ -123,6 +139,24 @@ function init() {
     }
 
     renderRxItems();
+    loadMemberProfile();
+    document.getElementById('prescriptionDate').value = new Date().toISOString().split('T')[0];
+}
+
+async function loadMemberProfile() {
+    try {
+        var res = await fetch('/api/auth/me');
+        var data = await res.json();
+        if (!data.loggedIn) {
+            window.location.href = '/login.html';
+            return;
+        }
+        if (data.user && data.user.fullName) {
+            document.getElementById('patientName').value = data.user.fullName;
+        }
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
 }
 
 function renderRxItems() {
@@ -159,6 +193,7 @@ function handleFileUpload(input) {
         if (allowed.indexOf(file.type) === -1) { alert('Invalid file type. Use PDF, JPEG, or PNG.'); return; }
 
         fileUploaded = true;
+        selectedFile = file;
         document.getElementById('uploaded-file-name').innerText = file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
         document.getElementById('upload-area').classList.add('hidden');
         document.getElementById('upload-success').classList.remove('hidden');
@@ -171,6 +206,7 @@ function handleFileUpload(input) {
 
 function removeUpload() {
     fileUploaded = false;
+    selectedFile = null;
     document.getElementById('file-input').value = '';
     document.getElementById('upload-area').classList.remove('hidden');
     document.getElementById('upload-success').classList.add('hidden');
@@ -179,11 +215,44 @@ function removeUpload() {
     btn.classList.add('opacity-40', 'cursor-not-allowed');
 }
 
-function verifyAndContinue() {
+async function verifyAndContinue() {
     if (!fileUploaded) { alert('Please upload a prescription first.'); return; }
-    // Mark prescription as uploaded in sessionStorage
-    sessionStorage.setItem('prescription_verified', 'true');
-    window.location.href = '/checkout.html';
+    var patientName = document.getElementById('patientName').value.trim();
+    var doctorName = document.getElementById('doctorName').value.trim();
+    var prescriptionDate = document.getElementById('prescriptionDate').value;
+    var dosage = document.getElementById('dosage').value.trim();
+    if (!patientName || !doctorName || !prescriptionDate || !dosage) {
+        alert('Please complete prescription details before continuing.');
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append('patientName', patientName);
+    formData.append('doctorName', doctorName);
+    formData.append('medicineDetails', rxItems.map(function(item) { return item.name + ' (x' + item.cartQty + ')'; }).join(', '));
+    formData.append('dosage', dosage);
+    formData.append('instructions', document.getElementById('instructions').value.trim());
+    formData.append('prescriptionDate', prescriptionDate);
+    formData.append('file', selectedFile);
+
+    var btn = document.getElementById('verify-btn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Submitting for review...';
+    try {
+        var res = await fetch('/api/prescriptions', { method: 'POST', body: formData });
+        if (!res.ok) {
+            var text = await res.text();
+            throw new Error(text || 'Prescription submission failed.');
+        }
+        var saved = await res.json();
+        sessionStorage.setItem('prescription_verified', 'true');
+        sessionStorage.setItem('latest_prescription_id', saved.prescriptionId || '');
+        window.location.href = '/checkout.html';
+    } catch (err) {
+        alert(err.message);
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Verify and Continue';
+    }
 }
 
 function skipPrescription() {

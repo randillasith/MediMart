@@ -122,7 +122,6 @@ public class SecurityConfig {
                     "/catalog.html",
                     "/checkout.html",
                     "/order-success.html",
-                    "/prescription.html",
                     "/profile.html",
                     "/catalog",
                     "/home"
@@ -168,6 +167,10 @@ public class SecurityConfig {
                     "/users-portal",
                     "/addmindetails",
                     "/orders-management"
+                    "/prescriptions",
+                    "/prescriptions.html",
+                    "/prescription-add.html",
+                    "/prescription-edit.html"
                 ).hasAuthority("ROLE_ADMIN")
 
                 // ── Admin-only API — write operations on medicines ─────────
@@ -194,6 +197,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,   "/api/categories").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAuthority("ROLE_ADMIN")
+
+                // Prescription submission and pharmacist/admin review
+                .requestMatchers(HttpMethod.GET, "/api/prescriptions/mine").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/prescriptions").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/prescriptions", "/api/prescriptions/*", "/api/prescriptions/stats").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/prescriptions/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/prescriptions/**").hasAuthority("ROLE_ADMIN")
 
                 // ── Anything else requires at least a valid session ────────
                 .anyRequest().authenticated()
