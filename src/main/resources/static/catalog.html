@@ -522,14 +522,10 @@
         let img = PRODUCT_IMAGES[index % PRODUCT_IMAGES.length];
         if (p.imageUrl) {
             img = `/uploads/${p.imageUrl}`;
-        } else if (p.formType) {
-            const formType = p.formType.toUpperCase();
-            if (formType === 'CREAM') img = '/images/cream.png';
-            else if (formType === 'SYRUP') img = '/images/Syrup_Liquid.png';
-            else if (formType === 'TABLET') img = '/images/Tablet_Capsule_Pill.png';
-            else img = '/images/other.png';
+        } else if (p.formType && p.formType.toUpperCase() !== 'OTHER') {
+            img = `/images/${p.formType.toUpperCase()}.png`;
         } else {
-            img = '/images/other.png';
+            img = '/images/logo.png';
         }
         
         const title = p.name;
@@ -554,7 +550,7 @@
         
         card.innerHTML = `
             <div class="relative aspect-[4/5] bg-white rounded-[2rem] overflow-hidden mb-6 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-xl border border-surface-container">
-                <img class="w-full h-full object-cover p-4 mix-blend-multiply" src="${img}" alt="${title}"/>
+                <img class="w-full h-full object-cover p-4 mix-blend-multiply" src="${img}" onerror="this.onerror=null; this.src='/images/logo.png';" alt="${title}"/>
                 <div class="absolute top-6 left-6">${badgeHtml}</div>
                 ${outOfStock ? '<div class="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center"><span class="bg-error text-white font-bold px-4 py-2 rounded-full text-sm">Out of Stock</span></div>' : ''}
             </div>
