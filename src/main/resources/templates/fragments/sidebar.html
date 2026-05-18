@@ -57,13 +57,19 @@
 
         <!-- Bottom Actions -->
         <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-                <a th:href="@{/logout}" 
-                class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold">
+                <button onclick="handleLogout()"
+                class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold">
                     <span class="material-symbols-outlined">logout</span>
                     <span class="text-sm">Sign Out</span>
-                </a>
+                </button>
         </div>
     </aside>
 
-</body>
-</html>
+    <script>
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+            } catch(e) { /* ignore network errors on logout */ }
+            window.location.href = '/index.html';
+        }
+    </script>
