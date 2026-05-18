@@ -97,6 +97,10 @@
                 <span class="material-symbols-outlined">security</span>
                 <span>Security</span>
             </button>
+            <button onclick="switchTab('orders')" id="tab-orders" class="px-4 py-2 rounded-full flex items-center gap-3 transition-all duration-300 ease-in-out text-on-surface-variant hover:bg-surface-container">
+                <span class="material-symbols-outlined">history_edu</span>
+                <span>Order History</span>
+            </button>
         </nav>
     </aside>
 
@@ -169,6 +173,30 @@
                         <p class="text-body-sm text-on-error-container mt-1">Once you delete your account, there is no going back. All clinical records and personal data will be permanently removed.</p>
                     </div>
                     <button onclick="openDeleteModal()" class="px-6 py-3 bg-error text-on-error rounded-xl font-bold text-sm transition-all hover:bg-on-error-container active:scale-95">Delete My Account</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Order History View -->
+        <div id="view-orders" class="grid grid-cols-1 gap-8 hidden">
+            <section class="bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/15">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                    <div>
+                        <h2 class="text-headline-sm font-headline font-bold text-primary">Order History</h2>
+                        <p class="text-body-sm text-outline">Your past and active medical orders</p>
+                    </div>
+                    <!-- Filter chips -->
+                    <div class="flex items-center gap-2 bg-surface-container-low p-1 rounded-full">
+                        <button onclick="filterOrders('ALL')" id="chip-ALL" class="px-4 py-1.5 rounded-full text-xs font-bold bg-surface-container-lowest text-primary shadow-sm transition-all">All</button>
+                        <button onclick="filterOrders('PENDING')" id="chip-PENDING" class="px-4 py-1.5 rounded-full text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-all">Pending</button>
+                        <button onclick="filterOrders('DELIVERED')" id="chip-DELIVERED" class="px-4 py-1.5 rounded-full text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-all">Delivered</button>
+                    </div>
+                </div>
+                <div id="orders-list">
+                    <div class="text-center py-16 text-on-surface-variant opacity-60">
+                        <span class="material-symbols-outlined text-5xl block mb-3" style="font-variation-settings:'FILL' 1;">inventory_2</span>
+                        <p class="text-sm">Loading your orders...</p>
+                    </div>
                 </div>
             </section>
         </div>
@@ -282,23 +310,42 @@
         document.getElementById('profileEmail').textContent = currentUser.email || 'N/A';
         document.getElementById('profileDob').textContent = currentUser.dob || 'N/A';
         document.getElementById('profileGender').textContent = currentUser.gender || 'N/A';
+
+        // Add Dashboard link for Admins and Staff (everyone except ROLE_USER)
+        if (currentUser.roleName && currentUser.roleName !== 'ROLE_USER') {
+            const nav = document.querySelector('nav.hidden.md\\:flex');
+            if (nav && !document.getElementById('adminDashLink')) {
+                const dashLink = document.createElement('a');
+                dashLink.id = 'adminDashLink';
+                dashLink.className = 'text-on-surface-variant hover:text-primary transition-colors font-body text-body-md font-medium';
+                dashLink.href = '/medicines';
+                dashLink.textContent = currentUser.roleName === 'ROLE_ADMIN' ? 'Admin Dashboard' : 'Staff Dashboard';
+                // Insert it before the "Members" link (which is the last one)
+                nav.insertBefore(dashLink, nav.lastElementChild);
+            }
+        }
     }
 
+    const ALL_TABS = ['personal', 'security', 'orders'];
+
     function switchTab(tabId) {
-        // Hide all views
-        document.getElementById('view-personal').classList.add('hidden');
-        document.getElementById('view-security').classList.add('hidden');
-        document.getElementById('view-personal').classList.remove('block');
-        document.getElementById('view-security').classList.remove('block');
-        
-        // Remove active class from all tabs
-        document.getElementById('tab-personal').classList.remove('nav-active');
-        document.getElementById('tab-security').classList.remove('nav-active');
-        
+        // Hide all views and deactivate all tabs
+        ALL_TABS.forEach(t => {
+            const view = document.getElementById('view-' + t);
+            if (view) { view.classList.add('hidden'); view.classList.remove('block'); }
+            const tab = document.getElementById('tab-' + t);
+            if (tab) tab.classList.remove('nav-active');
+        });
+
         // Show selected view and set active tab
         document.getElementById('view-' + tabId).classList.remove('hidden');
         document.getElementById('view-' + tabId).classList.add('block');
         document.getElementById('tab-' + tabId).classList.add('nav-active');
+
+        // Lazy-load orders the first time the tab is opened
+        if (tabId === 'orders' && !ordersLoaded) {
+            loadOrders();
+        }
     }
 
     async function logout() {
@@ -434,6 +481,102 @@
         } catch (err) {
             console.error(err);
         }
+    }
+    // ── Order History ─────────────────────────────────────────────────────────
+    let allOrders = [];
+    let ordersLoaded = false;
+    let currentFilter = 'ALL';
+
+    async function loadOrders() {
+        try {
+            const res = await fetch('/api/orders');
+            if (!res.ok) { showOrdersError('Could not load orders.'); return; }
+            const orders = await res.json();
+            const myEmail = (currentUser.email || '').toLowerCase().trim();
+            const myName  = (currentUser.fullName || '').toLowerCase().trim();
+
+            // Match by email (new orders) OR by name (legacy orders before email field was added)
+            allOrders = orders.filter(o => {
+                const orderEmail = (o.customerEmail || '').toLowerCase().trim();
+                const orderName  = (o.customerName  || '').toLowerCase().trim();
+                return (orderEmail && orderEmail === myEmail) || (!orderEmail && orderName === myName);
+            });
+            // Newest first
+            allOrders.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+            ordersLoaded = true;
+            renderOrders();
+        } catch (e) {
+            console.error(e);
+            showOrdersError('Could not load orders.');
+        }
+    }
+
+    function filterOrders(status) {
+        currentFilter = status;
+        ['ALL','PENDING','DELIVERED'].forEach(s => {
+            const btn = document.getElementById('chip-' + s);
+            if (!btn) return;
+            btn.className = s === status
+                ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-surface-container-lowest text-primary shadow-sm transition-all'
+                : 'px-4 py-1.5 rounded-full text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-all';
+        });
+        renderOrders();
+    }
+
+    function renderOrders() {
+        const container = document.getElementById('orders-list');
+        const filtered = currentFilter === 'ALL' ? allOrders
+            : allOrders.filter(o => o.status === currentFilter);
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-16 text-on-surface-variant opacity-60">
+                    <span class="material-symbols-outlined text-5xl block mb-3" style="font-variation-settings:'FILL' 1;">inventory_2</span>
+                    <p class="text-sm">No orders found.</p>
+                </div>`;
+            return;
+        }
+
+        const statusStyles = {
+            PENDING:    { badge: 'bg-secondary-container text-on-secondary-container', bar: 'bg-secondary',       icon: 'schedule' },
+            PROCESSING: { badge: 'bg-yellow-100 text-yellow-800',                      bar: 'bg-yellow-400',       icon: 'local_shipping' },
+            DELIVERED:  { badge: 'bg-surface-container-highest text-on-surface-variant', bar: 'bg-outline-variant', icon: 'package_2' },
+            CANCELLED:  { badge: 'bg-error-container text-on-error-container',          bar: 'bg-error',            icon: 'cancel' },
+        };
+
+        container.innerHTML = filtered.map(order => {
+            const st = statusStyles[order.status] || statusStyles.PENDING;
+            const date = order.createdAt
+                ? new Date(order.createdAt).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })
+                : 'N/A';
+            const price = typeof order.totalPrice === 'number'
+                ? 'Rs. ' + order.totalPrice.toFixed(2)
+                : 'Rs. ' + order.totalPrice;
+            return `
+            <div class="group relative flex flex-col md:flex-row gap-5 items-start md:items-center p-6 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all duration-200 mb-4 overflow-hidden">
+                <div class="absolute left-0 top-0 h-full w-1.5 ${st.bar} rounded-l-2xl"></div>
+                <div class="w-14 h-14 rounded-2xl bg-surface flex items-center justify-center flex-shrink-0 ml-2 shadow-sm">
+                    <span class="material-symbols-outlined text-on-surface-variant text-2xl" style="font-variation-settings:'FILL' 1;">${st.icon}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <span class="${st.badge} text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">${order.status}</span>
+                        <span class="text-xs text-on-surface-variant font-medium">#${order.orderId}</span>
+                    </div>
+                    <p class="font-headline font-bold text-on-surface text-base truncate" title="${order.medicineDetails || ''}">${order.medicineDetails || 'Order'}</p>
+                    <p class="text-xs text-on-surface-variant mt-0.5">Placed ${date}${order.shippingAddress ? ' &bull; ' + order.shippingAddress : ''}</p>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <p class="font-headline font-black text-primary text-xl">${price}</p>
+                    <p class="text-xs text-on-surface-variant">Qty: ${order.quantity}</p>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function showOrdersError(msg) {
+        document.getElementById('orders-list').innerHTML =
+            `<div class="text-center py-16 text-on-surface-variant opacity-60"><span class="material-symbols-outlined text-5xl block mb-3">error_outline</span><p class="text-sm">${msg}</p></div>`;
     }
 </script>
 </body>

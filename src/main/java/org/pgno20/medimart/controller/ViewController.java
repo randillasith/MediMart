@@ -1,50 +1,51 @@
 package org.pgno20.medimart.controller;
 
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import jakarta.servlet.http.HttpSession;
-
+/**
+ * Serves Thymeleaf admin page templates.
+ *
+ * Authorization is now enforced entirely by Spring Security (SecurityConfig).
+ * Unauthenticated or unauthorized requests are intercepted at the filter level
+ * before this controller is ever reached — no manual session checks needed.
+ */
 @Controller
 public class ViewController {
 
+    /** Admin: staff / user management page */
     @GetMapping("/users-portal")
     public String users() {
-        // Must match exactly: src/main/resources/templates/userdetails.html
-        return "staffdetails"; 
+        return "staffdetails";
     }
 
-    @GetMapping("/medicines") // Changed from /medicine to match your sidebar link
+    /** Admin + Staff: main inventory / medicines dashboard */
+    @GetMapping("/medicines")
     public String medicines() {
-
-        return "medicines"; 
+        return "medicines";
     }
 
-     @GetMapping("/addmindetails") // Changed from /medicine to match your sidebar link
+    /** Admin: admin profile / details page */
+    @GetMapping("/addmindetails")
     public String addmindetails() {
-
-        return "addmindetails"; 
+        return "addmindetails";
     }
 
-   @GetMapping("/logout")
-public String logout(HttpSession session) {
-    session.invalidate(); // Clears admin data
-    
-    // Use "redirect:" to the actual filename since it's in the static folder
-    return "redirect:/index.html"; 
-}
-
-
-
-    @GetMapping("/home")
-    public String homePage() {
-        // This looks for src/main/resources/templates/index.html
-        return "index"; 
-    }
-
+    /** Admin: supplier management page */
     @GetMapping("/supplier-details")
     public String supplierDetails() {
         return "suppliers";
+    }
+
+    /** Public: logout redirect (session cleared via POST /api/auth/logout) */
+    @GetMapping("/logout")
+    public String logout() {
+        return "redirect:/index.html";
+    }
+
+    /** Public: home page alias */
+    @GetMapping("/home")
+    public String homePage() {
+        return "forward:/index.html";
     }
 }

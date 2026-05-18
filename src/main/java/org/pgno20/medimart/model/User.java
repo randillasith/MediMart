@@ -34,4 +34,8 @@ public class User {
 
     @Column(name = "is_active", nullable = false)
     private Boolean active = true;
+
+    /** Default shipping address saved from the checkout form. */
+    @Column(name = "shipping_address", length = 500)
+    private String shippingAddress;
 }

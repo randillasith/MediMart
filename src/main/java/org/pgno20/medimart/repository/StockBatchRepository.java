@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,4 +30,16 @@ public interface StockBatchRepository extends JpaRepository<StockBatch, Long> {
 
     // Total count of batches for a medicine (all statuses)
     long countByMedicineId(Long medicineId);
+
+    /**
+     * FEFO deduction query: returns all ACTIVE batches for medicines whose name
+     * matches the given name, ordered by expiry date ascending (earliest-expiry first).
+     * Used by OrderService to deduct stock batch-by-batch when an order is placed.
+     */
+    @Query("SELECT sb FROM StockBatch sb " +
+           "WHERE sb.status = 'ACTIVE' " +
+           "AND LOWER(sb.medicine.name) = LOWER(:medicineName) " +
+           "ORDER BY sb.expiryDate ASC NULLS LAST")
+    List<StockBatch> findActiveBatchesByMedicineNameFEFO(@Param("medicineName") String medicineName);
 }
+

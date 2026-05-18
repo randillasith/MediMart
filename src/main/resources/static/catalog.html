@@ -82,6 +82,16 @@
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     body { font-family: 'Inter', sans-serif; }
     h1, h2, h3, h4, .font-headline { font-family: 'Manrope', sans-serif; }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #c2c6d4; border-radius: 10px; }
+
+    @keyframes slideIn {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+    }
+    .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
 </style>
 </head>
 <body class="bg-surface text-on-surface min-h-screen flex flex-col">
@@ -96,8 +106,8 @@
             </a>
             <div class="hidden md:flex gap-6">
                 <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/">Home</a>
-                <a class="text-[#00478D] dark:text-blue-400 font-bold border-b-2 border-[#00478D] pb-1 transition-all duration-200" href="/catalog">Catalog</a>
-                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Admin Panel</a>
+                <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/catalog">Catalog</a>
+                <a id="adminNavLink" class="hidden text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="/medicines">Admin Panel</a>
                 <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#005EB8] transition-colors" href="#">Help</a>
             </div>
         </div>
@@ -106,8 +116,9 @@
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
                 <input id="navSearchInput" class="bg-surface-container-low border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all w-64" placeholder="Search catalog..." type="text"/>
             </div>
-            <button class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
+            <button onclick="toggleCartDrawer()" class="relative text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
                 <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                <span id="navCartBadgeDesktop" class="absolute -top-1 -right-1 w-4 h-4 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
             </button>
             <button id="userAccountBtn" onclick="window.location.href='/login.html'" class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
                 <span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
@@ -283,11 +294,71 @@
         <span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
         <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Catalog</span>
     </a>
-    <a href="/medicines" class="flex flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
+    <a href="javascript:toggleCartDrawer()" class="relative flex flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
+        <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+        <span id="navCartBadgeMobile" class="absolute top-1 right-2 w-4 h-4 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
+        <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Cart</span>
+    </a>
+    <a id="adminMobileLink" href="/medicines" class="hidden flex-col items-center justify-center text-slate-500 px-4 py-2 hover:bg-slate-100 rounded-xl transition-all">
         <span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
         <span class="font-manrope text-[10px] font-semibold uppercase tracking-wider mt-1">Admin</span>
     </a>
 </footer>
+
+<!-- Shopping Cart Sidebar Drawer Overlay -->
+<div id="cartDrawerOverlay" class="fixed inset-0 z-[100] bg-on-background/20 backdrop-blur-sm justify-end hidden">
+    <!-- Drawer Container -->
+    <div class="w-full max-w-md bg-surface-bright/95 h-full backdrop-blur-xl shadow-[-12px_0px_40px_rgba(25,28,33,0.08)] flex flex-col animate-slide-in relative ml-auto">
+        <!-- Drawer Header -->
+        <div class="px-8 py-8 flex justify-between items-center border-b border-outline-variant/10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+                </div>
+                <div>
+                    <h2 class="text-headline-sm font-headline font-bold text-primary tracking-tight">Your Cart</h2>
+                    <p id="cartItemCountText" class="text-label-sm text-on-surface-variant">0 items</p>
+                </div>
+            </div>
+            <button onclick="toggleCartDrawer()" class="w-10 h-10 rounded-full hover:bg-surface-container-high flex items-center justify-center transition-colors">
+                <span class="material-symbols-outlined text-on-surface-variant">close</span>
+            </button>
+        </div>
+        <!-- Drawer Content -->
+        <div id="cartItemsContainer" class="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar">
+            <!-- Items injected here -->
+        </div>
+        <!-- Prescription Notice -->
+        <div id="cartRxNotice" class="mx-8 mb-4 bg-secondary-container/10 border border-secondary/20 rounded-[1.5rem] p-4 flex gap-4 hidden">
+            <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">description</span>
+            <div class="text-xs text-on-secondary-container leading-relaxed">
+                <strong>Prescription Required:</strong> One or more items require a valid doctor's prescription. You can upload it during checkout.
+            </div>
+        </div>
+        <!-- Drawer Footer -->
+        <div class="px-8 py-8 bg-surface-container-low rounded-t-[3rem]">
+            <div class="flex flex-col gap-4 mb-8">
+                <div class="flex justify-between items-center text-on-surface-variant">
+                    <span class="text-sm">Subtotal</span>
+                    <span id="cartSubtotal" class="font-medium">Rs. 0.00</span>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-outline-variant/20">
+                    <span class="font-bold text-on-surface">Total Estimate</span>
+                    <span id="cartTotal" class="text-headline-sm font-bold text-primary tracking-tight">Rs. 0.00</span>
+                </div>
+            </div>
+            <div class="flex flex-col gap-3">
+                <button onclick="goToCheckout()" class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-5 rounded-full font-bold flex items-center justify-center gap-3 shadow-lg shadow-primary/10 active:scale-[0.98] transition-all">
+                    Proceed to Checkout
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+                <button onclick="toggleCartDrawer()" class="w-full py-4 text-secondary font-bold hover:text-on-secondary-container transition-colors flex items-center justify-center gap-2">
+                    Continue Shopping
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     const PRODUCT_IMAGES = [
@@ -336,6 +407,8 @@
                 fetchProducts(true);
             }, 300);
         });
+        
+        initCart();
     });
 
     // Handle Category Loading
@@ -491,13 +564,21 @@
                     <span class="font-headline font-bold text-lg text-on-surface whitespace-nowrap">${price}</span>
                 </div>
                 <p class="text-outline text-sm font-medium mb-6 line-clamp-1">${p.categoryName || 'General'} • ${p.dosage || 'Standard'} • ${p.brand || 'Generic'}</p>
-                <button ${outOfStock ? 'disabled' : ''} class="w-full ${outOfStock ? 'bg-surface-dim text-outline cursor-not-allowed' : 'bg-surface-container-high text-on-primary-fixed-variant hover:bg-primary hover:text-white'} py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
+                <button ${outOfStock ? 'disabled' : ''} class="w-full ${outOfStock ? 'bg-surface-dim text-outline cursor-not-allowed' : 'bg-surface-container-high text-on-primary-fixed-variant hover:bg-primary hover:text-white'} py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm relative z-10">
                     <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
                     Add to Cart
                 </button>
             </div>
         `;
         grid.appendChild(card);
+        
+        const addBtn = card.querySelector('button');
+        if (addBtn && !outOfStock) {
+            addBtn.onclick = (e) => {
+                e.stopPropagation(); // prevent card click
+                addToCartObj(p, img);
+            };
+        }
     }
 
     function updateLoadMoreUI() {
@@ -553,10 +634,12 @@
             stockBadge.innerHTML = '<span class="text-error text-sm font-bold bg-error-container px-3 py-1 rounded-lg">Out of Stock</span>'; 
             cartBtn.disabled = true; 
             cartBtn.className = 'w-full py-4 bg-surface-dim text-outline rounded-xl font-bold text-lg cursor-not-allowed flex items-center justify-center gap-2'; 
+            cartBtn.onclick = null;
         } else { 
             stockBadge.innerHTML = `<span class="text-secondary text-sm font-bold flex items-center bg-secondary-container/30 px-3 py-1 rounded-lg"><span class="material-symbols-outlined text-sm mr-1">inventory_2</span>${product.totalStock} Available</span>`; 
             cartBtn.disabled = false; 
             cartBtn.className = 'w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl font-bold text-lg transition-transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 shadow-md cursor-pointer'; 
+            cartBtn.onclick = () => addToCartObj(product, imgSrc);
         }
 
         // Description
@@ -576,8 +659,181 @@
             if (data.loggedIn) {
                 const btn = document.getElementById('userAccountBtn');
                 if (btn) btn.onclick = () => window.location.href = '/profile.html';
+
+                // Show Admin Panel link only for admin users
+                if (data.user && data.user.roleName === 'ROLE_ADMIN') {
+                    const adminNav = document.getElementById('adminNavLink');
+                    const adminMobile = document.getElementById('adminMobileLink');
+                    if (adminNav) { adminNav.classList.remove('hidden'); adminNav.classList.add('flex'); }
+                    if (adminMobile) { adminMobile.classList.remove('hidden'); adminMobile.classList.add('flex'); }
+                }
             }
         } catch(e) { console.error(e); }
+    }
+
+    // --- Cart Logic ---
+    let cart = [];
+
+    function initCart() {
+        const stored = localStorage.getItem('medimart_cart');
+        if (stored) {
+            cart = JSON.parse(stored);
+        }
+        updateCartUI();
+    }
+
+    function saveCart() {
+        localStorage.setItem('medimart_cart', JSON.stringify(cart));
+        updateCartUI();
+    }
+
+    function toggleCartDrawer() {
+        const overlay = document.getElementById('cartDrawerOverlay');
+        if (overlay.classList.contains('hidden')) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        } else {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
+    }
+
+    function addToCartObj(product, img) {
+        const cartId = btoa(unescape(encodeURIComponent((product.name||'') + '|' + (product.brand||'') + '|' + (product.dosage||''))));
+        const existing = cart.find(item => item.cartId === cartId);
+        
+        const currentQty = existing ? existing.cartQty : 0;
+        // Check against totalStock, not stockQty
+        if (product.totalStock !== undefined && currentQty >= product.totalStock) {
+            alert('Cannot add more than available stock (' + product.totalStock + ').');
+            return;
+        }
+
+        if (existing) {
+            existing.cartQty += 1;
+        } else {
+            cart.push({
+                ...product,
+                cartId: cartId,
+                cartQty: 1,
+                cartImg: img
+            });
+        }
+        saveCart();
+        // Removed toggleCartDrawer() so it doesn't auto-open
+    }
+
+    function updateCartQuantity(cartId, delta) {
+        const item = cart.find(i => i.cartId === cartId);
+        if (item) {
+            if (delta > 0 && item.totalStock !== undefined && item.cartQty + delta > item.totalStock) {
+                alert('Cannot add more than available stock (' + item.totalStock + ').');
+                return;
+            }
+
+            item.cartQty += delta;
+            if (item.cartQty <= 0) {
+                cart = cart.filter(i => i.cartId !== cartId);
+            }
+            saveCart();
+        }
+    }
+
+    function removeFromCart(cartId) {
+        cart = cart.filter(i => i.cartId !== cartId);
+        saveCart();
+    }
+
+    function updateCartUI() {
+        const container = document.getElementById('cartItemsContainer');
+        const badgeDesktop = document.getElementById('navCartBadgeDesktop');
+        const badgeMobile = document.getElementById('navCartBadgeMobile');
+        const countText = document.getElementById('cartItemCountText');
+        
+        let totalItems = 0;
+        let subtotal = 0;
+        let requiresRx = false;
+
+        container.innerHTML = '';
+
+        if (cart.length === 0) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-on-surface-variant opacity-60">
+                    <span class="material-symbols-outlined text-6xl mb-4">shopping_cart</span>
+                    <p>Your cart is empty</p>
+                </div>
+            `;
+        }
+
+        cart.forEach(item => {
+            if (!item.cartId) {
+                item.cartId = btoa(unescape(encodeURIComponent((item.name||'') + '|' + (item.brand||'') + '|' + (item.dosage||''))));
+            }
+            totalItems += item.cartQty;
+            const itemPrice = item.finalPrice || 0;
+            subtotal += itemPrice * item.cartQty;
+            if (item.prescriptionRequired) requiresRx = true;
+
+            const div = document.createElement('div');
+            div.className = 'flex gap-4 p-4 bg-surface-container-lowest rounded-3xl mb-6 group transition-all duration-300 hover:shadow-lg hover:shadow-primary/5';
+            div.innerHTML = `
+                <div class="w-20 h-20 rounded-2xl bg-surface-container-low overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    <img class="w-16 h-auto mix-blend-multiply" src="${item.cartImg}" alt="${item.name}"/>
+                </div>
+                <div class="flex-1 flex flex-col justify-between">
+                    <div class="flex justify-between">
+                        <div>
+                            <h3 class="font-bold text-on-surface leading-tight">${item.name}</h3>
+                            <p class="text-xs text-on-surface-variant">${item.categoryName || 'General'} • ${item.brand || 'Generic'}</p>
+                        </div>
+                        <button onclick="removeFromCart('${item.cartId}')" class="text-on-surface-variant hover:text-error transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">delete_outline</span>
+                        </button>
+                    </div>
+                    <div class="flex justify-between items-end mt-2">
+                        <div class="flex items-center bg-surface-container rounded-full px-2 py-1">
+                            <button onclick="updateCartQuantity('${item.cartId}', -1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[16px]">remove</span></button>
+                            <span class="px-3 font-bold text-sm">${item.cartQty}</span>
+                            <button onclick="updateCartQuantity('${item.cartId}', 1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[16px]">add</span></button>
+                        </div>
+                        <span class="font-bold text-primary">Rs. ${(itemPrice * item.cartQty).toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        // Badges
+        if (totalItems > 0) {
+            badgeDesktop.textContent = totalItems;
+            if (badgeMobile) badgeMobile.textContent = totalItems;
+            badgeDesktop.classList.remove('hidden');
+            if (badgeMobile) badgeMobile.classList.remove('hidden');
+        } else {
+            badgeDesktop.classList.add('hidden');
+            if (badgeMobile) badgeMobile.classList.add('hidden');
+        }
+
+        countText.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
+        document.getElementById('cartSubtotal').textContent = `Rs. ${subtotal.toFixed(2)}`;
+        document.getElementById('cartTotal').textContent = `Rs. ${subtotal.toFixed(2)}`;
+
+        // RX Notice
+        const rxNotice = document.getElementById('cartRxNotice');
+        if (requiresRx) {
+            rxNotice.classList.remove('hidden');
+        } else {
+            rxNotice.classList.add('hidden');
+        }
+    }
+
+    function goToCheckout() {
+        var hasRx = cart.some(function(item) { return item.prescriptionRequired === true; });
+        if (hasRx) {
+            window.location.href = '/prescription.html';
+        } else {
+            window.location.href = '/checkout.html';
+        }
     }
 </script>
 </body>
