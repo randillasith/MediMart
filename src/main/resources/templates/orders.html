@@ -289,9 +289,13 @@
     }
 
     function updateKPIs() {
-        document.getElementById('kpiTotal').textContent = allOrders.length;
+        const validOrders = allOrders.filter(o => o.status !== 'CANCELLED');
+        document.getElementById('kpiTotal').textContent = validOrders.length;
         document.getElementById('kpiPending').textContent = allOrders.filter(o => o.status === 'PENDING').length;
-        const rev = allOrders.reduce((s, o) => s + parseFloat(o.totalPrice || 0), 0);
+        
+        // Revenue should only count DELIVERED orders to match the main dashboard metrics
+        const deliveredOrders = allOrders.filter(o => o.status === 'DELIVERED');
+        const rev = deliveredOrders.reduce((s, o) => s + parseFloat(o.totalPrice || 0), 0);
         document.getElementById('kpiRevenue').textContent = 'Rs. ' + rev.toLocaleString('en-LK', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
