@@ -1,0 +1,267 @@
+<html class="light" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Prescription Review | MediMart</title>
+    <link rel="icon" href="/logo.png" type="image/png"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00478d",
+                        "primary-container": "#005eb8",
+                        secondary: "#006970",
+                        surface: "#f9f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f3fb",
+                        "on-surface": "#191c21",
+                        "on-surface-variant": "#424752",
+                        error: "#ba1a1a"
+                    },
+                    fontFamily: { headline: ["Manrope"], body: ["Inter"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: Inter, sans-serif; }
+        .font-headline { font-family: Manrope, sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .shadow-clinical { box-shadow: 0 16px 50px rgba(25, 28, 33, 0.07); }
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-approved { background: #dcfce7; color: #166534; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+        #toast { transform: translateY(100px); opacity: 0; transition: .25s ease; }
+        #toast.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<div th:replace="~{fragments/sidebar :: medimart-sidebar}"></div>
+
+<main class="md:ml-72 min-h-screen">
+    <header class="h-16 sticky top-0 bg-slate-50/80 backdrop-blur-xl z-40 flex justify-between items-center px-4 md:px-8">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Clinical Review</p>
+            <h1 class="font-headline text-xl font-extrabold text-primary">Prescription Verification</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+                <p class="text-xs font-bold" th:text="${session.userFullName != null ? session.userFullName : 'Admin Portal'}">Admin Portal</p>
+                <p class="text-[10px] text-slate-500 font-bold uppercase">Pharmacy Admin</p>
+            </div>
+            <div class="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold border-2 border-white shadow-sm" th:text="${session.userInitials != null ? session.userInitials : 'AD'}">AD</div>
+        </div>
+    </header>
+
+    <section class="p-4 md:p-8 max-w-[1600px] mx-auto space-y-8">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div>
+                <h2 class="font-headline text-4xl font-extrabold tracking-tight">Prescription Review Queue</h2>
+                <p class="mt-2 max-w-2xl text-on-surface-variant">Approve valid prescriptions or reject unsafe submissions with a clear reason that members can see in their portal.</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 min-w-[460px]">
+                <div class="bg-white rounded-2xl p-4 shadow-clinical border border-slate-100">
+                    <p class="text-xs font-bold text-slate-400 uppercase">Total</p>
+                    <p id="statTotal" class="font-headline text-3xl font-black text-primary">0</p>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-clinical border border-slate-100">
+                    <p class="text-xs font-bold text-slate-400 uppercase">Pending</p>
+                    <p id="statPending" class="font-headline text-3xl font-black text-amber-600">0</p>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-clinical border border-slate-100">
+                    <p class="text-xs font-bold text-slate-400 uppercase">Approved</p>
+                    <p id="statApproved" class="font-headline text-3xl font-black text-emerald-700">0</p>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-clinical border border-slate-100">
+                    <p class="text-xs font-bold text-slate-400 uppercase">Rejected</p>
+                    <p id="statRejected" class="font-headline text-3xl font-black text-red-700">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-clinical border border-slate-100 p-4 flex flex-col lg:flex-row gap-3 lg:items-center">
+            <div class="relative flex-1">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input id="searchInput" class="w-full pl-10 pr-4 py-3 bg-surface-container-low border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search patient or doctor"/>
+            </div>
+            <select id="statusFilter" class="bg-surface-container-low border-none rounded-xl text-sm py-3 focus:ring-2 focus:ring-primary/20">
+                <option value="">All statuses</option>
+                <option value="PENDING">Pending</option>
+                <option value="APPROVED">Approved</option>
+                <option value="REJECTED">Rejected</option>
+            </select>
+            <button onclick="loadPrescriptions(0)" class="px-5 py-3 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-container transition">Apply</button>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-clinical border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="text-left px-5 py-4 text-xs uppercase tracking-wider text-slate-500">Prescription</th>
+                        <th class="text-left px-5 py-4 text-xs uppercase tracking-wider text-slate-500">Member</th>
+                        <th class="text-left px-5 py-4 text-xs uppercase tracking-wider text-slate-500">Clinical Details</th>
+                        <th class="text-left px-5 py-4 text-xs uppercase tracking-wider text-slate-500">Status</th>
+                        <th class="text-left px-5 py-4 text-xs uppercase tracking-wider text-slate-500">File</th>
+                        <th class="text-right px-5 py-4 text-xs uppercase tracking-wider text-slate-500">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100">
+                    <tr><td colspan="6" class="text-center py-12 text-slate-500">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex items-center justify-between px-5 py-4 border-t border-slate-100 bg-slate-50/70">
+                <span id="pageInfo" class="text-xs text-slate-500"></span>
+                <div class="flex gap-2">
+                    <button id="prevBtn" onclick="changePage(-1)" class="px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold disabled:opacity-40">Prev</button>
+                    <button id="nextBtn" onclick="changePage(1)" class="px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold disabled:opacity-40">Next</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div id="rejectModal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-slate-950/50 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
+        <div class="flex items-start gap-3">
+            <div class="h-11 w-11 rounded-xl bg-red-50 text-error flex items-center justify-center"><span class="material-symbols-outlined">block</span></div>
+            <div>
+                <h3 class="font-headline text-xl font-extrabold">Reject Prescription</h3>
+                <p class="text-sm text-slate-500 mt-1">This reason will be shown to the member in their profile.</p>
+            </div>
+        </div>
+        <textarea id="rejectReason" rows="5" class="mt-5 w-full rounded-xl border-slate-200 focus:ring-2 focus:ring-red-100 focus:border-error text-sm" placeholder="Example: Doctor registration number is not visible. Please upload a clearer prescription."></textarea>
+        <div class="flex justify-end gap-3 mt-5">
+            <button onclick="closeRejectModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold">Cancel</button>
+            <button onclick="confirmReject()" class="px-5 py-2.5 rounded-xl bg-error text-white text-sm font-bold">Reject</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="fixed bottom-5 right-5 z-[100] rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-2xl"></div>
+
+<script>
+let currentPage = 0;
+let rejectTargetId = null;
+
+async function loadStats() {
+    const res = await fetch('/api/prescriptions/stats');
+    if (!res.ok) return;
+    const stats = await res.json();
+    statTotal.textContent = stats.total || 0;
+    statPending.textContent = stats.pending || 0;
+    statApproved.textContent = stats.approved || 0;
+    statRejected.textContent = stats.rejected || 0;
+}
+
+async function loadPrescriptions(page = 0) {
+    currentPage = page;
+    tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-slate-500">Loading...</td></tr>';
+    const params = new URLSearchParams({ page, size: 10 });
+    if (searchInput.value.trim()) params.append('search', searchInput.value.trim());
+    if (statusFilter.value) params.append('status', statusFilter.value);
+
+    const res = await fetch('/api/prescriptions?' + params.toString());
+    if (!res.ok) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-error">Unable to load prescriptions.</td></tr>';
+        return;
+    }
+    const data = await res.json();
+    tableBody.innerHTML = data.content.length ? data.content.map(renderRow).join('') :
+        '<tr><td colspan="6" class="text-center py-12 text-slate-500">No prescriptions found.</td></tr>';
+    pageInfo.textContent = 'Page ' + (data.number + 1) + ' of ' + Math.max(data.totalPages, 1) + ' - ' + data.totalElements + ' record(s)';
+    prevBtn.disabled = data.first;
+    nextBtn.disabled = data.last;
+}
+
+function renderRow(p) {
+    const statusClass = {
+        PENDING: 'badge-pending',
+        APPROVED: 'badge-approved',
+        REJECTED: 'badge-rejected'
+    }[p.status] || 'badge-pending';
+    const fileLink = p.fileName ? '<a class="inline-flex items-center gap-1 text-primary font-bold hover:underline" target="_blank" href="/uploads/' + escAttr(p.fileName) + '"><span class="material-symbols-outlined text-base">visibility</span>View</a>' : '<span class="text-slate-400">No file</span>';
+    const rejection = p.rejectionReason ? '<p class="mt-2 text-xs text-red-700 bg-red-50 rounded-lg px-3 py-2">' + esc(p.rejectionReason) + '</p>' : '';
+    const actions = p.status === 'PENDING'
+        ? '<button onclick="reviewPrescription(' + p.id + ', \'APPROVED\')" class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold">Approve</button><button onclick="openRejectModal(' + p.id + ')" class="px-3 py-2 rounded-lg bg-red-600 text-white text-xs font-bold">Reject</button>'
+        : '<span class="text-xs text-slate-400 font-bold">Reviewed</span>';
+
+    return '<tr class="hover:bg-slate-50 transition">' +
+        '<td class="px-5 py-4"><p class="font-mono text-primary font-black">' + esc(p.prescriptionId || ('ID ' + p.id)) + '</p><p class="text-xs text-slate-500">Issued ' + esc(p.prescriptionDate || 'N/A') + '</p></td>' +
+        '<td class="px-5 py-4"><p class="font-bold">' + esc(p.patientName) + '</p><p class="text-xs text-slate-500">' + esc(p.submittedByEmail || p.submittedByName || 'Member') + '</p></td>' +
+        '<td class="px-5 py-4 max-w-md"><p class="font-bold">' + esc(p.medicineDetails) + '</p><p class="text-xs text-slate-500 mt-1">Doctor: ' + esc(p.doctorName) + ' | Dosage: ' + esc(p.dosage) + '</p>' + rejection + '</td>' +
+        '<td class="px-5 py-4"><span class="badge ' + statusClass + '">' + esc(p.status) + '</span></td>' +
+        '<td class="px-5 py-4">' + fileLink + '</td>' +
+        '<td class="px-5 py-4 text-right"><div class="flex justify-end gap-2">' + actions + '</div></td>' +
+    '</tr>';
+}
+
+async function reviewPrescription(id, status, reason) {
+    const res = await fetch('/api/prescriptions/' + id + '/review', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: status, rejectionReason: reason || '' })
+    });
+    if (!res.ok) {
+        const msg = await res.text();
+        showToast(msg || 'Review failed', true);
+        return;
+    }
+    showToast(status === 'APPROVED' ? 'Prescription approved.' : 'Prescription rejected.');
+    closeRejectModal();
+    loadStats();
+    loadPrescriptions(currentPage);
+}
+
+function openRejectModal(id) {
+    rejectTargetId = id;
+    rejectReason.value = '';
+    rejectModal.classList.remove('hidden');
+    rejectModal.classList.add('flex');
+}
+
+function closeRejectModal() {
+    rejectTargetId = null;
+    rejectModal.classList.add('hidden');
+    rejectModal.classList.remove('flex');
+}
+
+function confirmReject() {
+    const reason = rejectReason.value.trim();
+    if (!reason) {
+        showToast('Please enter a rejection reason.', true);
+        return;
+    }
+    reviewPrescription(rejectTargetId, 'REJECTED', reason);
+}
+
+function changePage(dir) { loadPrescriptions(currentPage + dir); }
+
+function showToast(message, error) {
+    toast.textContent = message;
+    toast.className = 'fixed bottom-5 right-5 z-[100] rounded-xl px-5 py-3 text-sm font-bold text-white shadow-2xl show ' + (error ? 'bg-error' : 'bg-primary');
+    setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+function esc(value) {
+    const d = document.createElement('div');
+    d.textContent = value || '';
+    return d.innerHTML;
+}
+
+function escAttr(value) {
+    return String(value || '').replace(/"/g, '&quot;');
+}
+
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') loadPrescriptions(0); });
+loadStats();
+loadPrescriptions(0);
+</script>
+</body>
+</html>
