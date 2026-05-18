@@ -166,7 +166,7 @@ public class SecurityConfig {
                     "/supplier-details",
                     "/users-portal",
                     "/addmindetails",
-                    "/orders-management"
+                    "/orders-management",
                     "/prescriptions",
                     "/prescriptions.html",
                     "/prescription-add.html",
