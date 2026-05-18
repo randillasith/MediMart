@@ -59,9 +59,9 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-bright":"#f9f9
 <div class="space-y-4">
 <h3 class="text-xl font-headline font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary">payments</span>Payment Summary</h3>
 <div class="space-y-2">
-<div class="flex justify-between text-body-md text-on-surface-variant"><span>Subtotal</span><span id="conf-subtotal">Rs. 0.00</span></div>
-<div class="flex justify-between text-body-md text-on-surface-variant"><span>Clinical Shipping</span><span class="text-secondary font-medium">FREE</span></div>
-<div class="flex justify-between text-xl font-headline font-bold text-primary pt-2"><span>Total Amount Paid</span><span id="conf-total">Rs. 0.00</span></div>
+<div class="flex justify-between text-body-md text-on-surface-variant"><span>Subtotal</span><span id="conf-subtotal">LKR 0.00</span></div>
+<div class="flex justify-between text-body-md text-on-surface-variant"><span>Clinical Shipping</span><span class="text-secondary font-medium" id="conf-shipping">FREE</span></div>
+<div class="flex justify-between text-xl font-headline font-bold text-primary pt-2"><span>Total Amount Paid</span><span id="conf-total">LKR 0.00</span></div>
 </div>
 </div>
 </div>
@@ -86,16 +86,36 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-bright":"#f9f9
 </footer>
 
 <script>
-function initConfirmation() {
+async function initConfirmation() {
     var raw = localStorage.getItem('medimart_last_order');
     if (!raw) { window.location.href = '/catalog.html'; return; }
     var order = JSON.parse(raw);
 
+    // Fetch delivery fee from settings
+    let deliveryFee = 0;
+    try {
+        const settingsRes = await fetch('/api/settings/public');
+        if (settingsRes.ok) {
+            const settings = await settingsRes.json();
+            deliveryFee = parseFloat(settings.standardDeliveryFee) || 0;
+        }
+    } catch(e) { console.error('Could not load settings', e); }
+
+    let total = order.totalPrice || 0;
+    // Calculate subtotal (total minus delivery fee, bounded to 0)
+    let subtotal = Math.max(0, total - deliveryFee);
+    
+    // If order has a subtotal property (maybe in future), use it instead
+    if (order.subtotal !== undefined) {
+        subtotal = order.subtotal;
+    }
+
     document.getElementById('conf-order-id').innerText = order.orderId || '—';
     document.getElementById('conf-status').innerText = order.status || 'PENDING';
     document.getElementById('conf-customer').innerText = order.customerName || '—';
-    document.getElementById('conf-subtotal').innerText = 'Rs. ' + (order.totalPrice || 0).toFixed(2);
-    document.getElementById('conf-total').innerText = 'Rs. ' + (order.totalPrice || 0).toFixed(2);
+    document.getElementById('conf-subtotal').innerText = 'LKR ' + subtotal.toFixed(2);
+    document.getElementById('conf-shipping').innerText = deliveryFee > 0 ? 'LKR ' + deliveryFee.toFixed(2) : 'FREE';
+    document.getElementById('conf-total').innerText = 'LKR ' + total.toFixed(2);
 
     if (order.shippingAddress) {
         document.getElementById('conf-address').innerHTML = order.shippingAddress.replace(/,\s*/g, '<br/>');
@@ -106,7 +126,7 @@ function initConfirmation() {
         order.items.forEach(function(item) {
             var div = document.createElement('div');
             div.className = 'flex justify-between text-body-md text-on-surface-variant';
-            div.innerHTML = '<span>' + item.name + ' &times; ' + item.qty + '</span><span>Rs. ' + (item.price * item.qty).toFixed(2) + '</span>';
+            div.innerHTML = '<span>' + item.name + ' &times; ' + item.qty + '</span><span>LKR ' + (item.price * item.qty).toFixed(2) + '</span>';
             itemsContainer.appendChild(div);
         });
     } else if (order.medicineDetails) {

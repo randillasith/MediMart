@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -19,8 +20,8 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     List<Order> findTop10ByOrderByCreatedAtDesc();
 
     @Query("SELECT SUM(o.totalPrice) FROM Order o WHERE o.status = 'DELIVERED' AND o.prescriptionSubmitted = :isPrescription")
-    BigDecimal calculateTotalRevenueByPrescription(boolean isPrescription);
+    BigDecimal calculateTotalRevenueByPrescription(@Param("isPrescription") boolean isPrescription);
 
     @Query("SELECT o FROM Order o WHERE o.status = 'DELIVERED' AND o.createdAt >= :startDate")
-    List<Order> findDeliveredOrdersSince(java.time.LocalDateTime startDate);
+    List<Order> findDeliveredOrdersSince(@Param("startDate") java.time.LocalDateTime startDate);
 }
