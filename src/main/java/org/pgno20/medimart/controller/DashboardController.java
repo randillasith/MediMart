@@ -32,6 +32,7 @@ public class DashboardController {
     @GetMapping("/metrics")
     public DashboardMetricsDTO getMetrics() {
         BigDecimal totalRevenue = orderRepository.calculateTotalRevenue();
+        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO; // SUM returns NULL when no rows match
         long totalOrders = orderRepository.count();
         long pendingOrders = orderRepository.countByStatus("PENDING");
         long processingOrders = orderRepository.countByStatus("PROCESSING");

@@ -70,6 +70,14 @@ public class OrderService {
                     throw new IllegalArgumentException("Medicine not found: " + 
                         (item.getMedicineId() != null ? item.getMedicineId() : item.getMedicineName()));
                 }
+
+                // ── Fix #2: Validate stock BEFORE deducting ──────────────────
+                if (m.getStockQty() < item.getQuantity()) {
+                    throw new IllegalArgumentException(
+                        "Insufficient stock for '" + m.getName() + "'. " +
+                        "Requested: " + item.getQuantity() + ", Available: " + m.getStockQty()
+                    );
+                }
                 
                 // Set snapshot values
                 item.setMedicineName(m.getName());
