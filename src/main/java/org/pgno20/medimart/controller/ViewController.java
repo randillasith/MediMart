@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ViewController {
 
     /** Admin: main dashboard overview */
-    @GetMapping({"/", "/dashboard"})
+    @GetMapping("/dashboard")
     public String dashboard() {
         return "dashboard";
     }
@@ -47,6 +47,12 @@ public class ViewController {
     @GetMapping("/orders-management")
     public String ordersManagement() {
         return "orders";
+    }
+
+    /** Admin: system configuration & global settings */
+    @GetMapping("/settings")
+    public String settings() {
+        return "settings";
     }
 
     /** Public: logout redirect (session cleared via POST /api/auth/logout) */

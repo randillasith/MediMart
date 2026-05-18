@@ -163,11 +163,13 @@ public class SecurityConfig {
 
                 // ── Admin-only pages (Thymeleaf templates) ────────────────
                 .requestMatchers(
+                    "/dashboard",
                     "/medicines",
                     "/supplier-details",
                     "/users-portal",
                     "/addmindetails",
-                    "/orders-management"
+                    "/orders-management",
+                    "/settings"
                 ).hasAuthority("ROLE_ADMIN")
 
                 // ── Admin-only API — write operations on medicines ─────────
@@ -194,6 +196,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,   "/api/categories").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAuthority("ROLE_ADMIN")
+
+                // ── Admin-only API — system settings ──────────────────────
+                // /api/settings/public is open (customer-facing tax/fee data)
+                .requestMatchers(HttpMethod.GET, "/api/settings/public").permitAll()
+                // All other /api/settings/** require ADMIN
+                .requestMatchers("/api/settings", "/api/settings/**").hasAuthority("ROLE_ADMIN")
 
                 // ── Anything else requires at least a valid session ────────
                 .anyRequest().authenticated()
