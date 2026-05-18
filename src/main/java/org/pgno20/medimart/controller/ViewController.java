@@ -53,6 +53,8 @@ public class ViewController {
     @GetMapping("/prescriptions")
     public String prescriptions() {
         return "prescriptions";
+    }
+
     /** Admin: system configuration & global settings */
     @GetMapping("/settings")
     public String settings() {
