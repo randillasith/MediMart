@@ -111,12 +111,7 @@
                 </div>
                 <div>
                     <label class="field-label">Status</label>
-                    <select id="editStatus" class="form-input form-select">
-                        <option value="PENDING">PENDING</option>
-                        <option value="PACKING">PACKING</option>
-                        <option value="REJECTED">REJECTED</option>
-                        <option value="DELIVERED">DELIVERED</option>
-                    </select>
+                    <div id="editStatusDisplay" class="px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-sm inline-flex items-center gap-1.5 shadow-sm"></div>
                 </div>
                 <div>
                     <label class="field-label">Notes / Reason</label>
@@ -125,7 +120,7 @@
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <button onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-slate-600 font-semibold hover:bg-slate-100 transition-colors">Cancel</button>
-                <button onclick="saveOrderChanges()" class="px-4 py-2 rounded-xl bg-primary text-white font-bold hover:brightness-110 transition-all">Save Changes</button>
+                <button onclick="saveOrderChanges()" id="saveChangesBtn" class="px-4 py-2 rounded-xl bg-primary text-white font-bold hover:brightness-110 transition-all">Save Changes</button>
             </div>
         </div>
     </div>
@@ -563,13 +558,24 @@
         document.getElementById('editOrderIdLabel').textContent = '#' + order.orderId;
         document.getElementById('editQuantity').value = order.quantity;
         document.getElementById('editDeliveryDate').value = order.expectedDelivery || '';
-        document.getElementById('editStatus').value = order.status;
+        const statusEl = document.getElementById('editStatusDisplay');
+        statusEl.textContent = order.status;
+        statusEl.className = `px-4 py-2.5 border rounded-xl font-bold text-sm inline-flex items-center gap-1.5 shadow-sm ${getStatusClass(order.status)}`;
         document.getElementById('editNotes').value = order.adminNotes || '';
         
-        // Disable quantity and delivery fields if order is not pending
+        // Disable quantity, delivery and notes fields if order is not pending
         const isPending = order.status === 'PENDING';
         document.getElementById('editQuantity').disabled = !isPending;
         document.getElementById('editDeliveryDate').disabled = !isPending;
+        document.getElementById('editNotes').disabled = !isPending;
+        
+        // Hide Save Changes button if order is not pending
+        const saveBtn = document.getElementById('saveChangesBtn');
+        if (isPending) {
+            saveBtn.classList.remove('hidden');
+        } else {
+            saveBtn.classList.add('hidden');
+        }
         
         document.getElementById('editModal').classList.remove('hidden');
     }
@@ -582,48 +588,34 @@
         const id = document.getElementById('editOrderId').value;
         const quantity = document.getElementById('editQuantity').value;
         const expectedDelivery = document.getElementById('editDeliveryDate').value;
-        const status = document.getElementById('editStatus').value;
         const notes = document.getElementById('editNotes').value;
         
         const order = currentOrders.find(o => o.orderId == id);
         if(!order) return;
         
         try {
-            // 1. If we are updating quantity or expectedDelivery, and order is currently PENDING
+            // Admin only ever updates quantity/delivery/notes on PENDING orders.
+            // Admin cannot change status.
             if (order.status === 'PENDING') {
-                await fetch(`/api/orders/${id}`, {
+                const res = await fetch(`/api/orders/${id}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ 
                         quantity: parseInt(quantity), 
-                        expectedDelivery, 
+                        expectedDelivery: expectedDelivery || null, 
                         adminNotes: notes 
                     })
                 });
-            }
-
-            // 2. If status was changed
-            if (order.status !== status) {
-                if (status === 'PACKING') {
-                    await fetch(`/api/orders/${id}/approve`, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ notes })
-                    });
-                } else if (status === 'REJECTED') {
-                    await fetch(`/api/orders/${id}/reject`, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ reason: notes })
-                    });
-                } else if (status === 'DELIVERED') {
-                    await fetch(`/api/orders/${id}/delivered`, { method: 'PUT' });
+                
+                if (res.ok) {
+                    closeEditModal();
+                    showToast("Order updated successfully!");
+                    loadOrders();
+                } else {
+                    const txt = await res.text();
+                    alert("Failed to update order: " + txt);
                 }
             }
-            
-            closeEditModal();
-            showToast("Order updated successfully!");
-            loadOrders();
         } catch (e) {
             console.error("Failed to update order", e);
             alert("Failed to update order.");

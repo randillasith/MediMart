@@ -27,20 +27,23 @@ public class MedicineOrderController {
         int quantity = (Integer) body.get("quantity");
         double unitPrice = Double.parseDouble(body.get("unitPrice").toString());
 
-        MedicineOrder order = orderService.placeOrder(supplierId, medicineName, quantity, unitPrice);
-        
+        LocalDate expectedDelivery = null;
         if (body.containsKey("expectedDelivery")) {
             Object val = body.get("expectedDelivery");
-            if (val != null) {
-                order.setExpectedDelivery(LocalDate.parse(val.toString()));
-                order = orderService.saveOrder(order);
+            if (val != null && !val.toString().isBlank()) {
+                expectedDelivery = LocalDate.parse(val.toString());
             }
         }
-        
+
+        String deliveryMode = null;
         if (body.containsKey("deliveryMode")) {
-            order.setDeliveryMode((String) body.get("deliveryMode"));
-            order = orderService.saveOrder(order);
+            Object val = body.get("deliveryMode");
+            if (val != null) {
+                deliveryMode = val.toString();
+            }
         }
+
+        MedicineOrder order = orderService.placeOrder(supplierId, medicineName, quantity, unitPrice, expectedDelivery, deliveryMode);
         
         return ResponseEntity.ok(order);
     }
