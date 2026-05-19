@@ -152,8 +152,25 @@
                        class="pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded-full text-sm w-64 focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all"
                        placeholder="Global search name..." type="text" />
             </div>
-            <div class="flex items-center gap-2">
-                <div class="ml-2 w-8 h-8 rounded-full bg-slate-200 overflow-hidden ring-2 ring-white">
+            <div class="flex items-center gap-4">
+                <!-- Notifications Bell -->
+                <div class="relative cursor-pointer" onclick="toggleNotifications()">
+                    <span class="material-symbols-outlined text-slate-500 hover:text-primary transition-colors">notifications</span>
+                    <span id="notifBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center hidden">0</span>
+                    
+                    <!-- Dropdown -->
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden z-50 transform origin-top-right transition-all">
+                        <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                            <h4 class="text-sm font-bold text-slate-800">Alerts</h4>
+                            <span class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold" id="notifCountText">0 Unread</span>
+                        </div>
+                        <div id="notifList" class="max-h-64 overflow-y-auto">
+                            <!-- Items injected via JS -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden ring-2 ring-white">
                     <img alt="Admin" src="https://ui-avatars.com/api/?name=Admin&background=00478d&color=fff" />
                 </div>
             </div>
@@ -467,6 +484,96 @@
     let currentPage = 0;
     let totalPages = 1;
     let searchTimeout;
+
+    // --- Notifications Polling logic ---
+    let notifInterval;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCategories();
+        loadMedicines(0);
+        pollNotifications();
+        notifInterval = setInterval(pollNotifications, 10000); // Poll every 10s
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('notifDropdown');
+            if (dropdown && !dropdown.classList.contains('hidden') && !e.target.closest('.relative.cursor-pointer')) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    });
+
+    async function pollNotifications() {
+        try {
+            const res = await fetch('/api/notifications/active/admin');
+            if(res.ok) {
+                const notifications = await res.json();
+                updateNotificationUI(notifications);
+            }
+        } catch(e) {
+            console.error("Failed to fetch notifications");
+        }
+    }
+
+    function updateNotificationUI(notifications) {
+        const badge = document.getElementById('notifBadge');
+        const countText = document.getElementById('notifCountText');
+        const list = document.getElementById('notifList');
+        
+        if(notifications.length > 0) {
+            badge.textContent = notifications.length;
+            badge.classList.remove('hidden');
+            countText.textContent = `${notifications.length} Unread`;
+        } else {
+            badge.classList.add('hidden');
+            countText.textContent = '0 Unread';
+        }
+        
+        list.innerHTML = '';
+        if(notifications.length === 0) {
+            list.innerHTML = '<div class="p-4 text-center text-sm text-slate-500">No active alerts.</div>';
+            return;
+        }
+        
+        notifications.forEach(n => {
+            const div = document.createElement('div');
+            div.className = 'p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors flex items-start gap-3';
+            
+            let icon = 'notifications';
+            let color = 'text-slate-500';
+            if (n.type === 'LOW_STOCK') {
+                icon = 'warning';
+                color = 'text-orange-500';
+            }
+            
+            div.innerHTML = `
+                <span class="material-symbols-outlined ${color} text-xl flex-shrink-0">${icon}</span>
+                <div class="flex-grow">
+                    <p class="text-sm font-semibold text-slate-800">${n.message}</p>
+                    <p class="text-[10px] text-slate-400 mt-1">${new Date(n.createdAt).toLocaleString()}</p>
+                </div>
+                <button onclick="markNotificationRead(${n.id}, event)" class="text-slate-300 hover:text-green-500" title="Mark as read">
+                    <span class="material-symbols-outlined text-sm">done</span>
+                </button>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function toggleNotifications() {
+        document.getElementById('notifDropdown').classList.toggle('hidden');
+    }
+
+    async function markNotificationRead(id, e) {
+        e.stopPropagation(); // prevent toggling dropdown
+        try {
+            await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+            pollNotifications();
+        } catch(err) {
+            console.error(err);
+        }
+    }
+    // --- End Notifications ---
 
     function toggleDosageFields() {
         const form = document.getElementById('medForm').value;

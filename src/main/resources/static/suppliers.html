@@ -11,11 +11,12 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
         tailwind.config = {
+
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary-fixed-dim": "#a9c7ff",
+                        "primary-fixed-dim": "#a9c1ff",
                         "secondary-fixed-dim": "#5dd8e2",
                         "tertiary": "#793100",
                         "surface-bright": "#f9f9ff",
@@ -121,7 +122,7 @@
             <span class="material-symbols-outlined">inventory_2</span>
             <span class="font-manrope font-semibold text-sm">Inventory</span>
         </a>
-        <a href="#" class="text-slate-600 dark:text-slate-400 hover:bg-[#F2F3FB] dark:hover:bg-[#1A1C1E] rounded-xl mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:translate-x-1 transition-transform duration-200">
+        <a href="/orders.html" class="text-slate-600 dark:text-slate-400 hover:bg-[#F2F3FB] dark:hover:bg-[#1A1C1E] rounded-xl mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:translate-x-1 transition-transform duration-200">
             <span class="material-symbols-outlined">receipt_long</span>
             <span class="font-manrope font-semibold text-sm">Orders</span>
         </a>
@@ -155,10 +156,16 @@
                 <h3 class="text-4xl font-headline font-extrabold tracking-tight text-primary">Supplier Directory</h3>
                 <p class="text-slate-500 mt-1">Manage and track your pharmaceutical procurement network.</p>
             </div>
-            <button onclick="showForm()" class="px-6 py-3 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-manrope font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-98 transition-all">
-                <span class="material-symbols-outlined">add_circle</span>
-                Add New Supplier
-            </button>
+            <div class="flex gap-3">
+                <a href="/orders.html" class="px-6 py-3 bg-surface-container-low text-primary border border-outline-variant/20 rounded-xl font-manrope font-bold flex items-center gap-2 hover:bg-surface-container hover:scale-[1.02] active:scale-98 transition-all">
+                    <span class="material-symbols-outlined">add_shopping_cart</span>
+                    Place Order
+                </a>
+                <button onclick="showForm()" class="px-6 py-3 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-manrope font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-98 transition-all">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    Add New Supplier
+                </button>
+            </div>
         </section>
 
         <!-- KPI Cards -->
@@ -251,7 +258,9 @@
                 </section>
 
                 <section class="bg-surface-container-lowest p-10 rounded-[2rem] shadow-sm border border-outline-variant/10">
-                    <div class="flex nt-display font-bold text-xl text-on-surface">Medicines Supplied</h3>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="material-symbols-outlined text-secondary bg-secondary-container w-10 h-10 flex items-center justify-center rounded-xl">pill</span>
+                        <h3 class="font-display font-bold text-xl text-on-surface">Medicines Supplied</h3>
                     </div>
                     <p class="text-sm text-slate-500 mb-8 ml-[3.25rem] italic">Type medicine names and press Enter to add them to the catalog.</p>
                     <div class="w-full bg-surface-container-low rounded-2xl p-4 flex flex-wrap gap-2 min-h-[120px] focus-within:bg-white focus-within:ring-2 ring-primary/20 transition-all border border-outline-variant/10" id="tagsContainer">
@@ -538,6 +547,10 @@
             // Error shown by toast inside apiCall
         }
     }
+    function editSupplier(id) {
+        const supplier = suppliersData.find(s => s.id === id);
+        if (supplier) showForm(supplier);
+    }
 
     async function deleteSupplier(id) {
         if (!confirm('Are you sure you want to delete this supplier? This action cannot be undone.')) return;
@@ -549,6 +562,7 @@
             // Error handled by apiCall
         }
     }
+
     function handleFileUpload(event) {
         const file = event.target.files[0];
         if (file) {

@@ -163,7 +163,8 @@
                         Log In
                     </button>
 <div class="mt-4 text-center">
-    <p class="text-sm text-on-surface-variant">Don't have an account? <a href="/register.html" class="font-bold text-secondary hover:underline">Register here</a></p>
+    <p class="text-sm text-on-surface-variant mb-2">Don't have an account? <a href="/register.html" class="font-bold text-secondary hover:underline">Register here</a></p>
+    <p class="text-sm text-on-surface-variant">Are you a supplier partner? <a href="/supplier-login.html" class="font-bold text-primary hover:underline">Supplier Login</a></p>
 </div>
 </form>
 <div class="mt-12 pt-8 border-t border-outline-variant/15">
@@ -222,8 +223,18 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
-                // Redirect to dashboard or profile
-                window.location.href = '/profile.html';
+                // Check role to redirect appropriately
+                try {
+                    const meRes = await fetch('/api/auth/me');
+                    const meData = await meRes.json();
+                    if (meData.loggedIn && meData.user && meData.user.role === 'ROLE_SUPPLIER') {
+                        window.location.href = '/supplier-dashboard.html';
+                    } else {
+                        window.location.href = '/index.html';
+                    }
+                } catch(e) {
+                    window.location.href = '/index.html';
+                }
             } else {
                 errorMsg.textContent = data.message || 'Login failed. Please check your credentials.';
                 errorMsg.classList.remove('hidden');
