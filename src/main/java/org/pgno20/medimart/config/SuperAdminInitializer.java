@@ -38,7 +38,10 @@ public class SuperAdminInitializer implements CommandLineRunner {
             userRepository.save(superAdmin);
             System.out.println("[SuperAdminInitializer] Default super admin created: " + superAdminEmail);
         } else {
-            System.out.println("[SuperAdminInitializer] Super admin already exists.");
+            User superAdmin = userRepository.findByEmail(superAdminEmail).get();
+            superAdmin.setPassword(passwordEncoder.encode("SuperAdmin@123"));
+            userRepository.save(superAdmin);
+            System.out.println("[SuperAdminInitializer] Super admin already exists. Password reset to BCrypt.");
         }
     }
 }
