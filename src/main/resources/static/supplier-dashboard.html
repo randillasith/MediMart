@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>MediMart | Supplier Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00478d", "primary-container": "#005eb8",
+                        "primary-fixed": "#d6e3ff", "on-primary-fixed": "#001b3d",
+                        "surface": "#f9f9ff", "surface-container": "#ecedf6",
+                        "surface-container-low": "#f2f3fb", "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c2c6d4", "on-surface": "#191c21",
+                    },
+                    fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .toast { animation: slideIn 0.3s cubic-bezier(0.4,0,0.2,1) forwards; }
+        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c2c6d4; border-radius: 10px; }
+        .section-card { background: #ffffff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.03); transition: all 0.3s ease; }
+        .section-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.05); transform: translateY(-2px); }
+        .field-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; display: block; }
+        .status-badge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-pending  { background-color: #f59e0b; color: #ffffff; }
+        .status-delivered{ background-color: #10b981; color: #ffffff; }
+        .status-rejected { background-color: #ef4444; color: #ffffff; }
+        .btn-action { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; border: 1px solid transparent; transition: all 0.2s; cursor: pointer; }
+        tr.group-first td { border-top: 2px solid #e0eaff !important; }
+        tr.group-row td { background: #f8faff; }
+        .price-wrap { position: relative; display: inline-flex; align-items: center; }
+        .price-wrap .currency { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 800; color: #00478d; pointer-events: none; z-index: 10; }
+
+        .price-input:focus { border-color: #00478d; box-shadow: 0 0 0 3px rgba(0,71,141,0.08); }
+        .total-chip { display: inline-flex; align-items: center; background: #d6e3ff; color: #00478d; border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: 800; white-space: nowrap; }
+
+        /* FIXED: .price-input class එක නිවැරදිව style tag එක ඇතුලට දැම්මා */
+        .price-input { width: 140px; background: #fff; border: 1.5px solid #c2c6d4; border-radius: 8px; padding: 7px 8px 7px 48px; font-size: 13px; font-weight: 600; color: #191c21; outline: none; transition: all 0.15s; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+
+<aside class="fixed left-0 top-0 h-full flex flex-col py-6 bg-[#F9F9FF] w-64 z-50 border-r border-outline-variant/10">
+    <div class="px-6 mb-8 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">medical_services</span>
+        </div>
+        <div>
+            <h1 class="font-headline font-black text-xl text-[#00478D]">MediMart</h1>
+            <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Supplier Portal</p>
+        </div>
+    </div>
+    <nav class="flex-1 space-y-1">
+        <a href="#" class="text-slate-600 hover:bg-[#F2F3FB] rounded-xl mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="font-headline font-semibold text-sm">Dashboard</span>
+        </a>
+        <a href="/supplier-dashboard.html" class="bg-[#00478D] text-white rounded-xl mx-2 my-1 px-4 py-3 flex items-center gap-3 shadow-md">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">receipt_long</span>
+            <span class="font-headline font-semibold text-sm">Assigned Orders</span>
+        </a>
+    </nav>
+</aside>
+
+<div id="confirmModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+        <h3 class="text-xl font-headline font-bold text-primary mb-1">Confirm Orders</h3>
+        <p id="confirmGroupLabel" class="text-xs text-slate-400 mb-4"></p>
+
+        <div id="confirmMedList" class="space-y-2 mb-4 max-h-56 overflow-y-auto pr-1"></div>
+
+        <div class="bg-primary-fixed border border-blue-200 rounded-xl px-4 py-3 flex justify-between items-center mb-4">
+            <span class="text-sm font-bold text-primary">Grand Total (All Orders)</span>
+            <span id="confirmGrandTotal" class="text-xl font-headline font-black text-primary">Rs. 0.00</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="field-label">Expected Delivery Date</label>
+                <input type="date" id="confirmDate" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"/>
+            </div>
+            <div>
+                <label class="field-label">Supplier Notes</label>
+                <input type="text" id="confirmNotes" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Optional notes..."/>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+            <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl text-slate-600 font-semibold hover:bg-slate-100 transition-colors">Cancel</button>
+            <button onclick="submitRejectGroup()" class="px-4 py-2 rounded-xl bg-red-50 text-red-600 border border-red-200 font-bold hover:bg-red-100 transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">cancel</span> Reject All
+            </button>
+            <button onclick="submitConfirmGroup()" class="px-4 py-2 rounded-xl bg-primary text-white font-bold hover:brightness-110 transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">fact_check</span> Confirm All
+            </button>
+        </div>
+    </div>
+</div>
+
+<main class="ml-64 min-h-screen pt-16">
+    <header class="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-[#F2F3FB] z-40 border-b border-outline-variant/10">
+        <h2 class="font-headline font-bold text-[#00478D] text-lg">Supplier Dashboard</h2>
+        <div class="flex items-center gap-4">
+            <span class="material-symbols-outlined text-slate-500 hover:bg-white/50 p-2 rounded-full cursor-pointer">notifications</span>
+            <div id="userAvatar" class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold">S</div>
+            <button onclick="logout()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-semibold text-sm">
+                <span class="material-symbols-outlined text-sm">logout</span> Logout
+            </button>
+        </div>
+    </header>
+
+    <div id="toastContainer" class="fixed top-24 right-8 z-[100] flex flex-col gap-3 pointer-events-none w-80"></div>
+
+    <div class="p-8 space-y-8">
+        <section class="flex justify-between items-end">
+            <div>
+                <h3 class="text-4xl font-headline font-extrabold tracking-tight text-primary">Assigned Orders</h3>
+                <p id="supplierWelcome" class="text-slate-500 mt-1">Loading your supplier profile...</p>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-4 gap-5">
+            <div class="section-card flex items-center justify-between">
+                <div><p class="field-label">Total Assigned</p><h4 id="statTotal" class="text-2xl font-headline font-bold text-primary">0</h4></div>
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20"><span class="material-symbols-outlined">receipt_long</span></div>
+            </div>
+            <div class="section-card flex items-center justify-between">
+                <div><p class="field-label">Pending Approval</p><h4 id="statPending" class="text-2xl font-headline font-bold text-amber-600">0</h4></div>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 border border-amber-200/60"><span class="material-symbols-outlined">pending_actions</span></div>
+            </div>
+            <div class="section-card flex items-center justify-between">
+                <div><p class="field-label">Ready to Deliver</p><h4 id="statApproved" class="text-2xl font-headline font-bold text-blue-600">0</h4></div>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-200/60"><span class="material-symbols-outlined">local_shipping</span></div>
+            </div>
+            <div class="section-card flex items-center justify-between">
+                <div><p class="field-label">Completed</p><h4 id="statCompleted" class="text-2xl font-headline font-bold text-emerald-600">0</h4></div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-200/60"><span class="material-symbols-outlined">check_circle</span></div>
+            </div>
+        </section>
+
+        <div class="section-card p-0 overflow-hidden">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                    <tr class="bg-[#f2f3fb] border-b border-outline-variant/10">
+                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Order ID</th>
+                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Medicine</th>
+                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Qty</th>
+                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Unit Price (Rs.)</th>
+                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Total (Rs.)</th>
+                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Delivery Date</th>
+                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="ordersTableBody" class="divide-y divide-outline-variant/5"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const BASE_URL = 'http://localhost:9090';
+    let ordersData = [];
+    let loggedInSupplier = null;
+    let pendingGroupIds = [];
+
+    const supplierPrices = {};
+
+    async function apiCall(url, method='GET', body=null) {
+        try {
+            const fullUrl = url.startsWith('http') ? url : BASE_URL + url;
+            const opts = { method, headers: body ? {'Content-Type':'application/json'} : {} };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch(fullUrl, opts);
+            if (!res.ok) throw new Error(await res.text());
+            if (res.status !== 204) return await res.json();
+        } catch(e) { throw e; }
+    }
+
+    function showToast(msg, isError=false) {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg pointer-events-auto border ${isError?'bg-red-50 text-red-800 border-red-200':'bg-blue-50 text-blue-800 border-blue-200'}`;
+        t.innerHTML = `<span class="material-symbols-outlined">${isError?'error':'check_circle'}</span><p class="text-sm font-semibold">${msg}</p>`;
+        c.appendChild(t);
+        setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 3000);
+    }
+
+    async function initDashboard() {
+        try {
+            const meData = await apiCall('/api/auth/me');
+            if (!meData.loggedIn || !meData.user || meData.user.role !== 'ROLE_SUPPLIER') {
+                window.location.href = '/login.html'; return;
+            }
+            const email = meData.user.email;
+            try {
+                loggedInSupplier = await apiCall(`/api/suppliers/email/${email}`);
+                document.getElementById('supplierWelcome').textContent = `Manage orders assigned to ${loggedInSupplier.name}`;
+                document.getElementById('userAvatar').textContent = loggedInSupplier.name.charAt(0).toUpperCase();
+                loadOrders(loggedInSupplier.id);
+            } catch(e) {
+                document.getElementById('supplierWelcome').textContent = 'Supplier record not found.';
+                showToast('Supplier profile not found. Please contact Admin.', true);
+            }
+        } catch(e) {
+            window.location.href = '/login.html';
+        }
+    }
+
+    async function loadOrders(supplierId) {
+        try {
+            const data = await apiCall(`/api/orders/supplier/${supplierId}`);
+            ordersData = data || [];
+            document.getElementById('statTotal').textContent = ordersData.length;
+            document.getElementById('statPending').textContent = ordersData.filter(o=>o.status==='PENDING').length;
+            document.getElementById('statApproved').textContent = ordersData.filter(o=>o.status==='APPROVED' || o.status==='PACKING').length;
+            document.getElementById('statCompleted').textContent = ordersData.filter(o=>o.status==='DELIVERED').length;
+            renderTable();
+        } catch(e) {
+            document.getElementById('ordersTableBody').innerHTML =
+                `<tr><td colspan="8" class="px-6 py-8 text-center text-slate-500">Could not load orders.</td></tr>`;
+        }
+    }
+
+    function updateRowTotal(orderId, qty) {
+        const priceEl = document.getElementById(`price_${orderId}`);
+        const totalEl = document.getElementById(`total_${orderId}`);
+        if (!priceEl || !totalEl) return;
+        const price = parseFloat(priceEl.value) || 0;
+        const total = price * qty;
+        supplierPrices[orderId] = price;
+        totalEl.textContent = `Rs. ${total.toLocaleString('en-LK', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('ordersTableBody');
+        if (!ordersData.length) {
+            tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-8 text-center text-slate-500 font-medium">No orders assigned to you yet.</td></tr>`;
+            return;
+        }
+
+        const sorted = [...ordersData].sort((a,b) => b.orderId - a.orderId);
+        const pendingOrders = sorted.filter(o => o.status === 'PENDING');
+        const otherOrders   = sorted.filter(o => o.status !== 'PENDING');
+
+        let rows = '';
+
+        if (pendingOrders.length > 0) {
+            const groupIds = pendingOrders.map(o => o.orderId);
+
+            pendingOrders.forEach((o, idx) => {
+                const isFirst  = idx === 0;
+                const rowspan  = pendingOrders.length;
+                const savedPrice = supplierPrices[o.orderId] ?? (o.unitPrice || 0);
+                const total = savedPrice * (o.quantity || 0);
+
+                const actionCell = isFirst ? `
+                    <td class="px-6 py-5 text-right align-middle" rowspan="${rowspan}">
+                        <div class="flex flex-col gap-2 items-end">
+                            <button onclick="openConfirmModal([${groupIds.join(',')}])"
+                                class="btn-action bg-[#00478D] text-white hover:brightness-110 whitespace-nowrap">
+                                <span class="material-symbols-outlined text-[16px]">fact_check</span>
+                                Confirm All (${rowspan})
+                            </button>
+                            <button onclick="rejectGroup([${groupIds.join(',')}])"
+                                class="btn-action bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 whitespace-nowrap">
+                                <span class="material-symbols-outlined text-[16px]">cancel</span>
+                                Reject All
+                            </button>
+                        </div>
+                    </td>` : '';
+
+                rows += `<tr class="group-row ${isFirst?'group-first':''} hover:bg-blue-50/30 transition-colors">
+                    <td class="px-6 py-4 text-xs font-bold text-slate-400">#${o.orderId}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-slate-800">${o.medicineName || '—'}</td>
+                    <td class="px-6 py-4 text-sm font-bold text-primary">${o.quantity || '—'}</td>
+                    <td class="px-6 py-4">
+                        <div class="price-wrap">
+                            <span class="currency">Rs.</span>
+                            <input type="number" id="price_${o.orderId}" min="0" step="0.01"
+                                value="${savedPrice > 0 ? savedPrice.toFixed(2) : ''}"
+                                placeholder="0.00"
+                                oninput="updateRowTotal(${o.orderId}, ${o.quantity || 0})"
+                                class="price-input"/>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span id="total_${o.orderId}" class="total-chip">
+                            Rs. ${total.toLocaleString('en-LK', {minimumFractionDigits:2, maximumFractionDigits:2})}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-500">${o.expectedDelivery || '—'}</td>
+                    <td class="px-6 py-4"><span class="status-badge status-pending">Pending</span></td>
+                    ${actionCell}
+                </tr>`;
+            });
+        }
+
+        otherOrders.forEach(o => {
+            const statusHtml = o.status === 'APPROVED' || o.status === 'PACKING'
+                ? `<span class="status-badge bg-blue-500 text-white">Approved</span>`
+                : o.status === 'DELIVERED'
+                    ? `<span class="status-badge status-delivered">Delivered</span>`
+                    : `<span class="status-badge status-rejected">Rejected</span>`;
+
+            const actionCell = o.status === 'APPROVED' || o.status === 'PACKING'
+                ? `<button onclick="markDelivered(${o.orderId})"
+                        class="btn-action bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-[16px]">local_shipping</span> Mark Delivered
+                   </button>`
+                : `<span class="text-xs text-slate-400">—</span>`;
+
+            const unitPrice = o.unitPrice || 0;
+            const total = unitPrice * (o.quantity || 0);
+
+            rows += `<tr class="hover:bg-blue-50/30 transition-colors">
+                <td class="px-6 py-4 text-xs font-bold text-slate-400">#${o.orderId}</td>
+                <td class="px-6 py-4 text-sm font-semibold text-slate-700">${o.medicineName || '—'}</td>
+                <td class="px-6 py-4 text-sm text-slate-600">${o.quantity || '—'}</td>
+                <td class="px-6 py-4 text-sm text-slate-500">Rs. ${unitPrice.toLocaleString('en-LK', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                <td class="px-6 py-4">
+                    <span class="total-chip">Rs. ${total.toLocaleString('en-LK', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                </td>
+                <td class="px-6 py-4 text-sm text-slate-500">${o.expectedDelivery || '—'}</td>
+                <td class="px-6 py-4">${statusHtml}</td>
+                <td class="px-6 py-4 text-right">${actionCell}</td>
+            </tr>`;
+        });
+
+        tbody.innerHTML = rows;
+    }
+
+    function openConfirmModal(ids) {
+        pendingGroupIds = ids;
+        const orders = ordersData.filter(o => ids.includes(o.orderId));
+
+        document.getElementById('confirmGroupLabel').textContent =
+            `${orders.length} medicine order${orders.length > 1 ? 's' : ''} from ${loggedInSupplier?.name || 'supplier'}`;
+
+        const medList = document.getElementById('confirmMedList');
+        let grandTotal = 0;
+
+        medList.innerHTML = orders.map(o => {
+            const price = parseFloat(document.getElementById(`price_${o.orderId}`)?.value) || 0;
+            const total = price * (o.quantity || 0);
+            grandTotal += total;
+            return `
+            <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-2">
+                <div>
+                    <span class="text-sm font-semibold text-slate-800">${o.medicineName}</span>
+                    <span class="text-xs text-slate-400 ml-2">${o.quantity} units × Rs. ${price.toLocaleString('en-LK', {minimumFractionDigits:2})}</span>
+                </div>
+                <span class="text-sm font-black text-primary">Rs. ${total.toLocaleString('en-LK', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+            </div>`;
+        }).join('');
+
+        document.getElementById('confirmGrandTotal').textContent =
+            `Rs. ${grandTotal.toLocaleString('en-LK', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+
+        const firstDate = orders[0]?.expectedDelivery || '';
+        document.getElementById('confirmDate').value = firstDate;
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('confirmDate').min = tomorrow.toISOString().split('T')[0];
+        document.getElementById('confirmNotes').value = '';
+        document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.add('hidden');
+        pendingGroupIds = [];
+    }
+
+    async function submitConfirmGroup() {
+        const deliveryDate = document.getElementById('confirmDate').value;
+        const notes = document.getElementById('confirmNotes').value;
+
+        if (!deliveryDate) {
+            showToast('Please set an expected delivery date.', true); return;
+        }
+
+        for (const id of pendingGroupIds) {
+            const price = parseFloat(document.getElementById(`price_${id}`)?.value) || 0;
+            if (price <= 0) {
+                const order = ordersData.find(o => o.orderId === id);
+                showToast(`Please enter unit price for ${order?.medicineName || 'Order #'+id}`, true);
+                closeConfirmModal();
+                return;
+            }
+        }
+
+        try {
+            for (const id of pendingGroupIds) {
+                const price = parseFloat(document.getElementById(`price_${id}`)?.value) || 0;
+                const order = ordersData.find(o => o.orderId === id);
+                const totalPrice = price * (order?.quantity || 0);
+
+                await apiCall(`/api/orders/${id}`, 'PUT', {
+                    unitPrice: price,
+                    totalPrice: totalPrice,
+                    expectedDelivery: deliveryDate
+                });
+                await apiCall(`/api/orders/${id}/approve`, 'PUT', {
+                    notes: notes || 'Confirmed by Supplier'
+                });
+            }
+            showToast(`✅ ${pendingGroupIds.length} order(s) confirmed successfully!`);
+            closeConfirmModal();
+            loadOrders(loggedInSupplier.id);
+        } catch(e) {
+            showToast('Failed to confirm some orders.', true);
+        }
+    }
+
+    async function rejectGroup(ids) {
+        const reason = prompt(`Reject all ${ids.length} pending order(s)?\nEnter reason:`);
+        if (reason === null) return;
+        try {
+            for (const id of ids) {
+                await apiCall(`/api/orders/${id}/reject`, 'PUT', { reason: reason || 'Rejected by Supplier' });
+            }
+            showToast(`${ids.length} order(s) rejected.`);
+            loadOrders(loggedInSupplier.id);
+        } catch(e) {
+            showToast('Failed to reject some orders.', true);
+        }
+    }
+
+    async function submitRejectGroup() {
+        closeConfirmModal();
+        await rejectGroup(pendingGroupIds);
+    }
+
+    async function markDelivered(id) {
+        if (!confirm('Mark this order as delivered?')) return;
+        try {
+            await apiCall(`/api/orders/${id}/delivered`, 'PUT');
+            showToast('Order marked as delivered!');
+            loadOrders(loggedInSupplier.id);
+        } catch(e) {
+            showToast('Failed to update order status.', true);
+        }
+    }
+
+    async function logout() {
+        try { await apiCall('/api/auth/logout', 'POST'); } catch(e) {}
+        window.location.href = '/login.html';
+    }
+
+    window.addEventListener('DOMContentLoaded', initDashboard);
+</script>
+</body>
+</html>

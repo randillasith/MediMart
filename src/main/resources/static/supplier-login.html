@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Supplier Portal Login | MediMart</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary": "#ffffff",
+              "secondary-fixed": "#7df4ff",
+              "outline-variant": "#c2c6d4",
+              "on-error": "#ffffff",
+              "on-secondary-fixed": "#002022",
+              "on-primary-fixed": "#001b3d",
+              "on-tertiary-fixed": "#341100",
+              "secondary": "#006970",
+              "surface-tint": "#005db6",
+              "surface-variant": "#e1e2ea",
+              "surface": "#f9f9ff",
+              "tertiary-fixed-dim": "#ffb691",
+              "tertiary-fixed": "#ffdbcb",
+              "outline": "#727783",
+              "inverse-primary": "#a9c7ff",
+              "on-primary-container": "#c8daff",
+              "secondary-fixed-dim": "#5dd8e2",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#ffcfb9",
+              "on-background": "#191c21",
+              "primary-fixed-dim": "#a9c7ff",
+              "tertiary-container": "#9f4300",
+              "on-secondary-container": "#006e75",
+              "on-tertiary": "#ffffff",
+              "surface-dim": "#d8dae2",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed-variant": "#793100",
+              "on-surface": "#191c21",
+              "primary": "#00478d",
+              "primary-container": "#005eb8",
+              "surface-container-highest": "#e1e2ea",
+              "on-secondary-fixed-variant": "#004f54",
+              "tertiary": "#793100",
+              "on-surface-variant": "#424752",
+              "surface-container-high": "#e7e8f0",
+              "on-error-container": "#93000a",
+              "on-primary-fixed-variant": "#00468c",
+              "background": "#f9f9ff",
+              "inverse-surface": "#2e3037",
+              "primary-fixed": "#d6e3ff",
+              "surface-bright": "#f9f9ff",
+              "on-secondary": "#ffffff",
+              "surface-container-low": "#f2f3fb",
+              "inverse-on-surface": "#eff0f8",
+              "error-container": "#ffdad6",
+              "secondary-container": "#7af1fc",
+              "surface-container": "#ecedf6"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .medical-pattern {
+            background-color: #f9f9ff;
+            background-image: radial-gradient(#00478d 0.5px, transparent 0.5px), radial-gradient(#00478d 0.5px, #f9f9ff 0.5px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            opacity: 0.03;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen flex flex-col overflow-x-hidden">
+<div class="fixed inset-0 pointer-events-none medical-pattern"></div>
+<main class="flex-grow flex items-center justify-center px-6 py-12 relative z-10">
+<div class="w-full max-w-[1100px] grid grid-cols-1 md:grid-cols-2 bg-surface-container-lowest rounded-full overflow-hidden shadow-[0_12px_40px_rgba(25,28,33,0.06)]">
+<div class="hidden md:flex flex-col justify-between p-12 bg-primary relative overflow-hidden">
+<div class="absolute inset-0 opacity-20">
+<img alt="Supply chain and logistics background" class="w-full h-full object-cover" data-alt="abstract close-up of logistics and shipping boxes representing supplier management" src="https://images.unsplash.com/photo-1586528116311-ad8ed7c50a63?auto=format&fit=crop&q=80"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-br from-primary via-primary/80 to-secondary opacity-90"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 text-on-primary mb-12">
+<span class="material-symbols-outlined text-4xl" data-icon="local_shipping">local_shipping</span>
+<span class="font-headline text-2xl font-extrabold tracking-tight">MediMart</span>
+</div>
+<h1 class="font-headline text-5xl font-bold text-on-primary leading-tight tracking-tight mb-6">
+                        Supplier<br/>Partner<br/>Portal
+                    </h1>
+<p class="text-primary-fixed text-lg max-w-sm leading-relaxed">
+                        Access your assigned orders, confirm deliveries, and manage your inventory operations securely.
+                    </p>
+</div>
+<div class="relative z-10 space-y-6">
+<div class="flex items-center gap-4 group">
+<div class="w-12 h-12 rounded-full bg-on-primary/10 flex items-center justify-center group-hover:bg-on-primary/20 transition-colors">
+<span class="material-symbols-outlined text-on-primary" data-icon="verified_user">verified_user</span>
+</div>
+<div>
+<p class="text-on-primary font-semibold text-sm">Enterprise Security</p>
+<p class="text-on-primary/70 text-xs">Verified Partner Access</p>
+</div>
+</div>
+</div>
+</div>
+<div class="p-8 md:p-16 flex flex-col justify-center">
+<div class="mb-10">
+<h2 class="font-headline text-3xl font-bold text-primary mb-2">Supplier Login</h2>
+<p class="text-on-surface-variant text-sm">Enter your credentials to manage your fulfillment orders.</p>
+</div>
+<div id="errorMessage" class="hidden mb-4 p-3 bg-error-container text-on-error-container rounded-lg text-sm"></div>
+<form id="loginForm" class="space-y-6">
+<div class="space-y-1.5">
+<label class="block text-sm font-medium text-on-surface-variant ml-1" for="email">Supplier Email</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl" data-icon="mail">mail</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container-low rounded-xl border-none focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-outline-variant text-on-surface border-b-2 border-transparent focus:border-surface-tint" id="email" name="email" placeholder="supplier@example.com" required="" type="email"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between items-center ml-1">
+<label class="block text-sm font-medium text-on-surface-variant" for="password">Password</label>
+</div>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl" data-icon="lock">lock</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container-low rounded-xl border-none focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-outline-variant text-on-surface border-b-2 border-transparent focus:border-surface-tint" id="password" name="password" placeholder="••••••••••••" required="" type="password"/>
+</div>
+</div>
+<div class="flex items-center gap-3 py-2 ml-1">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" id="remember" type="checkbox"/>
+<label class="text-sm text-on-surface-variant cursor-pointer" for="remember">Remember this workstation</label>
+</div>
+<button id="loginBtn" class="w-full py-4 bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined" data-icon="login">login</span>
+                        Log In
+                    </button>
+<div class="mt-4 text-center">
+    <p class="text-sm text-on-surface-variant mb-2">First time here? <a href="/supplier-setup.html" class="font-bold text-primary hover:underline">Create your password</a></p>
+    <p class="text-sm text-on-surface-variant">Are you a system admin? <a href="/login.html" class="font-bold text-secondary hover:underline">Admin Login</a></p>
+</div>
+</form>
+<div class="mt-12 pt-8 border-t border-outline-variant/15">
+<div class="flex justify-center items-center gap-8">
+<div class="flex flex-col items-center gap-1 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
+<span class="material-symbols-outlined text-3xl" data-icon="encrypted">encrypted</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">SSL Secure</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="w-full py-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center px-12 gap-4 relative z-10 bg-slate-50 dark:bg-slate-950">
+<p class="text-xs font-['Inter'] tracking-wide uppercase text-slate-400 dark:text-slate-500">
+            © 2024 MediMart Supplier Portal.
+        </p>
+</footer>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const rememberMe = document.getElementById('remember').checked;
+        const errorMsg = document.getElementById('errorMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        
+        errorMsg.classList.add('hidden');
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Logging in...';
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password, rememberMe })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Check role to redirect appropriately
+                try {
+                    const meRes = await fetch('/api/auth/me');
+                    const meData = await meRes.json();
+                    if (meData.loggedIn && meData.user && meData.user.role === 'ROLE_SUPPLIER') {
+                        window.location.href = '/supplier-dashboard.html';
+                    } else {
+                        // If an admin accidentally logs in here, redirect to admin dashboard
+                        window.location.href = '/index.html';
+                    }
+                } catch(e) {
+                    window.location.href = '/index.html';
+                }
+            } else {
+                errorMsg.textContent = data.message || 'Login failed. Please check your credentials.';
+                errorMsg.classList.remove('hidden');
+            }
+        } catch (err) {
+            errorMsg.textContent = 'Network error. Please try again later.';
+            errorMsg.classList.remove('hidden');
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<span class="material-symbols-outlined" data-icon="login">login</span> Log In';
+        }
+    });
+</script>
+</body></html>
