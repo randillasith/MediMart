@@ -1,24 +1,36 @@
 package org.pgno20.medimart.service;
 
+import org.pgno20.medimart.model.Medicine;
 import org.pgno20.medimart.entity.MedicineOrder;
+import org.pgno20.medimart.model.Notification;
 import org.pgno20.medimart.entity.Supplier;
 import org.pgno20.medimart.entity.SupplierType;
 import org.pgno20.medimart.repository.MedicineOrderRepository;
+import org.pgno20.medimart.repository.MedicineRepository;
 import org.pgno20.medimart.repository.SupplierRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MedicineOrderService {
 
     private final MedicineOrderRepository orderRepository;
     private final SupplierRepository supplierRepository;
+    private final MedicineRepository medicineRepository;
+    private final NotificationService notificationService;
 
+    @Autowired
     public MedicineOrderService(MedicineOrderRepository orderRepository,
-                                SupplierRepository supplierRepository) {
+                                SupplierRepository supplierRepository,
+                                MedicineRepository medicineRepository,
+                                NotificationService notificationService) {
         this.orderRepository = orderRepository;
         this.supplierRepository = supplierRepository;
+        this.medicineRepository = medicineRepository;
+        this.notificationService = notificationService;
     }
 
     // ==========================================
@@ -74,7 +86,7 @@ public class MedicineOrderService {
     // Approve order (Encapsulation - logic inside entity)
     public MedicineOrder approveOrder(Long orderId, String notes) {
         MedicineOrder order = getOrderById(orderId);
-        order.approve(notes); // Entity method use - encapsulation
+        order.approve(notes);
         return orderRepository.save(order);
     }
 
@@ -89,6 +101,35 @@ public class MedicineOrderService {
     public MedicineOrder markDelivered(Long orderId) {
         MedicineOrder order = getOrderById(orderId);
         order.markDelivered();
+        
+        // Automated Inventory Update
+        if (order.getMedicineName() != null && !order.getMedicineName().equals("Multiple Items")) {
+            Optional<Medicine> medOpt = medicineRepository.findFirstByName(order.getMedicineName());
+            if (medOpt.isPresent()) {
+                Medicine medicine = medOpt.get();
+                int currentQty = medicine.getStockQty() != null ? medicine.getStockQty() : 0;
+                int addedQty = order.getQuantity() != null ? order.getQuantity() : 0;
+                medicine.setStockQty(currentQty + addedQty);
+                medicine.normalizeStatusFromStock();
+                
+                // If stock is now above threshold, clear alerts
+                if (medicine.getStockQty() > 100) {
+                    notificationService.clearLowStockAlert(medicine.getId());
+                }
+                medicineRepository.save(medicine);
+                
+                // Log transaction via notification
+                Notification txLog = new Notification(
+                    "Inventory Updated: Added " + addedQty + " units to " + medicine.getName() + " from Order #" + order.getOrderId(),
+                    "ORDER_UPDATE",
+                    "ADMIN",
+                    medicine.getId()
+                );
+                // We use the underlying method in service or we can just send it manually, but wait, NotificationService doesn't have a save method. Let's skip the txlog via notification or add a method. Let's just rely on the existing logic and log to console if needed.
+                System.out.println("Inventory Updated: Added " + addedQty + " units to " + medicine.getName() + " from Order #" + order.getOrderId());
+            }
+        }
+        
         return orderRepository.save(order);
     }
 
@@ -99,8 +140,19 @@ public class MedicineOrderService {
         return supplier.getMedicineList();
     }
 
-    private MedicineOrder getOrderById(Long id) {
+    // Get single order by ID (public - used by controller)
+    public MedicineOrder getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + id));
+    }
+
+    // Save / update an order
+    public MedicineOrder saveOrder(MedicineOrder order) {
+        return orderRepository.save(order);
+    }
+
+    // Delete an order by ID
+    public void deleteOrder(Long id) {
+        orderRepository.deleteById(id);
     }
 }

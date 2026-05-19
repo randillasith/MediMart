@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     Optional<Medicine> findBySku(String sku);
+    Optional<Medicine> findFirstByName(String name);
 
     @Query("SELECT m FROM Medicine m WHERE " +
            "LOWER(m.name) = LOWER(:name) AND " +

@@ -48,6 +48,9 @@ public class MedicineOrder {
     @Column(length = 500)
     private String adminNotes;
 
+    @Column(length = 50)
+    private String deliveryMode; // E.g. "Standard Delivery", "Express Delivery"
+
     public MedicineOrder() {
         this.status = "PENDING";
         this.orderDate = LocalDate.now();
@@ -64,11 +67,11 @@ public class MedicineOrder {
     }
 
     public boolean isPending() { return "PENDING".equals(this.status); }
-    public boolean isApproved() { return "APPROVED".equals(this.status); }
+    public boolean isPacking() { return "PACKING".equals(this.status); }
 
     public void approve(String notes) {
-        if (!isPending()) throw new IllegalStateException("Only PENDING orders can be approved");
-        this.status = "APPROVED";
+        if (!isPending()) throw new IllegalStateException("Only PENDING orders can be confirmed");
+        this.status = "PACKING";
         this.adminNotes = notes;
     }
 
@@ -79,7 +82,7 @@ public class MedicineOrder {
     }
 
     public void markDelivered() {
-        if (!isApproved()) throw new IllegalStateException("Only APPROVED orders can be delivered");
+        if (!isPacking()) throw new IllegalStateException("Only PACKING orders can be delivered");
         this.status = "DELIVERED";
     }
 
@@ -119,4 +122,7 @@ public class MedicineOrder {
 
     public String getAdminNotes() { return adminNotes; }
     public void setAdminNotes(String adminNotes) { this.adminNotes = adminNotes; }
+
+    public String getDeliveryMode() { return deliveryMode; }
+    public void setDeliveryMode(String deliveryMode) { this.deliveryMode = deliveryMode; }
 }
