@@ -13,4 +13,6 @@ public interface SupplierRepository extends JpaRepository<Supplier, String> {
 
     @Query("SELECT MAX(s.id) FROM Supplier s")
     String findMaxId();
+
+    java.util.Optional<Supplier> findByEmail(String email);
 }

@@ -30,13 +30,16 @@ public class MedicineService {
     private final CategoryRepository categoryRepository;
     private final StockBatchRepository stockBatchRepository;
     private final StockBatchService stockBatchService;
+    private final NotificationService notificationService;
 
     public MedicineService(MedicineRepository medicineRepository, CategoryRepository categoryRepository,
-                           StockBatchRepository stockBatchRepository, StockBatchService stockBatchService) {
+                           StockBatchRepository stockBatchRepository, StockBatchService stockBatchService,
+                           NotificationService notificationService) {
         this.medicineRepository = medicineRepository;
         this.categoryRepository = categoryRepository;
         this.stockBatchRepository = stockBatchRepository;
         this.stockBatchService = stockBatchService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -71,11 +74,16 @@ public class MedicineService {
 
         // Business rules
         medicine.normalizeStatusFromStock();
-
+        
         assignDefaultImage(medicine);
 
         // First save to generate the ID
         Medicine saved = medicineRepository.save(medicine);
+        
+        // Trigger notification if low stock on creation
+        if (saved.getStockQty() != null && saved.getStockQty() <= 100) {
+            notificationService.triggerLowStockAlert(saved.getName(), saved.getId());
+        }
         
         // Update SKU with the MED001 format based on the generated ID
         saved.setSku(String.format("MED%03d", saved.getId()));
@@ -172,7 +180,16 @@ public class MedicineService {
             medicine.normalizeStatusFromStock();
         }
 
-        return toResponse(medicineRepository.save(medicine));
+        Medicine updated = medicineRepository.save(medicine);
+        
+        // Check for low stock alert
+        if (updated.getStockQty() != null && updated.getStockQty() <= 100 && !updated.getStatus().equals("DISCONTINUED")) {
+            notificationService.triggerLowStockAlert(updated.getName(), updated.getId());
+        } else {
+            notificationService.clearLowStockAlert(updated.getId());
+        }
+
+        return toResponse(updated);
     }
 
     @Transactional

@@ -62,6 +62,14 @@ public class SupplierController {
         return ResponseEntity.ok(supplierService.searchByName(q));
     }
 
+    // Get by email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Supplier> getByEmail(@PathVariable String email) {
+        return supplierService.getSupplierByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // Search by medicine
     @GetMapping("/search/medicine")
     public ResponseEntity<List<Supplier>> searchByMedicine(@RequestParam String q) {

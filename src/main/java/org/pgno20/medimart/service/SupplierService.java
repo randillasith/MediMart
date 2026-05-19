@@ -62,6 +62,10 @@ public class SupplierService {
         return supplierRepository.findByNameContainingIgnoreCase(name);
     }
 
+    public java.util.Optional<Supplier> getSupplierByEmail(String email) {
+        return supplierRepository.findByEmail(email);
+    }
+
     public List<Supplier> searchByMedicineKeyword(String keyword) {
         return supplierRepository.findByMedicinesSuppliedContainingIgnoreCase(keyword);
     }

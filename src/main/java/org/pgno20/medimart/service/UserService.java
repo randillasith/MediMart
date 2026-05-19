@@ -24,6 +24,9 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private org.pgno20.medimart.repository.SupplierRepository supplierRepository;
+
     public User registerUser(UserRegistrationDTO dto) {
         // Confirm password check
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
@@ -45,6 +48,31 @@ public class UserService {
         // Store password as SHA-256 hash
         user.setPassword(hashPassword(dto.getPassword())); 
         user.setRole("ROLE_USER");
+        user.setActive(true);
+
+        return userRepository.save(user);
+    }
+
+    public User setupSupplierAccount(org.pgno20.medimart.dto.SupplierSetupDTO dto) {
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+        validatePasswordStrength(dto.getPassword());
+
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Account already configured for this email");
+        }
+
+        org.pgno20.medimart.entity.Supplier supplier = supplierRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("No supplier found with this email"));
+
+        User user = new User();
+        user.setFullName(supplier.getName());
+        user.setEmail(dto.getEmail());
+        user.setDob(java.time.LocalDate.of(1970, 1, 1)); // Default for supplier users
+        user.setGender("N/A"); // Default for supplier users
+        user.setPassword(hashPassword(dto.getPassword()));
+        user.setRole("ROLE_SUPPLIER");
         user.setActive(true);
 
         return userRepository.save(user);

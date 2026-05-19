@@ -101,7 +101,8 @@ public class Supplier extends org.pgno20.medimart.entity.AbstractSupplier {
     public void setType(String type) { this.type = type; }
 
     public String getContact() { return contact; }
-    public void setContact(String contact) { this.contact = contact; }
+    public void setContact(String
+                                   contact) { this.contact = contact; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }

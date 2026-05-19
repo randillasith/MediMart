@@ -37,6 +37,18 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/supplier-setup")
+    public ResponseEntity<AuthResponse> setupSupplier(@Valid @RequestBody org.pgno20.medimart.dto.SupplierSetupDTO dto) {
+        try {
+            userService.setupSupplierAccount(dto);
+            return ResponseEntity.ok(new AuthResponse("Supplier account configured successfully", true));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(e.getMessage(), false));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse("An error occurred during supplier setup", false));
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginDTO dto, HttpServletRequest request) {
         try {
@@ -140,5 +152,14 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse("An error occurred during account deletion", false));
         }
+    }
+
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<AuthResponse> handleValidationExceptions(org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .findFirst()
+                .orElse("Validation failed");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(errorMessage, false));
     }
 }
