@@ -407,15 +407,9 @@
         try {
             for (const id of pendingGroupIds) {
                 const price = parseFloat(document.getElementById(`price_${id}`)?.value) || 0;
-                const order = ordersData.find(o => o.orderId === id);
-                const totalPrice = price * (order?.quantity || 0);
-
-                await apiCall(`/api/orders/${id}`, 'PUT', {
+                await apiCall(`/api/orders/${id}/confirm`, 'PUT', {
                     unitPrice: price,
-                    totalPrice: totalPrice,
-                    expectedDelivery: deliveryDate
-                });
-                await apiCall(`/api/orders/${id}/approve`, 'PUT', {
+                    expectedDelivery: deliveryDate,
                     notes: notes || 'Confirmed by Supplier'
                 });
             }

@@ -11,10 +11,13 @@ import org.pgno20.medimart.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class MedicineOrderService {
 
     private final MedicineOrderRepository orderRepository;
@@ -38,7 +41,8 @@ public class MedicineOrderService {
     // Supplier validate කරලා, medicine check කරලා order හදනවා
     // ==========================================
     public MedicineOrder placeOrder(String supplierId, String medicineName,
-                                    int quantity, double unitPrice) {
+                                    int quantity, double unitPrice,
+                                    java.time.LocalDate expectedDelivery, String deliveryMode) {
 
         // Supplier exist කරනවාද check
         Supplier supplier = supplierRepository.findById(supplierId)
@@ -64,6 +68,13 @@ public class MedicineOrderService {
         // POLYMORPHISM: SupplierType enum use කරලා total + delivery date calculate
         SupplierType type = supplier.getSupplierTypeEnum();
         order.calculateAndSetTotals(type);
+
+        if (expectedDelivery != null) {
+            order.setExpectedDelivery(expectedDelivery);
+        }
+        if (deliveryMode != null) {
+            order.setDeliveryMode(deliveryMode);
+        }
 
         return orderRepository.save(order);
     }
