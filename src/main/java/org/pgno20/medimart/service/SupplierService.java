@@ -1,10 +1,12 @@
 package org.pgno20.medimart.service;
 
+import org.pgno20.medimart.dto.SupplierResponse;
 import org.pgno20.medimart.entity.Supplier;
 import org.pgno20.medimart.repository.SupplierRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SupplierService {
@@ -16,26 +18,33 @@ public class SupplierService {
     }
 
     // Create
-    public Supplier createSupplier(Supplier supplier) {
+    public SupplierResponse createSupplier(Supplier supplier) {
         if (supplier.getId() == null || supplier.getId().isBlank()) {
             supplier.setId(generateNextId());
         }
-        return supplierRepository.save(supplier);
+        return toResponse(supplierRepository.save(supplier));
     }
 
     // Read all
-    public List<Supplier> getAllSuppliers() {
-        return supplierRepository.findAll();
+    public List<SupplierResponse> getAllSuppliers() {
+        return supplierRepository.findAll().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     // Read by id
     public Supplier getSupplierById(String id) {
         return supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + id));
+    }
+
+    // Read by id (DTO)
+    public SupplierResponse getSupplierResponseById(String id) {
+        return toResponse(getSupplierById(id));
     }
 
     // Update
-    public Supplier updateSupplier(String id, Supplier updated) {
+    public SupplierResponse updateSupplier(String id, Supplier updated) {
         Supplier existing = getSupplierById(id);
 
         existing.setName(updated.getName());
@@ -46,28 +55,32 @@ public class SupplierService {
         existing.setAddress(updated.getAddress());
         existing.setMedicinesSupplied(updated.getMedicinesSupplied());
 
-        return supplierRepository.save(existing);
+        return toResponse(supplierRepository.save(existing));
     }
 
     // Delete
     public void deleteSupplier(String id) {
         if (!supplierRepository.existsById(id)) {
-            throw new RuntimeException("Supplier not found: " + id);
+            throw new IllegalArgumentException("Supplier not found: " + id);
         }
         supplierRepository.deleteById(id);
     }
 
     // Search
-    public List<Supplier> searchByName(String name) {
-        return supplierRepository.findByNameContainingIgnoreCase(name);
+    public List<SupplierResponse> searchByName(String name) {
+        return supplierRepository.findByNameContainingIgnoreCase(name).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     public java.util.Optional<Supplier> getSupplierByEmail(String email) {
         return supplierRepository.findByEmail(email);
     }
 
-    public List<Supplier> searchByMedicineKeyword(String keyword) {
-        return supplierRepository.findByMedicinesSuppliedContainingIgnoreCase(keyword);
+    public List<SupplierResponse> searchByMedicineKeyword(String keyword) {
+        return supplierRepository.findByMedicinesSuppliedContainingIgnoreCase(keyword).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     // Safe ID generator: SUP001, SUP002...
@@ -78,5 +91,19 @@ public class SupplierService {
         }
         int currentNum = Integer.parseInt(maxId.substring(3));
         return String.format("SUP%03d", currentNum + 1);
+    }
+
+    // Convert entity to DTO
+    private SupplierResponse toResponse(Supplier supplier) {
+        SupplierResponse r = new SupplierResponse();
+        r.setId(supplier.getId());
+        r.setName(supplier.getName());
+        r.setType(supplier.getType());
+        r.setContact(supplier.getContact());
+        r.setEmail(supplier.getEmail());
+        r.setAddress(supplier.getAddress());
+        r.setMedicinesSupplied(supplier.getMedicinesSupplied());
+        r.setSupplierCategory(supplier.getSupplierCategory());
+        return r;
     }
 }

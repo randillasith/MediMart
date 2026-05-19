@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MediMart | Prescription Verification</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{"secondary-fixed-dim":"#5dd8e2","on-primary-fixed":"#001b3d","primary-fixed":"#d6e3ff","surface-variant":"#e1e2ea","surface-tint":"#005db6","error-container":"#ffdad6",outline:"#727783","on-tertiary-fixed-variant":"#793100",tertiary:"#793100","surface-container-high":"#e7e8f0",error:"#ba1a1a","surface-container-lowest":"#ffffff","surface-container-highest":"#e1e2ea","surface-bright":"#f9f9ff","tertiary-container":"#9f4300","surface-container":"#ecedf6","surface-dim":"#d8dae2","on-secondary-fixed-variant":"#004f54","on-primary-container":"#c8daff","inverse-on-surface":"#eff0f8",surface:"#f9f9ff",primary:"#00478d","surface-container-low":"#f2f3fb","inverse-primary":"#a9c7ff","inverse-surface":"#2e3037","secondary-container":"#7af1fc","primary-fixed-dim":"#a9c7ff","on-tertiary":"#ffffff","on-secondary":"#ffffff","primary-container":"#005eb8",secondary:"#006970","on-primary":"#ffffff","on-tertiary-container":"#ffcfb9","on-error-container":"#93000a","tertiary-fixed-dim":"#ffb691","secondary-fixed":"#7df4ff","tertiary-fixed":"#ffdbcb","on-surface-variant":"#424752",background:"#f9f9ff","on-primary-fixed-variant":"#00468c","on-secondary-container":"#006e75","on-surface":"#191c21","on-secondary-fixed":"#002022","on-background":"#191c21","outline-variant":"#c2c6d4","on-error":"#ffffff","on-tertiary-fixed":"#341100"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},fontFamily:{headline:["Manrope"],display:["Manrope"],body:["Inter"],label:["Inter"]}}}};
+</script>
+<style>
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.cta-gradient{background:linear-gradient(135deg,#00478D 0%,#005EB8 100%)}
+.glass-effect{backdrop-filter:blur(12px);background-color:rgba(249,249,255,0.8)}
+.ghost-border{border:1px solid rgba(194,198,212,0.15)}
+</style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen flex flex-col">
+
+<header class="w-full bg-surface-container-low px-8 py-6 flex justify-between items-center max-w-7xl mx-auto sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer" onclick="window.location.href='/catalog.html'">arrow_back</span>
+<h1 class="text-2xl font-headline font-extrabold tracking-tighter text-primary cursor-pointer" onclick="window.location.href='/catalog.html'">MediMart</h1>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<div class="flex items-center gap-2"><span class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-label-md font-bold">1</span><span class="text-primary font-bold text-body-md">Verification</span></div>
+<div class="w-12 h-[1px] bg-outline-variant opacity-30"></div>
+<div class="flex items-center gap-2 opacity-50"><span class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center text-label-md">2</span><span class="text-on-surface-variant font-medium text-body-md">Shipping And Payment</span></div>
+<div class="w-12 h-[1px] bg-outline-variant opacity-30"></div>
+<div class="flex items-center gap-2 opacity-50"><span class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center text-label-md">3</span><span class="text-on-surface-variant font-medium text-body-md">Confirmation</span></div>
+</div>
+<div class="flex items-center gap-2"><span class="material-symbols-outlined text-on-surface-variant">lock</span><span class="text-label-md font-medium text-on-surface-variant uppercase tracking-widest">Secure Checkout</span></div>
+</header>
+
+<main class="flex-grow w-full max-w-7xl mx-auto px-8 py-12">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+<div class="lg:col-span-7 space-y-12">
+<section>
+<h2 class="text-xl font-headline font-bold tracking-tight text-primary mb-4">Prescription Required</h2>
+<p class="text-body-md text-on-surface-variant leading-relaxed max-w-2xl">To fulfill your order for clinical medications, we are legally required to verify a valid prescription from a registered medical practitioner.</p>
+</section>
+
+<!-- Prescription Details -->
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_12px_40px_rgba(25,28,33,0.05)] ghost-border">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">clinical_notes</span>
+<h3 class="text-xl font-headline font-bold text-on-surface">Prescription Details</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<label class="space-y-2"><span class="text-sm font-bold text-on-surface-variant">Patient Name</span><input id="patientName" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" placeholder="Full name on prescription" required/></label>
+<label class="space-y-2"><span class="text-sm font-bold text-on-surface-variant">Doctor Name</span><input id="doctorName" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" placeholder="Prescribing doctor's name" required/></label>
+<label class="space-y-2"><span class="text-sm font-bold text-on-surface-variant">Prescription Date</span><input id="prescriptionDate" type="date" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" required/></label>
+<label class="space-y-2"><span class="text-sm font-bold text-on-surface-variant">Dosage Instructions</span><input id="dosage" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" placeholder="Example: 1 tablet twice daily" required/></label>
+</div>
+<label class="block space-y-2 mt-5"><span class="text-sm font-bold text-on-surface-variant">Additional Notes</span><textarea id="instructions" rows="3" class="w-full rounded-xl border-outline-variant bg-surface-container-low focus:border-primary focus:ring-primary" placeholder="Optional notes visible to the pharmacist"></textarea></label>
+</section>
+
+<!-- Upload Area -->
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-secondary-container to-primary-container rounded-xl blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+<div id="upload-area" class="relative glass-effect ghost-border p-12 rounded-xl flex flex-col items-center justify-center text-center space-y-6 cursor-pointer hover:bg-surface-container-lowest transition-all" onclick="document.getElementById('file-input').click()">
+<input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden" onchange="handleFileUpload(this)"/>
+<div class="w-20 h-20 rounded-full bg-secondary-container/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-4xl">cloud_upload</span>
+</div>
+<div class="space-y-2">
+<h3 class="text-xl font-headline font-bold text-on-surface">Upload Prescription</h3>
+<p class="text-body-md text-on-surface-variant">Drag and drop your PDF or Image here, or <span class="text-primary font-bold">browse files</span></p>
+<p class="text-label-md text-outline opacity-70">Accepted formats: PDF, JPEG, PNG (Max 10MB)</p>
+</div>
+</div>
+</div>
+
+<!-- Upload Success (hidden initially) -->
+<div id="upload-success" class="hidden relative glass-effect ghost-border p-8 rounded-xl">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full bg-secondary-container/30 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-secondary text-3xl" style="font-variation-settings:'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-grow">
+<h3 class="text-lg font-headline font-bold text-on-surface">Prescription Uploaded</h3>
+<p id="uploaded-file-name" class="text-body-sm text-on-surface-variant">document.pdf</p>
+</div>
+<button onclick="removeUpload()" class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined">close</span></button>
+</div>
+</div>
+
+<!-- Validation Checklist -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-6 rounded-xl space-y-3"><div class="flex items-center gap-3 text-secondary"><span class="material-symbols-outlined">verified</span><h4 class="font-headline font-bold">Valid Date</h4></div><p class="text-body-sm text-on-surface-variant">Must be issued within the last 6 months to ensure clinical accuracy.</p></div>
+<div class="bg-surface-container-low p-6 rounded-xl space-y-3"><div class="flex items-center gap-3 text-secondary"><span class="material-symbols-outlined">badge</span><h4 class="font-headline font-bold">Doctor's Info</h4></div><p class="text-body-sm text-on-surface-variant">The prescriber's name, signature, and registration number must be visible.</p></div>
+<div class="bg-surface-container-low p-6 rounded-xl space-y-3"><div class="flex items-center gap-3 text-secondary"><span class="material-symbols-outlined">person</span><h4 class="font-headline font-bold">Patient Details</h4></div><p class="text-body-sm text-on-surface-variant">The name on the prescription must match your MediMart profile name.</p></div>
+<div class="bg-surface-container-low p-6 rounded-xl space-y-3"><div class="flex items-center gap-3 text-secondary"><span class="material-symbols-outlined">medication</span><h4 class="font-headline font-bold">Legible Dosage</h4></div><p class="text-body-sm text-on-surface-variant">The medication name and dosage instructions must be clearly readable.</p></div>
+</div>
+</div>
+
+<!-- Right: Cart Summary -->
+<aside class="lg:col-span-5 bg-surface-container-lowest rounded-xl p-8 shadow-[0_12px_40px_rgba(25,28,33,0.06)] sticky top-28">
+<h3 class="text-xl font-headline font-bold text-primary mb-8">Prescription Items</h3>
+<div class="space-y-8" id="rx-items-list"><!-- Dynamic --></div>
+
+<div class="pt-8 space-y-3 border-t border-outline-variant/10" id="rx-totals"><!-- Dynamic --></div>
+
+<div class="pt-8 space-y-4">
+<button id="verify-btn" onclick="verifyAndContinue()" class="w-full py-4 rounded-full cta-gradient text-on-primary font-bold text-body-lg flex items-center justify-center gap-2 opacity-40 cursor-not-allowed" disabled>
+<span>Verify and Continue</span><span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<button onclick="skipPrescription()" class="w-full py-4 rounded-full bg-surface-container-high text-on-primary-fixed-variant font-bold text-body-md hover:bg-surface-container-highest transition-colors">I will provide it later</button>
+<p class="text-[10px] text-center text-outline-variant uppercase tracking-widest leading-relaxed">Orders are subject to clinical review by our licensed pharmacists.</p>
+</div>
+</aside>
+</div>
+</main>
+
+<footer class="w-full px-8 py-12 flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto gap-6 mt-12 border-t border-outline-variant/10">
+<div class="flex flex-col items-center md:items-start gap-2"><span class="text-xl font-headline font-bold text-primary">MediMart</span><p class="text-body-sm text-on-surface-variant">&copy; 2024 MediMart Clinical Care. All rights reserved.</p></div>
+<div class="flex gap-8"><a class="text-label-md font-body text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a><a class="text-label-md font-body text-on-surface-variant hover:text-primary transition-colors" href="#">HIPAA Compliance</a><a class="text-label-md font-body text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a></div>
+<div class="flex items-center gap-4"><span class="material-symbols-outlined text-secondary">security</span><span class="text-label-md font-bold text-secondary uppercase tracking-tighter">Verified Pharmacy</span></div>
+</footer>
+
+<script>
+var cart = [];
+var rxItems = [];
+var fileUploaded = false;
+var selectedFile = null;
+
+function init() {
+    var stored = localStorage.getItem('medimart_cart');
+    if (stored) cart = JSON.parse(stored);
+
+    // Filter only prescription-required items
+    rxItems = cart.filter(function(item) { return item.prescriptionRequired === true; });
+
+    if (rxItems.length === 0) {
+        // No prescription items, skip to checkout
+        window.location.href = '/checkout.html';
+        return;
+    }
+
+    renderRxItems();
+    loadMemberProfile();
+    document.getElementById('prescriptionDate').value = new Date().toISOString().split('T')[0];
+}
+
+async function loadMemberProfile() {
+    try {
+        var res = await fetch('/api/auth/me');
+        var data = await res.json();
+        if (!data.loggedIn) {
+            window.location.href = '/login.html';
+            return;
+        }
+        if (data.user && data.user.fullName) {
+            document.getElementById('patientName').value = data.user.fullName;
+        }
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+}
+
+function renderRxItems() {
+    var container = document.getElementById('rx-items-list');
+    var totalsContainer = document.getElementById('rx-totals');
+    container.innerHTML = '';
+    var subtotal = 0;
+
+    rxItems.forEach(function(item) {
+        var price = item.finalPrice || 0;
+        subtotal += price * item.cartQty;
+
+        var div = document.createElement('div');
+        div.className = 'flex gap-6 items-start';
+        div.innerHTML = '<div class="w-24 h-24 bg-surface-container-low rounded-lg overflow-hidden flex-shrink-0 relative flex items-center justify-center">' +
+            '<img alt="' + item.name + '" class="w-20 h-auto mix-blend-multiply" src="' + (item.cartImg || '') + '"/>' +
+            '<span class="absolute top-0 left-0 bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded-br-lg uppercase tracking-wider">RX</span></div>' +
+            '<div class="flex-grow"><h4 class="text-body-md font-bold text-on-surface">' + item.name + '</h4>' +
+            '<p class="text-label-md text-on-surface-variant">' + (item.dosage || '') + ' &bull; ' + (item.brand || 'Generic') + '</p>' +
+            '<p class="text-body-md font-bold text-primary mt-2">Rs. ' + (price * item.cartQty).toFixed(2) + '</p></div>';
+        container.appendChild(div);
+    });
+
+    totalsContainer.innerHTML = '<div class="flex justify-between text-body-md"><span class="text-on-surface-variant">Subtotal (' + rxItems.length + ' Rx items)</span><span class="text-on-surface font-medium">Rs. ' + subtotal.toFixed(2) + '</span></div>' +
+        '<div class="flex justify-between text-body-md"><span class="text-on-surface-variant">Verified Clinical Fee</span><span class="text-secondary font-medium">Free</span></div>' +
+        '<div class="flex justify-between text-xl font-headline font-extrabold pt-4 text-primary"><span>Total</span><span>Rs. ' + subtotal.toFixed(2) + '</span></div>';
+}
+
+function handleFileUpload(input) {
+    if (input.files && input.files[0]) {
+        var file = input.files[0];
+        if (file.size > 10 * 1024 * 1024) { alert('File too large. Max 10MB.'); return; }
+        var allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+        if (allowed.indexOf(file.type) === -1) { alert('Invalid file type. Use PDF, JPEG, or PNG.'); return; }
+
+        fileUploaded = true;
+        selectedFile = file;
+        document.getElementById('uploaded-file-name').innerText = file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+        document.getElementById('upload-area').classList.add('hidden');
+        document.getElementById('upload-success').classList.remove('hidden');
+
+        var btn = document.getElementById('verify-btn');
+        btn.disabled = false;
+        btn.classList.remove('opacity-40', 'cursor-not-allowed');
+    }
+}
+
+function removeUpload() {
+    fileUploaded = false;
+    selectedFile = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('upload-area').classList.remove('hidden');
+    document.getElementById('upload-success').classList.add('hidden');
+    var btn = document.getElementById('verify-btn');
+    btn.disabled = true;
+    btn.classList.add('opacity-40', 'cursor-not-allowed');
+}
+
+async function verifyAndContinue() {
+    if (!fileUploaded) { alert('Please upload a prescription first.'); return; }
+    var patientName = document.getElementById('patientName').value.trim();
+    var doctorName = document.getElementById('doctorName').value.trim();
+    var prescriptionDate = document.getElementById('prescriptionDate').value;
+    var dosage = document.getElementById('dosage').value.trim();
+    if (!patientName || !doctorName || !prescriptionDate || !dosage) {
+        alert('Please complete prescription details before continuing.');
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append('patientName', patientName);
+    formData.append('doctorName', doctorName);
+    formData.append('medicineDetails', rxItems.map(function(item) { return item.name + ' (x' + item.cartQty + ')'; }).join(', '));
+    formData.append('dosage', dosage);
+    formData.append('instructions', document.getElementById('instructions').value.trim());
+    formData.append('prescriptionDate', prescriptionDate);
+    formData.append('file', selectedFile);
+
+    var btn = document.getElementById('verify-btn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Submitting for review...';
+    try {
+        var res = await fetch('/api/prescriptions', { method: 'POST', body: formData });
+        if (!res.ok) {
+            var text = await res.text();
+            throw new Error(text || 'Prescription submission failed.');
+        }
+        var saved = await res.json();
+        sessionStorage.setItem('prescription_verified', 'true');
+        sessionStorage.setItem('latest_prescription_id', saved.prescriptionId || '');
+        window.location.href = '/checkout.html';
+    } catch (err) {
+        alert(err.message);
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Verify and Continue';
+    }
+}
+
+function skipPrescription() {
+    if (confirm('Your prescription items may be held for review. Continue without uploading?')) {
+        sessionStorage.setItem('prescription_verified', 'skipped');
+        window.location.href = '/checkout.html';
+    }
+}
+
+// Drag and drop support
+document.addEventListener('DOMContentLoaded', function() {
+    init();
+    var area = document.getElementById('upload-area');
+    if (area) {
+        area.addEventListener('dragover', function(e) { e.preventDefault(); area.classList.add('bg-surface-container-lowest'); });
+        area.addEventListener('dragleave', function() { area.classList.remove('bg-surface-container-lowest'); });
+        area.addEventListener('drop', function(e) {
+            e.preventDefault(); area.classList.remove('bg-surface-container-lowest');
+            if (e.dataTransfer.files.length > 0) {
+                document.getElementById('file-input').files = e.dataTransfer.files;
+                handleFileUpload(document.getElementById('file-input'));
+            }
+        });
+    }
+});
+</script>
+</body></html>

@@ -1,5 +1,6 @@
 package org.pgno20.medimart.controller;
 
+import org.pgno20.medimart.dto.SupplierResponse;
 import org.pgno20.medimart.entity.Supplier;
 import org.pgno20.medimart.service.SupplierService;
 import org.springframework.http.ResponseEntity;
@@ -20,32 +21,27 @@ public class SupplierController {
 
     // Create
     @PostMapping
-    public ResponseEntity<Supplier> create(@Valid @RequestBody Supplier supplier) {
-        Supplier created = supplierService.createSupplier(supplier);
+    public ResponseEntity<SupplierResponse> create(@Valid @RequestBody Supplier supplier) {
+        SupplierResponse created = supplierService.createSupplier(supplier);
         URI location = URI.create("/api/suppliers/" + created.getId());
-        return ResponseEntity.created(location).body(created);  // 201 instead of 200
+        return ResponseEntity.created(location).body(created);
     }
 
     // Read all
     @GetMapping
-    public ResponseEntity<List<Supplier>> getAll() {
+    public ResponseEntity<List<SupplierResponse>> getAll() {
         return ResponseEntity.ok(supplierService.getAllSuppliers());
     }
 
-    // Read by id — returns 404 if not found
+    // Read by id
     @GetMapping("/{id}")
-    public ResponseEntity<Supplier> getById(@PathVariable String id) {
-        try {
-            Supplier supplier = supplierService.getSupplierById(id);
-            return ResponseEntity.ok(supplier);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<SupplierResponse> getById(@PathVariable String id) {
+        return ResponseEntity.ok(supplierService.getSupplierResponseById(id));
     }
 
     // Update
     @PutMapping("/{id}")
-    public ResponseEntity<Supplier> update(@PathVariable String id, @Valid @RequestBody Supplier supplier) {
+    public ResponseEntity<SupplierResponse> update(@PathVariable String id, @Valid @RequestBody Supplier supplier) {
         return ResponseEntity.ok(supplierService.updateSupplier(id, supplier));
     }
 
@@ -58,7 +54,7 @@ public class SupplierController {
 
     // Search by name
     @GetMapping("/search/name")
-    public ResponseEntity<List<Supplier>> searchByName(@RequestParam String q) {
+    public ResponseEntity<List<SupplierResponse>> searchByName(@RequestParam String q) {
         return ResponseEntity.ok(supplierService.searchByName(q));
     }
 
@@ -72,7 +68,7 @@ public class SupplierController {
 
     // Search by medicine
     @GetMapping("/search/medicine")
-    public ResponseEntity<List<Supplier>> searchByMedicine(@RequestParam String q) {
+    public ResponseEntity<List<SupplierResponse>> searchByMedicine(@RequestParam String q) {
         return ResponseEntity.ok(supplierService.searchByMedicineKeyword(q));
     }
 }
