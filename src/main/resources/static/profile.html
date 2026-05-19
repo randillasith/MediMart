@@ -101,6 +101,10 @@
                 <span class="material-symbols-outlined">history_edu</span>
                 <span>Order History</span>
             </button>
+            <button onclick="switchTab('prescriptions')" id="tab-prescriptions" class="px-4 py-2 rounded-full flex items-center gap-3 transition-all duration-300 ease-in-out text-on-surface-variant hover:bg-surface-container">
+                <span class="material-symbols-outlined">clinical_notes</span>
+                <span>Prescriptions</span>
+            </button>
         </nav>
     </aside>
 
@@ -200,6 +204,25 @@
                 </div>
             </section>
         </div>
+
+        <!-- Prescriptions View -->
+        <div id="view-prescriptions" class="grid grid-cols-1 gap-8 hidden">
+            <section class="bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/15">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                    <div>
+                        <h2 class="text-headline-sm font-headline font-bold text-primary">Prescription Status</h2>
+                        <p class="text-body-sm text-outline">Review decisions from the pharmacy team</p>
+                    </div>
+                    <a href="/catalog.html" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm">Continue Shopping</a>
+                </div>
+                <div id="prescriptions-list">
+                    <div class="text-center py-16 text-on-surface-variant opacity-60">
+                        <span class="material-symbols-outlined text-5xl block mb-3">clinical_notes</span>
+                        <p class="text-sm">Loading prescriptions...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
     </main>
 </div>
 
@@ -278,6 +301,7 @@
 
 <script>
     let currentUser = {};
+    let deliveryFee = 0;
 
     document.addEventListener('DOMContentLoaded', async () => {
         try {
@@ -289,6 +313,13 @@
             }
             currentUser = data.user;
             populateProfile();
+
+            // Fetch delivery fee
+            const settingsRes = await fetch('/api/settings/public');
+            if (settingsRes.ok) {
+                const settings = await settingsRes.json();
+                deliveryFee = parseFloat(settings.standardDeliveryFee) || 0;
+            }
         } catch (e) {
             console.error('Error fetching profile:', e);
             window.location.href = '/login.html';
@@ -318,7 +349,7 @@
                 const dashLink = document.createElement('a');
                 dashLink.id = 'adminDashLink';
                 dashLink.className = 'text-on-surface-variant hover:text-primary transition-colors font-body text-body-md font-medium';
-                dashLink.href = '/medicines';
+                dashLink.href = '/dashboard';
                 dashLink.textContent = currentUser.roleName === 'ROLE_ADMIN' ? 'Admin Dashboard' : 'Staff Dashboard';
                 // Insert it before the "Members" link (which is the last one)
                 nav.insertBefore(dashLink, nav.lastElementChild);
@@ -326,7 +357,7 @@
         }
     }
 
-    const ALL_TABS = ['personal', 'security', 'orders'];
+    const ALL_TABS = ['personal', 'security', 'orders', 'prescriptions'];
 
     function switchTab(tabId) {
         // Hide all views and deactivate all tabs
@@ -345,6 +376,9 @@
         // Lazy-load orders the first time the tab is opened
         if (tabId === 'orders' && !ordersLoaded) {
             loadOrders();
+        }
+        if (tabId === 'prescriptions' && !prescriptionsLoaded) {
+            loadPrescriptions();
         }
     }
 
@@ -568,7 +602,8 @@
                 </div>
                 <div class="text-right flex-shrink-0">
                     <p class="font-headline font-black text-primary text-xl">${price}</p>
-                    <p class="text-xs text-on-surface-variant">Qty: ${order.quantity}</p>
+                    <p class="text-[10px] text-on-surface-variant mb-1">Incl. LKR ${deliveryFee.toFixed(2)} delivery</p>
+                    <p class="text-xs text-on-surface-variant font-bold">Qty: ${order.quantity}</p>
                 </div>
             </div>`;
         }).join('');
@@ -577,6 +612,83 @@
     function showOrdersError(msg) {
         document.getElementById('orders-list').innerHTML =
             `<div class="text-center py-16 text-on-surface-variant opacity-60"><span class="material-symbols-outlined text-5xl block mb-3">error_outline</span><p class="text-sm">${msg}</p></div>`;
+    }
+
+    // Prescription status notifications
+    let prescriptionsLoaded = false;
+
+    async function loadPrescriptions() {
+        try {
+            const res = await fetch('/api/prescriptions/mine?size=20');
+            if (!res.ok) { showPrescriptionsError('Could not load prescriptions.'); return; }
+            const data = await res.json();
+            prescriptionsLoaded = true;
+            renderPrescriptions(data.content || []);
+        } catch (e) {
+            console.error(e);
+            showPrescriptionsError('Could not load prescriptions.');
+        }
+    }
+
+    function renderPrescriptions(items) {
+        const container = document.getElementById('prescriptions-list');
+        if (items.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-16 text-on-surface-variant opacity-60">
+                    <span class="material-symbols-outlined text-5xl block mb-3">clinical_notes</span>
+                    <p class="text-sm">No prescription submissions yet.</p>
+                </div>`;
+            return;
+        }
+
+        const styles = {
+            PENDING: { badge: 'bg-yellow-100 text-yellow-800', icon: 'hourglass_top', label: 'Waiting for pharmacist review' },
+            APPROVED: { badge: 'bg-green-100 text-green-800', icon: 'verified', label: 'Approved for dispensing' },
+            REJECTED: { badge: 'bg-error-container text-on-error-container', icon: 'cancel', label: 'Rejected - action required' }
+        };
+
+        container.innerHTML = items.map(p => {
+            const st = styles[p.status] || styles.PENDING;
+            const reason = p.rejectionReason
+                ? `<div class="mt-4 rounded-2xl bg-error-container/40 p-4 text-sm text-on-error-container"><strong>Rejection reason:</strong> ${escapeHtml(p.rejectionReason)}</div>`
+                : '';
+            const file = p.fileName
+                ? `<a href="/uploads/${escapeAttr(p.fileName)}" target="_blank" class="text-xs font-bold text-primary hover:underline">View uploaded file</a>`
+                : '';
+            return `
+                <article class="group relative p-6 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all duration-200 mb-4 overflow-hidden">
+                    <div class="flex flex-col md:flex-row md:items-start gap-5">
+                        <div class="w-14 h-14 rounded-2xl bg-surface flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings:'FILL' 1;">${st.icon}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <span class="${st.badge} text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">${p.status}</span>
+                                <span class="text-xs text-on-surface-variant font-mono">#${p.prescriptionId || p.id}</span>
+                            </div>
+                            <h3 class="font-headline font-bold text-on-surface text-base">${st.label}</h3>
+                            <p class="text-sm text-on-surface-variant mt-1">${escapeHtml(p.medicineDetails || '')}</p>
+                            <p class="text-xs text-on-surface-variant mt-2">Doctor: ${escapeHtml(p.doctorName || 'N/A')} | Date: ${escapeHtml(p.prescriptionDate || 'N/A')} ${file ? '| ' + file : ''}</p>
+                            ${reason}
+                        </div>
+                    </div>
+                </article>`;
+        }).join('');
+    }
+
+    function showPrescriptionsError(msg) {
+        document.getElementById('prescriptions-list').innerHTML =
+            `<div class="text-center py-16 text-on-surface-variant opacity-60"><span class="material-symbols-outlined text-5xl block mb-3">error_outline</span><p class="text-sm">${msg}</p></div>`;
+    }
+
+    function escapeHtml(value) {
+        const d = document.createElement('div');
+        d.textContent = value || '';
+        return d.innerHTML;
+    }
+
+    function escapeAttr(value) {
+        return String(value || '').replace(/"/g, '&quot;');
     }
 </script>
 </body>

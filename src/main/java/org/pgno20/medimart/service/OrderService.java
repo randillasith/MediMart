@@ -49,111 +49,223 @@ public class OrderService {
      */
     @Transactional
     public Order placeOrder(Order order) {
-        // 1. Parse ordered items and deduct from stock_batches (FEFO)
-        if (order.getMedicineDetails() != null && !order.getMedicineDetails().isBlank()) {
-            deductStockFEFO(order.getMedicineDetails());
+        // 1. Deduct stock for each item using medicineId (FEFO) and populate snapshot data
+        if (order.getItems() != null && !order.getItems().isEmpty()) {
+            for (org.pgno20.medimart.model.OrderItem item : order.getItems()) {
+                Medicine m = null;
+                if (item.getMedicineId() != null) {
+                    m = medicineRepository.findById(item.getMedicineId()).orElse(null);
+                }
+                
+                // Fallback for old carts where medicineId wasn't stored
+                if (m == null && item.getMedicineName() != null) {
+                    List<Medicine> meds = medicineRepository.findByNameIgnoreCase(item.getMedicineName());
+                    if (!meds.isEmpty()) {
+                        m = meds.get(0);
+                        item.setMedicineId(m.getId()); // Update the ID for the database
+                    }
+                }
+
+                if (m == null) {
+                    throw new IllegalArgumentException("Medicine not found: " + 
+                        (item.getMedicineId() != null ? item.getMedicineId() : item.getMedicineName()));
+                }
+
+                // ── Fix #2: Validate stock BEFORE deducting ──────────────────
+                if (m.getStockQty() < item.getQuantity()) {
+                    throw new IllegalArgumentException(
+                        "Insufficient stock for '" + m.getName() + "'. " +
+                        "Requested: " + item.getQuantity() + ", Available: " + m.getStockQty()
+                    );
+                }
+                
+                // Set snapshot values
+                item.setMedicineName(m.getName());
+                item.setUnitPrice(m.getFinalPrice());
+                item.setOrder(order);
+
+                deductStockItem(item.getMedicineName(), item.getQuantity());
+            }
+        } else if (order.getMedicineDetails() != null && !order.getMedicineDetails().isBlank()) {
+             // Fallback for backwards compatibility if old payload is sent
+             deductStockFEFO(order.getMedicineDetails());
         }
 
-        // 2. Save the order record
+        // 2. Save the order record (cascades to order_items)
         return orderRepository.save(order);
     }
 
     /**
-     * Parses the medicine details string and applies FEFO deduction
-     * against the stock_batches table.
-     *
-     * Expected format per item: "Medicine Name (xQTY)"
-     * e.g. "Paracetamol 500mg (x2), Amoxicillin 250mg (x1)"
+     * Deducts stock for a specific medicine name using FEFO ordering.
      */
-    private void deductStockFEFO(String details) {
-        // Matches: "anything (xDIGITS)"
-        Pattern pattern = Pattern.compile("(.+?)\\s+\\(x(\\d+)\\)");
+    private void deductStockItem(String medicineName, int remainingToDeduct) {
+        // Fetch ACTIVE batches for this medicine in FEFO order (earliest expiry first)
+        List<StockBatch> batches =
+                stockBatchRepository.findActiveBatchesByMedicineNameFEFO(medicineName);
 
-        for (String part : details.split(",")) {
-            Matcher matcher = pattern.matcher(part.trim());
-            if (!matcher.find()) continue;
+        for (StockBatch batch : batches) {
+            if (remainingToDeduct <= 0) break;
 
-            String medicineName = matcher.group(1).trim();
-            int remainingToDeduct = Integer.parseInt(matcher.group(2));
-
-            // Fetch ACTIVE batches for this medicine in FEFO order (earliest expiry first)
-            List<StockBatch> batches =
-                    stockBatchRepository.findActiveBatchesByMedicineNameFEFO(medicineName);
-
-            for (StockBatch batch : batches) {
-                if (remainingToDeduct <= 0) break;
-
-                int available = batch.getQuantity();
-                if (available <= 0) {
-                    batch.setStatus("DEPLETED");
-                    stockBatchRepository.save(batch);
-                    continue;
-                }
-
-                if (available >= remainingToDeduct) {
-                    // This batch covers the rest
-                    batch.setQuantity(available - remainingToDeduct);
-                    remainingToDeduct = 0;
-                } else {
-                    // Use all of this batch and continue to the next
-                    remainingToDeduct -= available;
-                    batch.setQuantity(0);
-                }
-
-                // Mark depleted if empty
-                if (batch.getQuantity() == 0) {
-                    batch.setStatus("DEPLETED");
-                }
-
+            int available = batch.getQuantity();
+            if (available <= 0) {
+                batch.setStatus("DEPLETED");
                 stockBatchRepository.save(batch);
+                continue;
             }
 
-            // After batch deduction, sync medicine.stockQty from the sum of active batches
-            // and update its status (AVAILABLE / LOW_STOCK / OUT_OF_STOCK)
-            syncMedicineStock(medicineName);
+            if (available >= remainingToDeduct) {
+                // This batch covers the rest
+                batch.setQuantity(available - remainingToDeduct);
+                remainingToDeduct = 0;
+            } else {
+                // Use all of this batch and continue to the next
+                remainingToDeduct -= available;
+                batch.setQuantity(0);
+            }
+
+            // Mark depleted if empty
+            if (batch.getQuantity() == 0) {
+                batch.setStatus("DEPLETED");
+            }
+
+            stockBatchRepository.save(batch);
         }
+
+        // After batch deduction, sync medicine.stockQty
+        syncMedicineStock(medicineName);
     }
 
     /**
-     * Recalculates medicine.stockQty as the sum of all ACTIVE batch quantities
-     * for the given medicine name, then updates the medicine status.
+     * Recalculates medicine.stockQty by ID and updates its status.
      */
-    private void syncMedicineStock(String medicineName) {
-        List<Medicine> medicines = medicineRepository.findByNameIgnoreCase(medicineName);
-        for (Medicine m : medicines) {
-            int totalStock = stockBatchRepository.sumActiveQuantityByMedicineId(m.getId());
+    private void syncMedicineStockById(Long medicineId) {
+        Medicine m = medicineRepository.findById(medicineId).orElse(null);
+        if (m != null) {
+            int totalStock = stockBatchRepository.sumActiveQuantityByMedicineId(medicineId);
             m.setStockQty(totalStock);
             m.normalizeStatusFromStock();
             medicineRepository.save(m);
         }
     }
 
-    /** Returns all orders — admin use only. */
+
+    /**
+     * Parses the medicine details string and applies FEFO deduction (Legacy fallback).
+     */
+    private void deductStockFEFO(String details) {
+        Pattern pattern = Pattern.compile("(.+?)\\s+\\(x(\\d+)\\)");
+        for (String part : details.split(",")) {
+            Matcher matcher = pattern.matcher(part.trim());
+            if (!matcher.find()) continue;
+
+            String medicineName = matcher.group(1).trim();
+            int remainingToDeduct = Integer.parseInt(matcher.group(2));
+            List<StockBatch> batches = stockBatchRepository.findActiveBatchesByMedicineNameFEFO(medicineName);
+            // ... (deduction logic for string parsing - keeping it simple for fallback)
+            for(StockBatch batch : batches) {
+               if(remainingToDeduct <= 0) break;
+               int available = batch.getQuantity();
+               if(available <= 0) { batch.setStatus("DEPLETED"); stockBatchRepository.save(batch); continue; }
+               if(available >= remainingToDeduct) { batch.setQuantity(available - remainingToDeduct); remainingToDeduct = 0; }
+               else { remainingToDeduct -= available; batch.setQuantity(0); }
+               if(batch.getQuantity() == 0) batch.setStatus("DEPLETED");
+               stockBatchRepository.save(batch);
+            }
+            syncMedicineStock(medicineName);
+        }
+    }
+
+    private void syncMedicineStock(String medicineName) {
+        List<Medicine> medicines = medicineRepository.findByNameIgnoreCase(medicineName);
+        for (Medicine m : medicines) {
+            syncMedicineStockById(m.getId());
+        }
+    }
+
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
 
-    /**
-     * Updates the status of an existing order (PENDING → PROCESSING → DELIVERED).
-     * Throws IllegalArgumentException (→ 404) if the order is not found.
-     */
     @Transactional
     public Order updateOrderStatus(String id, String newStatus) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
+        String oldStatus = order.getStatus();
         order.setStatus(newStatus);
+        
+        // If status is changed to CANCELLED from something else, restore stock
+        if ("CANCELLED".equals(newStatus) && !"CANCELLED".equals(oldStatus)) {
+            if (order.getItems() != null && !order.getItems().isEmpty()) {
+                for (org.pgno20.medimart.model.OrderItem item : order.getItems()) {
+                    restoreStockItem(item.getMedicineName(), item.getQuantity());
+                }
+            } else if (order.getMedicineDetails() != null && !order.getMedicineDetails().isBlank()) {
+                restoreStockFEFO(order.getMedicineDetails());
+            }
+        }
+        
         return orderRepository.save(order);
     }
 
     /**
      * Cancels and deletes an order by ID.
-     * NOTE: Does not restore stock — add reverse-deduction logic here if needed.
+     * Before deleting, restores the ordered quantities back to stock batches.
      */
     @Transactional
     public void cancelOrder(String id) {
-        if (!orderRepository.existsById(id)) {
-            throw new IllegalArgumentException("Order not found: " + id);
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
+
+        // Restore stock before deleting if it hasn't been cancelled yet
+        if (!"CANCELLED".equals(order.getStatus())) {
+            if (order.getItems() != null && !order.getItems().isEmpty()) {
+                for (org.pgno20.medimart.model.OrderItem item : order.getItems()) {
+                    restoreStockItem(item.getMedicineName(), item.getQuantity());
+                }
+            } else if (order.getMedicineDetails() != null && !order.getMedicineDetails().isBlank()) {
+                // Legacy fallback
+                restoreStockFEFO(order.getMedicineDetails());
+            }
         }
+
         orderRepository.deleteById(id);
+    }
+
+    /**
+     * Restores stock for a specific medicine. Uses name to handle grouped storefront products.
+     */
+    private void restoreStockItem(String medicineName, int qtyToRestore) {
+        // Find the most recently added batch for this medicine name
+        List<StockBatch> batches = stockBatchRepository.findAllBatchesByMedicineNameLatestFirst(medicineName);
+        if (!batches.isEmpty()) {
+            StockBatch batch = batches.get(0);
+            batch.setQuantity(batch.getQuantity() + qtyToRestore);
+            if ("DEPLETED".equals(batch.getStatus())) {
+                batch.setStatus("ACTIVE");
+            }
+            stockBatchRepository.save(batch);
+            syncMedicineStock(medicineName);
+        }
+    }
+
+    /**
+     * Legacy string-based restore.
+     */
+    private void restoreStockFEFO(String details) {
+        Pattern pattern = Pattern.compile("(.+?)\\s+\\(x(\\d+)\\)");
+        for (String part : details.split(",")) {
+            Matcher matcher = pattern.matcher(part.trim());
+            if (!matcher.find()) continue;
+            String medicineName = matcher.group(1).trim();
+            int qtyToRestore = Integer.parseInt(matcher.group(2));
+            List<StockBatch> batches = stockBatchRepository.findAllBatchesByMedicineNameLatestFirst(medicineName);
+            if (!batches.isEmpty()) {
+                StockBatch batch = batches.get(0);
+                batch.setQuantity(batch.getQuantity() + qtyToRestore);
+                if ("DEPLETED".equals(batch.getStatus())) batch.setStatus("ACTIVE");
+                stockBatchRepository.save(batch);
+                syncMedicineStock(medicineName);
+            }
+        }
     }
 }
