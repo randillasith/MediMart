@@ -463,7 +463,7 @@
         }
 
         try {
-            let url = `/api/medicines/storefront?size=50`; // Fetch max and client-side filter for now
+            let url = `/api/medicines/storefront?size=1000`; // Fetch max and client-side filter for now
             if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
             
             const res = await fetch(url);
@@ -735,6 +735,22 @@
         }
     }
 
+    function updateCartQuantityInput(cartId, value) {
+        const item = cart.find(i => i.cartId === cartId);
+        if (item) {
+            let newQty = parseInt(value, 10);
+            if (isNaN(newQty) || newQty <= 0) {
+                newQty = 1;
+            }
+            if (item.totalStock !== undefined && newQty > item.totalStock) {
+                alert('Cannot add more than available stock (' + item.totalStock + ').');
+                newQty = item.totalStock;
+            }
+            item.cartQty = newQty;
+            saveCart();
+        }
+    }
+
     function removeFromCart(cartId) {
         cart = cart.filter(i => i.cartId !== cartId);
         saveCart();
@@ -789,7 +805,7 @@
                     <div class="flex justify-between items-end mt-2">
                         <div class="flex items-center bg-surface-container rounded-full px-2 py-1">
                             <button onclick="updateCartQuantity('${item.cartId}', -1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[16px]">remove</span></button>
-                            <span class="px-3 font-bold text-sm">${item.cartQty}</span>
+                            <input type="number" value="${item.cartQty}" min="1" max="${item.totalStock || ''}" onchange="updateCartQuantityInput('${item.cartId}', this.value)" class="w-12 text-center bg-transparent font-bold text-sm border-none focus:ring-0 p-0 m-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"/>
                             <button onclick="updateCartQuantity('${item.cartId}', 1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[16px]">add</span></button>
                         </div>
                         <span class="font-bold text-primary">Rs. ${(itemPrice * item.cartQty).toFixed(2)}</span>
