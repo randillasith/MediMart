@@ -7,6 +7,10 @@ public class Person {
         this.customerName = customerName;
     }
 
+    public Person() {
+        this.customerName = "";
+    }
+
     public void displayName() {
         System.out.println(customerName);
     }

@@ -61,6 +61,12 @@ public class ViewController {
         return "settings";
     }
 
+    /** Admin: user feedback management dashboard */
+    @GetMapping("/feedback-management")
+    public String feedbackManagement() {
+        return "feedback";
+    }
+
     /** Public: logout redirect (session cleared via POST /api/auth/logout) */
     @GetMapping("/logout")
     public String logout() {

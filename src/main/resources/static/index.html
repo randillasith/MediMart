@@ -376,12 +376,147 @@
                         <h4 class="font-bold">Expert Support</h4>
                         <p class="text-xs text-white/60 mt-1">Always available</p>
                     </div>
+        </section>
+
+        <!-- Customer Feedback & Reviews Section -->
+        <section class="bg-surface-container-low py-24 border-t border-slate-100/50">
+            <div class="max-w-7xl mx-auto px-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-16">
+                    <div>
+                        <span class="text-xs font-black text-secondary uppercase tracking-widest bg-secondary/10 px-3 py-1 rounded-full">Customer Voice</span>
+                        <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-primary mt-3">What Our Customers Say</h2>
+                        <p class="text-on-surface-variant mt-2">Real experiences from patients and caregivers who trust MediMart.</p>
+                    </div>
+                    <button onclick="openFeedbackModal()" class="px-8 py-4 bg-primary hover:bg-primary-container text-white font-bold text-sm rounded-full transition-all shadow-md flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">rate_review</span>
+                        Write a Review
+                    </button>
+                </div>
+
+                <!-- Reviews Grid -->
+                <div id="storefrontFeedbackGrid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Loaded dynamically via JS -->
+                    <div class="col-span-full text-center py-12 text-slate-400">
+                        <span class="material-symbols-outlined animate-spin text-3xl mb-2">progress_activity</span>
+                        <p class="text-xs font-semibold">Loading reviews...</p>
+                    </div>
                 </div>
             </div>
         </section>
+
+        <!-- Modern Footer -->
+        <footer class="bg-slate-900 text-slate-400 py-16 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 text-white">
+                        <img src="/logo.png" alt="MediMart Logo" class="h-8 w-auto filter brightness-0 invert">
+                        <span class="text-xl font-bold tracking-tighter text-white">MediMart</span>
+                    </div>
+                    <p class="text-xs leading-relaxed max-w-xs text-slate-400">Clinical sophistication & digital convenience combined to deliver certified pharmacy-grade care.</p>
+                </div>
+                <div>
+                    <h5 class="text-white font-bold text-sm mb-4">Quick Links</h5>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="/" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="/catalog" class="hover:text-white transition-colors">Catalog</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-white font-bold text-sm mb-4">Services</h5>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="/catalog" class="hover:text-white transition-colors">Prescriptions</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Pharmacist Support</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Order Tracking</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-white font-bold text-sm mb-4">Contact Support</h5>
+                    <p class="text-xs text-slate-400 mb-2">Have a question? We're open 24/7.</p>
+                    <a href="mailto:support@medimart.lk" class="text-xs font-bold text-white hover:underline">support@medimart.lk</a>
+                </div>
+            </div>
+            <div class="max-w-7xl mx-auto px-8 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-center">
+                <p class="text-xs">© 2024 MediMart. Sri Lanka. All rights reserved.</p>
+                <div class="flex gap-6 text-xs">
+                    <a href="#" class="hover:text-white transition-colors">Terms</a>
+                    <a href="#" class="hover:text-white transition-colors">Privacy</a>
+                    <a href="#" class="hover:text-white transition-colors">Cookies</a>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Write Feedback Modal -->
+        <div id="feedback-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-[2rem] max-w-lg w-full p-8 shadow-2xl border border-slate-100 transform scale-95 transition-all duration-300">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 bg-primary/5 text-primary rounded-2xl flex items-center justify-center">
+                        <span class="material-symbols-outlined text-2xl">rate_review</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-primary font-headline" id="modal-title">Share Your Feedback</h3>
+                        <p class="text-xs text-slate-500" id="modal-subtitle">Your opinion helps us build a healthier community</p>
+                    </div>
+                </div>
+
+                <input type="hidden" id="storefront-feedback-id" value="" />
+                <div class="space-y-6">
+                    <div id="modal-meta-fields" class="space-y-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Your Name</label>
+                            <input id="feedback-name" type="text" placeholder="e.g., Jane Doe (optional)"
+                                   class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all font-semibold" />
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Overall Rating</label>
+                            <div class="flex gap-2" id="star-selector">
+                                <button type="button" onclick="selectStar(1)" class="star-btn text-amber-400 hover:text-amber-400 transition-colors">
+                                    <span class="material-symbols-outlined text-3xl fill-current">star</span>
+                                </button>
+                                <button type="button" onclick="selectStar(2)" class="star-btn text-amber-400 hover:text-amber-400 transition-colors">
+                                    <span class="material-symbols-outlined text-3xl fill-current">star</span>
+                                </button>
+                                <button type="button" onclick="selectStar(3)" class="star-btn text-amber-400 hover:text-amber-400 transition-colors">
+                                    <span class="material-symbols-outlined text-3xl fill-current">star</span>
+                                </button>
+                                <button type="button" onclick="selectStar(4)" class="star-btn text-amber-400 hover:text-amber-400 transition-colors">
+                                    <span class="material-symbols-outlined text-3xl fill-current">star</span>
+                                </button>
+                                <button type="button" onclick="selectStar(5)" class="star-btn text-amber-400 hover:text-amber-400 transition-colors">
+                                    <span class="material-symbols-outlined text-3xl fill-current">star</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="feedback-rating" value="5" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Your Review</label>
+                        <textarea id="feedback-message" rows="4" placeholder="How was your checkout experience, delivery, or support?..."
+                                  class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all font-semibold resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-8">
+                    <button onclick="closeFeedbackModal()" class="px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full text-xs font-bold transition-all">
+                        Cancel
+                    </button>
+                    <button id="modal-submit-btn" onclick="submitStorefrontFeedback()" class="px-8 py-4 bg-gradient-to-r from-primary to-primary-container text-white rounded-full text-xs font-bold shadow-md hover:opacity-90 transition-all">
+                        Submit Review
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="storefront-toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-xl z-[9999] opacity-0 pointer-events-none transition-all duration-300 transform translate-y-4"></div>
     </main>
 
     <script>
+        let isUserLoggedIn = false;
+        let loggedInUserFullName = '';
+
         const IMAGES = [
             "https://lh3.googleusercontent.com/aida-public/AB6AXuDESUdxMuNg_OrWhTrUE1qyCxVe_FReLWME7yHfRSEz2m1adqP5HfKfyqs6qpfm0K90NElyvzutwIDnfD0jBDdla417T_D0iW-vqSB8YLst-5tEImh5AkK4cFF7mWL3k9BFBkP9b-o0asb6ynXOU0eWaaPb3D2vNNWxTc290HCx0PeH844dzNtlUrxaK5_YgAk_1PrEZBmEiyHfJWF-M3GeyGNvMFEbg63IL_ae2rDalGRjXhFT9r74Z9KiBZfNRPL_IfDJ1bWHUOw",
             "https://lh3.googleusercontent.com/aida-public/AB6AXuBl04ngxRQRqN1_5-ziME5I2nRq4ADEqfKC51bS0YM5V6rR3WPKR1wAoRva2IdZSzlAUvUQWlD5G5nN2Q8mZ6xbImdjsHHSIn3FzpSkakwPXoRvqxWU902M5-3ozTeEsVOexNSbz3Wv07JnqDScLMAV85S0XjjUqjU1Hnz-7LBF_R3WtyJmAkHHMMTUQHIoYTU0dRIIF0MhWyxnlPBJ_ZVClJZgEC6s0cGboePd3eR7ZnP6wgmOunFvlREFArypVOko0Ed_Cg8u6l0",
@@ -393,7 +528,8 @@
             Promise.all([
                 loadStorefrontProducts(),
                 loadNewArrivals(),
-                checkAuthStatus()
+                checkAuthStatus(),
+                loadStorefrontFeedbacks()
             ]).then(() => {
                 // Once products are loaded, wait for fonts and window to be fully ready
                 Promise.all([
@@ -480,6 +616,8 @@
                 const res = await fetch('/api/auth/me');
                 const data = await res.json();
                 if (data.loggedIn) {
+                    isUserLoggedIn = true;
+                    loggedInUserFullName = data.user && data.user.fullName ? data.user.fullName : 'Verified Customer';
                     const btn = document.getElementById('userAccountBtn');
                     if (btn) btn.onclick = () => window.location.href = '/profile.html';
 
@@ -512,6 +650,215 @@
                     grid.appendChild(renderCard(dto, i + 2, i === 0 ? 'New' : ''));
                 });
             } catch (e) { console.error(e); }
+        }
+
+        // --- Storefront Feedback Logic ---
+        function showStorefrontToast(msg, isError = false) {
+            const toast = document.getElementById('storefront-toast');
+            toast.textContent = msg;
+            toast.className = `fixed bottom-6 right-6 px-6 py-4 rounded-2xl shadow-xl z-[9999] transition-all duration-300 transform translate-y-0 opacity-100 ${isError ? 'bg-red-600 text-white' : 'bg-slate-900 text-white'}`;
+            setTimeout(() => {
+                toast.className = 'fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-xl z-[9999] opacity-0 pointer-events-none transition-all duration-300 transform translate-y-4';
+            }, 4000);
+        }
+
+        async function loadStorefrontFeedbacks() {
+            const grid = document.getElementById('storefrontFeedbackGrid');
+            try {
+                const res = await fetch('/api/feedbacks');
+                if (!res.ok) throw new Error('Could not fetch reviews');
+                const list = await res.json();
+
+                if (!list || list.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-12 text-slate-400 bg-white/50 rounded-3xl p-6 border border-slate-100">
+                            <span class="material-symbols-outlined text-2xl mb-1">sentiment_neutral</span>
+                            <p class="text-xs font-semibold">No reviews yet. Be the first to write one!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Show up to 3 reviews on storefront landing page
+                const displayed = list.slice(0, 3);
+                grid.innerHTML = displayed.map(item => {
+                    let stars = '';
+                    for (let i = 1; i <= 5; i++) {
+                        if (i <= item.rating) {
+                            stars += `<span class="material-symbols-outlined text-amber-400 text-sm fill-current">star</span>`;
+                        } else {
+                            stars += `<span class="material-symbols-outlined text-slate-200 text-sm">star</span>`;
+                        }
+                    }
+
+                    const isOwner = isUserLoggedIn && loggedInUserFullName && loggedInUserFullName.toLowerCase() === (item.customerName || '').toLowerCase();
+                    const actionButtons = isOwner ? `
+                        <div class="flex gap-2 mt-2 pt-2 border-t border-slate-50 justify-end">
+                            <button onclick="openStorefrontEditModal(${item.id}, \`${encodeURIComponent(item.message)}\`)" class="text-[10px] text-slate-400 hover:text-primary transition-colors flex items-center gap-0.5 font-bold uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-xs">edit</span> Edit
+                            </button>
+                            <button onclick="deleteStorefrontFeedback(${item.id})" class="text-[10px] text-slate-400 hover:text-red-500 transition-colors flex items-center gap-0.5 font-bold uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-xs">delete</span> Delete
+                            </button>
+                        </div>
+                    ` : '';
+
+                    return `
+                        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+                            <div>
+                                <div class="flex gap-0.5 mb-3">${stars}</div>
+                                <p class="text-slate-600 text-xs leading-relaxed italic mb-4">"${item.message}"</p>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-3 pt-4 border-t border-slate-50">
+                                    <div class="w-8 h-8 rounded-full bg-primary/5 text-primary flex items-center justify-center font-bold text-xs uppercase">
+                                        ${item.customerName ? item.customerName.charAt(0) : 'C'}
+                                    </div>
+                                    <span class="font-bold text-slate-700 text-xs">${item.customerName || 'Anonymous Customer'}</span>
+                                </div>
+                                ${actionButtons}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (e) {
+                grid.innerHTML = `<div class="col-span-full text-center py-8 text-red-500 text-xs">Error loading reviews: ${e.message}</div>`;
+            }
+        }
+
+        function openFeedbackModal() {
+            if (!isUserLoggedIn) {
+                showStorefrontToast('You must log in to submit a review!', true);
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
+                return;
+            }
+
+            // Set fields for "Write Feedback" mode
+            document.getElementById('storefront-feedback-id').value = '';
+            document.getElementById('modal-title').textContent = 'Share Your Feedback';
+            document.getElementById('modal-subtitle').textContent = 'Your opinion helps us build a healthier community';
+            document.getElementById('modal-submit-btn').textContent = 'Submit Review';
+
+            // Show meta fields
+            document.getElementById('modal-meta-fields').classList.remove('hidden');
+
+            const modal = document.getElementById('feedback-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.firstElementChild.classList.remove('scale-95'), 50);
+
+            selectStar(5);
+
+            const nameInput = document.getElementById('feedback-name');
+            nameInput.value = loggedInUserFullName;
+            nameInput.readOnly = true;
+            nameInput.classList.add('opacity-70', 'bg-slate-100');
+
+            document.getElementById('feedback-message').value = '';
+        }
+
+        function openStorefrontEditModal(id, encodedMsg) {
+            // Set fields for "Edit Feedback" mode
+            document.getElementById('storefront-feedback-id').value = id;
+            document.getElementById('modal-title').textContent = 'Edit Your Review';
+            document.getElementById('modal-subtitle').textContent = 'Update your feedback message below';
+            document.getElementById('modal-submit-btn').textContent = 'Update Review';
+
+            // Hide meta fields (name and rating) since PUT API only updates message
+            document.getElementById('modal-meta-fields').classList.add('hidden');
+
+            const modal = document.getElementById('feedback-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.firstElementChild.classList.remove('scale-95'), 50);
+
+            document.getElementById('feedback-message').value = decodeURIComponent(encodedMsg);
+        }
+
+        function closeFeedbackModal() {
+            const modal = document.getElementById('feedback-modal');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                // Restore defaults
+                document.getElementById('modal-meta-fields').classList.remove('hidden');
+            }, 200);
+        }
+
+        function selectStar(rating) {
+            document.getElementById('feedback-rating').value = rating;
+            const buttons = document.querySelectorAll('#star-selector button');
+            buttons.forEach((btn, idx) => {
+                const star = btn.querySelector('.material-symbols-outlined');
+                if (idx < rating) {
+                    star.classList.add('fill-current');
+                    star.classList.remove('text-slate-300');
+                    star.classList.add('text-amber-400');
+                } else {
+                    star.classList.remove('fill-current');
+                    star.classList.add('text-slate-300');
+                    star.classList.remove('text-amber-400');
+                }
+            });
+        }
+
+        async function submitStorefrontFeedback() {
+            const id = document.getElementById('storefront-feedback-id').value;
+            const message = document.getElementById('feedback-message').value.trim();
+
+            if (!message) {
+                showStorefrontToast('Please enter a feedback message!', true);
+                return;
+            }
+
+            const isEdit = !!id;
+            const url = isEdit ? `/api/feedbacks/${id}` : '/api/feedbacks';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            const rating = parseInt(document.getElementById('feedback-rating').value);
+            const name = document.getElementById('feedback-name').value.trim();
+
+            const body = isEdit ? { message } : {
+                customerName: name || loggedInUserFullName,
+                message: message,
+                rating: rating
+            };
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showStorefrontToast(isEdit ? '✓ Review updated successfully!' : '✓ Thank you! Your review has been submitted.');
+                    closeFeedbackModal();
+                    loadStorefrontFeedbacks();
+                } else {
+                    throw new Error(data.message || 'Failed to process request');
+                }
+            } catch (e) {
+                showStorefrontToast('Error: ' + e.message, true);
+            }
+        }
+
+        async function deleteStorefrontFeedback(id) {
+            if (!confirm('Are you sure you want to permanently delete this review?')) return;
+            try {
+                const res = await fetch(`/api/feedbacks/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (res.ok) {
+                    showStorefrontToast('✓ Review deleted successfully.');
+                    loadStorefrontFeedbacks();
+                } else {
+                    throw new Error(data.message || 'Failed to delete review');
+                }
+            } catch (e) {
+                showStorefrontToast('Error: ' + e.message, true);
+            }
         }
     </script>
 </body>

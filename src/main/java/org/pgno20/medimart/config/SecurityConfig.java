@@ -173,7 +173,8 @@ public class SecurityConfig {
                     "/prescriptions.html",
                     "/prescription-add.html",
                     "/prescription-edit.html",
-                    "/settings"
+                    "/settings",
+                    "/feedback-management"
                 ).hasAuthority("ROLE_ADMIN")
 
                 // ── Admin-only API — write operations on medicines ─────────
@@ -207,9 +208,15 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/prescriptions", "/api/prescriptions/*", "/api/prescriptions/stats").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/prescriptions/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/prescriptions/**").hasAuthority("ROLE_ADMIN")
-                // ── Admin-only API — system settings ──────────────────────
+                // ── Admin-only API — system settings & feedback operations ──
                 // /api/settings/public is open (customer-facing tax/fee data)
                 .requestMatchers(HttpMethod.GET, "/api/settings/public").permitAll()
+                // Public feedback reading
+                .requestMatchers(HttpMethod.GET, "/api/feedbacks").permitAll()
+                // Logged-in users can submit, update, delete feedback (ownership/roles validated in controller)
+                .requestMatchers(HttpMethod.POST, "/api/feedbacks").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/feedbacks/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/feedbacks/**").authenticated()
                 // All other /api/settings/** require ADMIN
                 .requestMatchers("/api/settings", "/api/settings/**").hasAuthority("ROLE_ADMIN")
 

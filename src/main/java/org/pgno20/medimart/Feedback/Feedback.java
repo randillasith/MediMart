@@ -3,7 +3,6 @@ package org.pgno20.medimart.Feedback;
 public class Feedback extends Person{
 
     private int id;
-    private String customerName;
     private String message;
     private int rating;
 
@@ -13,6 +12,10 @@ public class Feedback extends Person{
 
         this.message = message;
         this.rating = rating;
+    }
+
+    public Feedback() {
+        super("");
     }
 
 
