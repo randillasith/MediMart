@@ -109,6 +109,16 @@
         h4 {
             font-family: 'Manrope', sans-serif;
         }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c2c6d4; border-radius: 10px; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
     </style>
 </head>
 
@@ -182,8 +192,9 @@
                         class="bg-surface-container-low border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all w-64"
                         placeholder="Search catalog..." type="text" />
                 </div>
-                <button class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
+                <button onclick="toggleCartDrawer()" class="relative text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
                     <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                    <span id="navCartBadgeDesktop" class="absolute -top-1 -right-1 w-4 h-4 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
                 </button>
                 <button id="userAccountBtn" onclick="window.location.href='/login.html'"
                     class="text-slate-600 dark:text-slate-400 hover:text-[#005EB8] transition-colors">
@@ -381,6 +392,66 @@
         </section>
     </main>
 
+    <!-- Shopping Cart Sidebar Drawer Overlay -->
+    <div id="cartDrawerOverlay" class="fixed inset-0 z-[100] bg-on-background/20 backdrop-blur-sm justify-end hidden">
+        <!-- Drawer Container -->
+        <div class="w-full max-w-md bg-surface-bright/95 h-full backdrop-blur-xl shadow-[-12px_0px_40px_rgba(25,28,33,0.08)] flex flex-col animate-slide-in relative ml-auto">
+            <!-- Drawer Header -->
+            <div class="px-8 py-8 flex justify-between items-center border-b border-outline-variant/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+                    </div>
+                    <div>
+                        <h2 class="text-headline-sm font-headline font-bold text-primary tracking-tight">Your Cart</h2>
+                        <p id="cartItemCountText" class="text-label-sm text-on-surface-variant">0 items</p>
+                    </div>
+                </div>
+                <button onclick="toggleCartDrawer()" class="w-10 h-10 rounded-full hover:bg-surface-container-high flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+            </div>
+            <!-- Drawer Content -->
+            <div id="cartItemsContainer" class="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar">
+                <!-- Items injected here -->
+            </div>
+            <!-- Prescription Notice -->
+            <div id="cartRxNotice" class="mx-8 mb-4 bg-secondary-container/10 border border-secondary/20 rounded-[1.5rem] p-4 flex gap-4 hidden">
+                <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">description</span>
+                <div class="text-xs text-on-secondary-container leading-relaxed">
+                    <strong>Prescription Required:</strong> One or more items require a valid doctor's prescription. You can upload it during checkout.
+                </div>
+            </div>
+            <!-- Drawer Footer -->
+            <div class="px-8 py-8 bg-surface-container-low rounded-t-[3rem]">
+                <div class="flex flex-col gap-4 mb-8">
+                    <div class="flex justify-between items-center text-on-surface-variant">
+                        <span class="text-sm">Subtotal</span>
+                        <span id="cartSubtotal" class="font-medium">Rs. 0.00</span>
+                    </div>
+                    <!-- Prescription Dispensing Fee Isolated Row -->
+                    <div id="cartDispensingFeeRow" class="flex justify-between items-center text-on-surface-variant hidden">
+                        <span class="text-sm">Prescription Dispensing Fee</span>
+                        <span id="cartDispensingFee" class="font-medium">Rs. 0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-4 border-t border-outline-variant/20">
+                        <span class="font-bold text-on-surface">Total Estimate</span>
+                        <span id="cartTotal" class="text-headline-sm font-bold text-primary tracking-tight">Rs. 0.00</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button onclick="goToCheckout()" class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-5 rounded-full font-bold flex items-center justify-center gap-3 shadow-lg shadow-primary/10 active:scale-[0.98] transition-all">
+                        Proceed to Checkout
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                    <button onclick="toggleCartDrawer()" class="w-full py-4 text-secondary font-bold hover:text-on-secondary-container transition-colors flex items-center justify-center gap-2">
+                        Continue Shopping
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const IMAGES = [
             "https://lh3.googleusercontent.com/aida-public/AB6AXuDESUdxMuNg_OrWhTrUE1qyCxVe_FReLWME7yHfRSEz2m1adqP5HfKfyqs6qpfm0K90NElyvzutwIDnfD0jBDdla417T_D0iW-vqSB8YLst-5tEImh5AkK4cFF7mWL3k9BFBkP9b-o0asb6ynXOU0eWaaPb3D2vNNWxTc290HCx0PeH844dzNtlUrxaK5_YgAk_1PrEZBmEiyHfJWF-M3GeyGNvMFEbg63IL_ae2rDalGRjXhFT9r74Z9KiBZfNRPL_IfDJ1bWHUOw",
@@ -389,11 +460,227 @@
             "https://lh3.googleusercontent.com/aida-public/AB6AXuBIcIFhIM6LdinKm5AMqdAIfWpkG-QhJXZ1Ei26nwrQPQWu8ro2DNqxck5kxeh01fXICMRroGvuz5GntUVh-zUQnaSMoVl4-FdH8_Sf6qon414rBIqg9aklQWOqhhhb1q4py-RJ63jYSQU2ie0C3uRN6ZLSH-jFjnto9IyEe3AEZ9fIsenj757rBHmv3srfMmM6rfftkjiSxEksL9JFik4VQ-HTgFZYl8EP05kXM_sMDQuYhIZexYlgh_sqgxWScsRlmzS-WAvm-5U"
         ];
 
+        let cart = [];
+        let prescriptionDispensingFee = 5.00;
+        let otcTaxRate = 10.00;
+        let standardDeliveryFee = 12.50;
+
+        async function fetchSettingsAndInit() {
+            try {
+                const settingsRes = await fetch('/api/settings/public');
+                if (settingsRes.ok) {
+                    const settings = await settingsRes.json();
+                    prescriptionDispensingFee = parseFloat(settings.prescriptionDispensingFee) || 5.00;
+                    otcTaxRate = parseFloat(settings.otcTaxRate) || 10.00;
+                    standardDeliveryFee = parseFloat(settings.standardDeliveryFee) || 12.50;
+                }
+            } catch(e) { console.error('Failed to load settings', e); }
+            initCart();
+        }
+
+        function initCart() {
+            const stored = localStorage.getItem('medimart_cart');
+            if (stored) {
+                cart = JSON.parse(stored);
+            }
+            updateCartUI();
+        }
+
+        function saveCart() {
+            localStorage.setItem('medimart_cart', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function toggleCartDrawer() {
+            const overlay = document.getElementById('cartDrawerOverlay');
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            } else {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+        }
+
+        function addToCartObj(product, img) {
+            const cartId = btoa(unescape(encodeURIComponent((product.name||'') + '|' + (product.brand||'') + '|' + (product.dosage||''))));
+            const existing = cart.find(item => item.cartId === cartId);
+            
+            const currentQty = existing ? existing.cartQty : 0;
+            if (product.totalStock !== undefined && currentQty >= product.totalStock) {
+                alert('Cannot add more than available stock (' + product.totalStock + ').');
+                return;
+            }
+
+            if (existing) {
+                existing.cartQty += 1;
+            } else {
+                cart.push({
+                    ...product,
+                    cartId: cartId,
+                    cartQty: 1,
+                    cartImg: img
+                });
+            }
+            saveCart();
+            toggleCartDrawer();
+        }
+
+        function updateCartQuantity(cartId, delta) {
+            const item = cart.find(i => i.cartId === cartId);
+            if (item) {
+                if (delta > 0 && item.totalStock !== undefined && item.cartQty + delta > item.totalStock) {
+                    alert('Cannot add more than available stock (' + item.totalStock + ').');
+                    return;
+                }
+
+                item.cartQty += delta;
+                if (item.cartQty <= 0) {
+                    cart = cart.filter(i => i.cartId !== cartId);
+                }
+                saveCart();
+            }
+        }
+
+        function updateCartQuantityInput(cartId, value) {
+            const item = cart.find(i => i.cartId === cartId);
+            if (item) {
+                let newQty = parseInt(value, 10);
+                if (isNaN(newQty) || newQty <= 0) {
+                    newQty = 1;
+                }
+                if (item.totalStock !== undefined && newQty > item.totalStock) {
+                    alert('Cannot add more than available stock (' + item.totalStock + ').');
+                    newQty = item.totalStock;
+                }
+                item.cartQty = newQty;
+                saveCart();
+            }
+        }
+
+        function removeFromCart(cartId) {
+            cart = cart.filter(i => i.cartId !== cartId);
+            saveCart();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cartItemsContainer');
+            const badgeDesktop = document.getElementById('navCartBadgeDesktop');
+            const countText = document.getElementById('cartItemCountText');
+            
+            let totalItems = 0;
+            let baseSubtotal = 0;
+            let totalDispensingFee = 0;
+            let requiresRx = false;
+
+            container.innerHTML = '';
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-on-surface-variant opacity-60">
+                        <span class="material-symbols-outlined text-6xl mb-4">shopping_cart</span>
+                        <p>Your cart is empty</p>
+                    </div>
+                `;
+            }
+
+            cart.forEach(item => {
+                if (!item.cartId) {
+                    item.cartId = btoa(unescape(encodeURIComponent((item.name||'') + '|' + (item.brand||'') + '|' + (item.dosage||''))));
+                }
+                totalItems += item.cartQty;
+                
+                let basePrice = parseFloat(item.minPrice || item.price || 0);
+                if (item.prescriptionRequired) {
+                    requiresRx = true;
+                    baseSubtotal += basePrice * item.cartQty;
+                } else {
+                    basePrice = basePrice * (1 + otcTaxRate / 100);
+                    baseSubtotal += basePrice * item.cartQty;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'flex gap-4 p-4 bg-surface-container-lowest rounded-3xl mb-6 group transition-all duration-300 hover:shadow-lg hover:shadow-primary/5';
+                div.innerHTML = `
+                    <div class="w-20 h-20 rounded-2xl bg-surface-container-low overflow-hidden flex-shrink-0 flex items-center justify-center">
+                        <img class="w-16 h-auto mix-blend-multiply" src="${item.cartImg}" alt="${item.name}"/>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div class="flex justify-between">
+                            <div>
+                                <h3 class="font-bold text-on-surface leading-tight">${item.name}</h3>
+                                <p class="text-xs text-on-surface-variant">${item.categoryName || 'General'} • ${item.brand || 'Generic'}</p>
+                            </div>
+                            <button onclick="removeFromCart('${item.cartId}')" class="text-on-surface-variant hover:text-error transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">delete_outline</span>
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-end mt-2">
+                            <div class="flex items-center bg-surface-container rounded-full px-2 py-1">
+                                <button onclick="updateCartQuantity('${item.cartId}', -1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[16px]">remove</span></button>
+                                <input type="number" value="${item.cartQty}" min="1" max="${item.totalStock || ''}" onchange="updateCartQuantityInput('${item.cartId}', this.value)" class="w-12 text-center bg-transparent font-bold text-sm border-none focus:ring-0 p-0 m-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"/>
+                                <button onclick="updateCartQuantity('${item.cartId}', 1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[16px]">add</span></button>
+                            </div>
+                            <span class="font-bold text-primary">Rs. ${(basePrice * item.cartQty).toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            if (requiresRx) {
+                totalDispensingFee = prescriptionDispensingFee;
+            }
+
+            // Badges
+            if (badgeDesktop) {
+                if (totalItems > 0) {
+                    badgeDesktop.textContent = totalItems;
+                    badgeDesktop.classList.remove('hidden');
+                } else {
+                    badgeDesktop.classList.add('hidden');
+                }
+            }
+
+            countText.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
+            document.getElementById('cartSubtotal').textContent = `Rs. ${baseSubtotal.toFixed(2)}`;
+            
+            const dfRow = document.getElementById('cartDispensingFeeRow');
+            const dfVal = document.getElementById('cartDispensingFee');
+            if (totalDispensingFee > 0) {
+                dfVal.textContent = `Rs. ${totalDispensingFee.toFixed(2)}`;
+                dfRow.classList.remove('hidden');
+            } else {
+                dfRow.classList.add('hidden');
+            }
+
+            const grandTotal = baseSubtotal + totalDispensingFee;
+            document.getElementById('cartTotal').textContent = `Rs. ${grandTotal.toFixed(2)}`;
+
+            // RX Notice
+            const rxNotice = document.getElementById('cartRxNotice');
+            if (requiresRx) {
+                rxNotice.classList.remove('hidden');
+            } else {
+                rxNotice.classList.add('hidden');
+            }
+        }
+
+        function goToCheckout() {
+            var hasRx = cart.some(function(item) { return item.prescriptionRequired === true; });
+            if (hasRx) {
+                window.location.href = '/prescription.html';
+            } else {
+                window.location.href = '/checkout.html';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             Promise.all([
                 loadStorefrontProducts(),
                 loadNewArrivals(),
-                checkAuthStatus()
+                checkAuthStatus(),
+                fetchSettingsAndInit()
             ]).then(() => {
                 // Once products are loaded, wait for fonts and window to be fully ready
                 Promise.all([
@@ -439,7 +726,7 @@
 
         function renderCard(p, index, tag) {
             const title = p.dosage ? `${p.name} ${p.dosage}` : p.name;
-            const price = p.minPrice ? `Rs. ${Number(p.minPrice).toFixed(2)}` : 'Rs. 0.00';
+            const price = p.finalPrice ? `Rs. ${Number(p.finalPrice).toFixed(2)}` : (p.minPrice ? `Rs. ${Number(p.minPrice).toFixed(2)}` : 'Rs. 0.00');
 
             let img = IMAGES[index % IMAGES.length];
             if (p.imageUrl) {
@@ -456,10 +743,19 @@
             else if (p.totalStock < 50) stock = `<p class="text-xs text-orange-500 font-bold mb-4">Only ${p.totalStock} left</p>`;
             else stock = '<p class="text-xs text-secondary font-bold mb-4">In Stock</p>';
             let tagHtml = tag ? `<div class="absolute top-6 left-6"><span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">${tag}</span></div>` : '';
+            
             const card = document.createElement('div');
             card.className = 'group cursor-pointer';
             card.onclick = () => { localStorage.setItem('searchQuery', p.name); window.location.href = '/catalog'; };
-            card.innerHTML = `<div class="aspect-square bg-surface-container-lowest rounded-3xl overflow-hidden mb-6 transition-shadow group-hover:shadow-xl p-8 relative">${tagHtml}<img class="w-full h-full object-contain" src="${img}" onerror="this.onerror=null; this.src='/images/logo.png';"/></div><h4 class="text-lg font-bold text-on-surface mb-1">${title}</h4><p class="text-on-surface-variant text-sm">${p.brand || p.categoryName || 'Generic'}</p>${stock}<div class="flex items-center justify-between"><span class="text-xl font-bold text-primary">${price}</span><button ${p.totalStock === 0 ? 'disabled' : ''} class="bg-surface-container-high text-on-primary-fixed-variant px-4 py-2 rounded-full font-bold text-sm hover:bg-secondary hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">Add to Cart</button></div>`;
+            card.innerHTML = `<div class="aspect-square bg-surface-container-lowest rounded-3xl overflow-hidden mb-6 transition-shadow group-hover:shadow-xl p-8 relative">${tagHtml}<img class="w-full h-full object-contain" src="${img}" onerror="this.onerror=null; this.src='/images/logo.png';"/></div><h4 class="text-lg font-bold text-on-surface mb-1">${title}</h4><p class="text-on-surface-variant text-sm">${p.brand || p.categoryName || 'Generic'}</p>${stock}<div class="flex items-center justify-between"><span class="text-xl font-bold text-primary">${price}</span><button class="add-to-cart-btn bg-surface-container-high text-on-primary-fixed-variant px-4 py-2 rounded-full font-bold text-sm hover:bg-secondary hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"${p.totalStock === 0 ? ' disabled' : ''}>Add to Cart</button></div>`;
+            
+            const btn = card.querySelector('.add-to-cart-btn');
+            if (btn && p.totalStock > 0) {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    addToCartObj(p, img);
+                };
+            }
             return card;
         }
 
@@ -512,7 +808,19 @@
                 const grid = document.getElementById('newArrivalsGrid');
                 grid.innerHTML = '';
                 products.forEach((p, i) => {
-                    const dto = { name: p.name, brand: p.brand, dosage: p.dosage, minPrice: p.price, totalStock: p.stockQty, categoryName: p.categoryName, imageUrl: p.imageUrl, formType: p.formType };
+                    const dto = { 
+                        id: p.id,
+                        name: p.name, 
+                        brand: p.brand, 
+                        dosage: p.dosage, 
+                        minPrice: p.price, 
+                        finalPrice: p.finalPrice, 
+                        prescriptionRequired: p.prescriptionRequired, 
+                        totalStock: p.stockQty, 
+                        categoryName: p.categoryName, 
+                        imageUrl: p.imageUrl, 
+                        formType: p.formType 
+                    };
                     grid.appendChild(renderCard(dto, i + 2, i === 0 ? 'New' : ''));
                 });
             } catch (e) { console.error(e); }

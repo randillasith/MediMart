@@ -342,6 +342,11 @@
                     <span class="text-sm">Subtotal</span>
                     <span id="cartSubtotal" class="font-medium">Rs. 0.00</span>
                 </div>
+                <!-- Prescription Dispensing Fee Isolated Row -->
+                <div id="cartDispensingFeeRow" class="flex justify-between items-center text-on-surface-variant hidden">
+                    <span class="text-sm">Prescription Dispensing Fee</span>
+                    <span id="cartDispensingFee" class="font-medium">Rs. 0.00</span>
+                </div>
                 <div class="flex justify-between items-center pt-4 border-t border-outline-variant/20">
                     <span class="font-bold text-on-surface">Total Estimate</span>
                     <span id="cartTotal" class="text-headline-sm font-bold text-primary tracking-tight">Rs. 0.00</span>
@@ -408,7 +413,7 @@
             }, 300);
         });
         
-        initCart();
+        fetchSettingsAndInit();
     });
 
     // Handle Category Loading
@@ -669,6 +674,22 @@
 
     // --- Cart Logic ---
     let cart = [];
+    let prescriptionDispensingFee = 5.00;
+    let otcTaxRate = 10.00;
+    let standardDeliveryFee = 12.50;
+
+    async function fetchSettingsAndInit() {
+        try {
+            const settingsRes = await fetch('/api/settings/public');
+            if (settingsRes.ok) {
+                const settings = await settingsRes.json();
+                prescriptionDispensingFee = parseFloat(settings.prescriptionDispensingFee) || 5.00;
+                otcTaxRate = parseFloat(settings.otcTaxRate) || 10.00;
+                standardDeliveryFee = parseFloat(settings.standardDeliveryFee) || 12.50;
+            }
+        } catch(e) { console.error('Failed to load settings', e); }
+        initCart();
+    }
 
     function initCart() {
         const stored = localStorage.getItem('medimart_cart');
@@ -763,7 +784,8 @@
         const countText = document.getElementById('cartItemCountText');
         
         let totalItems = 0;
-        let subtotal = 0;
+        let baseSubtotal = 0;
+        let totalDispensingFee = 0;
         let requiresRx = false;
 
         container.innerHTML = '';
@@ -782,9 +804,15 @@
                 item.cartId = btoa(unescape(encodeURIComponent((item.name||'') + '|' + (item.brand||'') + '|' + (item.dosage||''))));
             }
             totalItems += item.cartQty;
-            const itemPrice = item.finalPrice || 0;
-            subtotal += itemPrice * item.cartQty;
-            if (item.prescriptionRequired) requiresRx = true;
+            
+            let basePrice = parseFloat(item.minPrice || item.price || 0);
+            if (item.prescriptionRequired) {
+                requiresRx = true;
+                baseSubtotal += basePrice * item.cartQty;
+            } else {
+                basePrice = basePrice * (1 + otcTaxRate / 100);
+                baseSubtotal += basePrice * item.cartQty;
+            }
 
             const div = document.createElement('div');
             div.className = 'flex gap-4 p-4 bg-surface-container-lowest rounded-3xl mb-6 group transition-all duration-300 hover:shadow-lg hover:shadow-primary/5';
@@ -808,12 +836,16 @@
                             <input type="number" value="${item.cartQty}" min="1" max="${item.totalStock || ''}" onchange="updateCartQuantityInput('${item.cartId}', this.value)" class="w-12 text-center bg-transparent font-bold text-sm border-none focus:ring-0 p-0 m-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"/>
                             <button onclick="updateCartQuantity('${item.cartId}', 1)" class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[16px]">add</span></button>
                         </div>
-                        <span class="font-bold text-primary">Rs. ${(itemPrice * item.cartQty).toFixed(2)}</span>
+                        <span class="font-bold text-primary">Rs. ${(basePrice * item.cartQty).toFixed(2)}</span>
                     </div>
                 </div>
             `;
             container.appendChild(div);
         });
+
+        if (requiresRx) {
+            totalDispensingFee = prescriptionDispensingFee;
+        }
 
         // Badges
         if (totalItems > 0) {
@@ -827,8 +859,19 @@
         }
 
         countText.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
-        document.getElementById('cartSubtotal').textContent = `Rs. ${subtotal.toFixed(2)}`;
-        document.getElementById('cartTotal').textContent = `Rs. ${subtotal.toFixed(2)}`;
+        document.getElementById('cartSubtotal').textContent = `Rs. ${baseSubtotal.toFixed(2)}`;
+        
+        const dfRow = document.getElementById('cartDispensingFeeRow');
+        const dfVal = document.getElementById('cartDispensingFee');
+        if (totalDispensingFee > 0) {
+            dfVal.textContent = `Rs. ${totalDispensingFee.toFixed(2)}`;
+            dfRow.classList.remove('hidden');
+        } else {
+            dfRow.classList.add('hidden');
+        }
+
+        const grandTotal = baseSubtotal + totalDispensingFee;
+        document.getElementById('cartTotal').textContent = `Rs. ${grandTotal.toFixed(2)}`;
 
         // RX Notice
         const rxNotice = document.getElementById('cartRxNotice');

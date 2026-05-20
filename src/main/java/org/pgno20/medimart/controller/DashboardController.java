@@ -78,7 +78,9 @@ public class DashboardController {
         Map<java.time.LocalDate, BigDecimal> dailyRevenueMap = recentOrders.stream()
                 .collect(Collectors.groupingBy(
                         order -> order.getCreatedAt().toLocalDate(),
-                        Collectors.reducing(BigDecimal.ZERO, Order::getTotalPrice, BigDecimal::add)
+                        Collectors.reducing(BigDecimal.ZERO, 
+                                            order -> order.getTotalPrice().subtract(order.getDeliveryFee() != null ? order.getDeliveryFee() : BigDecimal.ZERO), 
+                                            BigDecimal::add)
                 ));
 
         java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("MMM dd");

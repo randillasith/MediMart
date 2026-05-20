@@ -126,6 +126,7 @@ h1,h2,h3,.font-headline{font-family:'Manrope',sans-serif}
 <script>
 let cart = [];
 let subtotal = 0;
+let orderTotalPrice = 0;
 let deliveryFee = 0;
 let addressSaved = false;
 let paymentSaved = false;
@@ -223,7 +224,7 @@ function renderCartItems() {
     }
     document.getElementById('summary-total').innerText = 'LKR ' + total.toFixed(2);
     // Store total (with delivery) for order submission
-    subtotal = total;
+    orderTotalPrice = total;
 }
 
 function removeFromCart(cartId) {
@@ -338,10 +339,13 @@ async function placeOrder() {
             }; 
         }),
         quantity: cart.reduce(function(acc, item) { return acc + item.cartQty; }, 0),
-        totalPrice: parseFloat(subtotal.toFixed(2)),
+        totalPrice: parseFloat(orderTotalPrice.toFixed(2)),
+        deliveryFee: parseFloat(deliveryFee.toFixed(2)),
         status: 'PENDING',
         shippingAddress: savedAddress.street + ', ' + savedAddress.cityStateZip,
-        prescriptionSubmitted: sessionStorage.getItem('prescription_verified') === 'true'
+        prescriptionSubmitted: sessionStorage.getItem('prescription_verified') === 'true',
+        hasPrescriptionItems: cart.some(function(item) { return item.prescriptionRequired === true; }),
+        prescriptionId: sessionStorage.getItem('latest_prescription_id') || null
     };
 
     var btn = document.querySelector('button[onclick="placeOrder()"]');
@@ -364,6 +368,8 @@ async function placeOrder() {
             };
             localStorage.setItem('medimart_last_order', JSON.stringify(lastOrder));
             localStorage.removeItem('medimart_cart');
+            sessionStorage.removeItem('prescription_verified');
+            sessionStorage.removeItem('latest_prescription_id');
             window.location.href = '/order-success.html';
         }
         else { alert('Failed to place order. Status: ' + res.status); btn.disabled = false; spinner.classList.add('hidden'); icon.classList.remove('hidden'); }
