@@ -252,5 +252,13 @@ public class UserService {
             return roleName;
         }
         throw new IllegalArgumentException("Invalid role. Must be ROLE_USER, ROLE_ADMIN, ROLE_STOCK_MANAGER, ROLE_ORDER_MANAGER, or ROLE_SUPPLIER_HANDLER");
+     * Accepted roles: ROLE_USER, ROLE_ADMIN, ROLE_SUPPLIER, ROLE_STOCK_MANAGER, ROLE_ORDER_MANAGER, ROLE_SUPPLIER_HANDLER
+     */
+    private String resolveRole(String roleName) {
+        if (roleName == null || roleName.isBlank()) return "ROLE_USER";
+        if (java.util.Set.of("ROLE_USER", "ROLE_ADMIN", "ROLE_SUPPLIER", "ROLE_STOCK_MANAGER", "ROLE_ORDER_MANAGER", "ROLE_SUPPLIER_HANDLER").contains(roleName)) {
+            return roleName;
+        }
+        throw new IllegalArgumentException("Invalid role. Must be one of the permitted roles.");
     }
 }
