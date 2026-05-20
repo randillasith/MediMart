@@ -1,212 +1,341 @@
 <html class="light" lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Orders Management | MediMart</title>
-    <link rel="icon" href="/logo.png" type="image/png"/>
+    <link rel="icon" href="/logo.png" type="image/png" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
-            theme: { extend: {
-                colors: {
-                    "primary": "#00478d", "primary-container": "#005eb8",
-                    "secondary": "#006970", "error": "#ba1a1a",
-                    "surface": "#f9f9ff", "surface-container-lowest": "#ffffff",
-                    "surface-container-low": "#f2f3fb", "surface-container": "#ecedf6",
-                    "surface-container-high": "#e7e8f0",
-                    "on-surface": "#191c21", "on-surface-variant": "#424752",
-                    "outline-variant": "#c2c6d4",
-                    "secondary-container": "#7af1fc", "error-container": "#ffdad6",
-                    "on-secondary-container": "#006e75", "on-error-container": "#93000a",
-                },
-                fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
-            }}
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00478d", "primary-container": "#005eb8",
+                        "secondary": "#006970", "error": "#ba1a1a",
+                        "surface": "#f9f9ff", "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f3fb", "surface-container": "#ecedf6",
+                        "surface-container-high": "#e7e8f0",
+                        "on-surface": "#191c21", "on-surface-variant": "#424752",
+                        "outline-variant": "#c2c6d4",
+                        "secondary-container": "#7af1fc", "error-container": "#ffdad6",
+                        "on-secondary-container": "#006e75", "on-error-container": "#93000a",
+                    },
+                    fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
+                }
+            }
         }
     </script>
     <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
-        body { font-family: 'Inter', sans-serif; }
-        #toast { position:fixed;bottom:20px;right:20px;padding:1rem 1.5rem;color:white;border-radius:8px;box-shadow:0 10px 15px -3px rgba(0,0,0,.3);transform:translateY(100px);opacity:0;transition:all .3s cubic-bezier(.68,-.55,.265,1.55);z-index:9999; }
-        #toast.show { transform:translateY(0);opacity:1; }
-        #toast.success { background:#10B981; }
-        #toast.error { background:#EF4444; }
-        .modal-overlay { background:rgba(15,23,42,.5);backdrop-filter:blur(4px); }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all .3s cubic-bezier(.68, -.55, .265, 1.55);
+            z-index: 9999;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        #toast.success {
+            background: #10B981;
+        }
+
+        #toast.error {
+            background: #EF4444;
+        }
+
+        .modal-overlay {
+            background: rgba(15, 23, 42, .5);
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
+
 <body class="bg-surface text-on-surface antialiased overflow-hidden">
 
-<!-- Preloader -->
-<div id="medimart-preloader" class="fixed inset-0 z-[9999] bg-[#f9f9ff] flex flex-col items-center justify-center transition-opacity duration-700">
-    <div class="relative flex flex-col items-center z-10 bg-[#f2f3fb] p-12 rounded-[2rem] shadow-sm border border-white">
-        <div class="bg-white p-4 rounded-xl shadow-sm mb-2">
-            <img src="/logo.png" alt="MediMart" class="h-16 w-auto animate-pulse"/>
+    <!-- Preloader -->
+    <div id="medimart-preloader"
+        class="fixed inset-0 z-[9999] bg-[#f9f9ff] flex flex-col items-center justify-center transition-opacity duration-700">
+        <div
+            class="relative flex flex-col items-center z-10 bg-[#f2f3fb] p-12 rounded-[2rem] shadow-sm border border-white">
+            <div class="bg-white p-4 rounded-xl shadow-sm mb-2">
+                <img src="/logo.png" alt="MediMart" class="h-16 w-auto animate-pulse" />
+            </div>
+            <h1 class="mt-4 text-3xl font-extrabold text-[#00478D] font-headline">MediMart</h1>
+            <p class="text-slate-500 text-sm mt-1">Loading Orders...</p>
+            <svg class="mt-8 animate-spin h-6 w-6 text-[#005EB8]" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
         </div>
-        <h1 class="mt-4 text-3xl font-extrabold text-[#00478D] font-headline">MediMart</h1>
-        <p class="text-slate-500 text-sm mt-1">Loading Orders...</p>
-        <svg class="mt-8 animate-spin h-6 w-6 text-[#005EB8]" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-        </svg>
     </div>
-</div>
 
-<!-- Sidebar -->
-<div th:replace="~{fragments/sidebar :: medimart-sidebar}"></div>
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar :: medimart-sidebar}"></div>
 
-<!-- Main -->
-<main class="md:ml-72 min-h-screen flex flex-col overflow-y-auto">
+    <!-- Main -->
+    <main class="md:ml-72 min-h-screen flex flex-col overflow-y-auto">
 
-    <!-- Top Bar -->
-    <header class="h-16 sticky top-0 bg-slate-50/80 backdrop-blur-xl z-40 flex justify-between items-center px-4 md:px-8 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary">shopping_cart</span>
-            <h1 class="text-xl font-bold tracking-tight text-blue-900 font-headline">Orders Management</h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="relative hidden sm:block">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                <input id="globalSearch" oninput="filterTable()" placeholder="Search orders..."
-                       class="pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded-full text-sm w-56 focus:ring-2 focus:ring-primary/20 transition-all"/>
+        <!-- Top Bar -->
+        <header
+            class="h-16 sticky top-0 bg-slate-50/80 backdrop-blur-xl z-40 flex justify-between items-center px-4 md:px-8 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary">shopping_cart</span>
+                <h1 class="text-xl font-bold tracking-tight text-blue-900 font-headline">Orders Management</h1>
             </div>
-            <div class="text-right hidden sm:block">
-                <p class="text-xs font-bold text-on-surface" th:text="${session.userFullName != null ? session.userFullName : 'Admin'}">Admin</p>
-                <p class="text-[10px] text-slate-500 font-bold uppercase" th:text="${session.userRole != null ? session.userRole.replace('ROLE_', '') : 'ADMIN'}">ADMIN</p>
-            </div>
-            <div class="h-10 w-10 rounded-full bg-[#00478D] flex items-center justify-center text-white font-bold border-2 border-white shadow-sm cursor-pointer"
-                 onclick="window.location.href='/profile.html'" th:text="${session.userInitials != null ? session.userInitials : 'AD'}">AD</div>
-        </div>
-    </header>
-
-    <!-- Page Content -->
-    <div class="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto w-full">
-
-        <!-- KPI Cards -->
-        <section class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_12px_40px_rgba(25,28,33,0.06)] border border-slate-100/50 flex items-center justify-between overflow-hidden relative group">
-                <div class="relative z-10">
-                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Total Orders</p>
-                    <h3 id="kpiTotal" class="text-3xl font-extrabold text-blue-900 font-headline">-</h3>
+            <div class="flex items-center gap-4">
+                <div class="relative hidden sm:block">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                    <input id="globalSearch" oninput="filterTable()" placeholder="Search orders..."
+                        class="pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded-full text-sm w-56 focus:ring-2 focus:ring-primary/20 transition-all" />
                 </div>
-                <span class="material-symbols-outlined text-6xl text-blue-50 absolute -right-4 -bottom-4 rotate-12 transition-transform group-hover:scale-110">receipt_long</span>
-            </div>
-            <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_12px_40px_rgba(25,28,33,0.06)] border border-slate-100/50 flex items-center justify-between overflow-hidden relative group">
-                <div class="relative z-10">
-                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Pending</p>
-                    <h3 id="kpiPending" class="text-3xl font-extrabold text-blue-900 font-headline">-</h3>
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs font-bold text-on-surface"
+                        th:text="${session.userFullName != null ? session.userFullName : 'Admin'}">Admin</p>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase"
+                        th:text="${session.userRole != null ? session.userRole.replace('ROLE_', '') : 'ADMIN'}">ADMIN
+                    </p>
                 </div>
-                <span class="material-symbols-outlined text-6xl text-orange-50 absolute -right-4 -bottom-4 rotate-12 transition-transform group-hover:scale-110">pending_actions</span>
+                <div class="h-10 w-10 rounded-full bg-[#00478D] flex items-center justify-center text-white font-bold border-2 border-white shadow-sm cursor-pointer"
+                    onclick="window.location.href='/profile.html'"
+                    th:text="${session.userInitials != null ? session.userInitials : 'AD'}">AD</div>
             </div>
-            <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_12px_40px_rgba(25,28,33,0.06)] border border-slate-100/50 flex items-center justify-between overflow-hidden relative group">
-                <div class="relative z-10">
-                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Total Revenue</p>
-                    <h3 id="kpiRevenue" class="text-3xl font-extrabold text-blue-900 font-headline">-</h3>
-                </div>
-                <span class="material-symbols-outlined text-6xl text-teal-50 absolute -right-4 -bottom-4 rotate-12 transition-transform group-hover:scale-110">payments</span>
-            </div>
-        </section>
+        </header>
 
-        <!-- Filter Bar -->
-        <section class="bg-surface-container-low p-2 rounded-2xl flex flex-col md:flex-row items-center gap-2">
-            <div class="relative flex-grow w-full">
-                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                <input id="filterSearch" oninput="filterTable()"
-                       class="w-full bg-surface-container-lowest border-none rounded-xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-primary/10 transition-all"
-                       placeholder="Search by order ID, name or email..."/>
-            </div>
-            <div class="flex items-center gap-2 w-full md:w-auto">
-                <select id="filterStatus" onchange="filterTable()"
+        <!-- Page Content -->
+        <div class="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto w-full">
+
+            <!-- KPI Cards -->
+            <section class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div
+                    class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_12px_40px_rgba(25,28,33,0.06)] border border-slate-100/50 flex items-center justify-between overflow-hidden relative group">
+                    <div class="relative z-10">
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Total Orders</p>
+                        <h3 id="kpiTotal" class="text-3xl font-extrabold text-blue-900 font-headline">-</h3>
+                    </div>
+                    <span
+                        class="material-symbols-outlined text-6xl text-blue-50 absolute -right-4 -bottom-4 rotate-12 transition-transform group-hover:scale-110">receipt_long</span>
+                </div>
+                <div
+                    class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_12px_40px_rgba(25,28,33,0.06)] border border-slate-100/50 flex items-center justify-between overflow-hidden relative group">
+                    <div class="relative z-10">
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Pending</p>
+                        <h3 id="kpiPending" class="text-3xl font-extrabold text-blue-900 font-headline">-</h3>
+                    </div>
+                    <span
+                        class="material-symbols-outlined text-6xl text-orange-50 absolute -right-4 -bottom-4 rotate-12 transition-transform group-hover:scale-110">pending_actions</span>
+                </div>
+                <div
+                    class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_12px_40px_rgba(25,28,33,0.06)] border border-slate-100/50 flex items-center justify-between overflow-hidden relative group">
+                    <div class="relative z-10">
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Total Revenue</p>
+                        <h3 id="kpiRevenue" class="text-3xl font-extrabold text-blue-900 font-headline">-</h3>
+                    </div>
+                    <span
+                        class="material-symbols-outlined text-6xl text-teal-50 absolute -right-4 -bottom-4 rotate-12 transition-transform group-hover:scale-110">payments</span>
+                </div>
+            </section>
+
+            <!-- Filter Bar -->
+            <section class="bg-surface-container-low p-2 rounded-2xl flex flex-col md:flex-row items-center gap-2">
+                <div class="relative flex-grow w-full">
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                    <input id="filterSearch" oninput="filterTable()"
+                        class="w-full bg-surface-container-lowest border-none rounded-xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-primary/10 transition-all"
+                        placeholder="Search by order ID, name or email..." />
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <select id="filterStatus" onchange="filterTable()"
                         class="bg-surface-container-lowest border-none rounded-xl py-3 pl-4 pr-10 text-sm focus:ring-2 focus:ring-primary/10 cursor-pointer">
-                    <option value="">All Statuses</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="PROCESSING">Processing</option>
-                    <option value="SHIPPED">Shipped</option>
-                    <option value="DELIVERED">Delivered</option>
-                    <option value="CANCELLED">Cancelled</option>
-                </select>
-            </div>
-        </section>
+                        <option value="">All Statuses</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="PROCESSING">Processing</option>
+                        <option value="SHIPPED">Shipped</option>
+                        <option value="DELIVERED">Delivered</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+            </section>
 
-        <!-- Orders Table -->
-        <section class="bg-surface-container-lowest rounded-2xl shadow-[0_12px_40px_rgba(25,28,33,0.06)] overflow-hidden border border-slate-100/50">
-            <div class="px-6 py-4 border-b border-slate-100 flex items-end justify-between">
+            <!-- Orders Table -->
+            <section
+                class="bg-surface-container-lowest rounded-2xl shadow-[0_12px_40px_rgba(25,28,33,0.06)] overflow-hidden border border-slate-100/50">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-end justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-blue-900 font-headline">All Orders</h2>
+                        <p class="text-slate-500 text-xs mt-1">Manage and track all customer orders.</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[900px]">
+                        <thead>
+                            <tr class="border-b border-slate-100 bg-slate-50/50">
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    Order ID</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    Customer</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    Date</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    Items</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    Total</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    Status</th>
+                                <th
+                                    class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody" class="divide-y divide-slate-50">
+                            <tr>
+                                <td colspan="7" class="text-center py-12 text-slate-400">
+                                    <span
+                                        class="material-symbols-outlined text-4xl block mb-2">hourglass_empty</span>Loading
+                                    orders...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-4 border-t border-slate-50 flex items-center justify-between">
+                    <p id="page-info" class="text-xs text-slate-500">Loading...</p>
+                </div>
+            </section>
+
+            <!-- Procurement Queue -->
+            <section id="procurement-queue"
+                class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden mt-8">
+                <div class="px-10 py-8 border-b border-slate-50 flex justify-between items-center bg-error-container/5">
+                    <div>
+                        <h4 class="text-xl font-black text-on-surface">Procurement Queue</h4>
+                    </div>
+                    <a th:href="@{/supplier-details}"
+                        class="flex items-center gap-2 text-xs font-black text-secondary hover:text-secondary-fixed-variant transition-colors">
+                        <span class="material-symbols-outlined text-lg">local_shipping</span>
+                        Open Supplier Portal
+                    </a>
+                </div>
+                <div class="p-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="procurement-list">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer class="mt-auto p-8 text-center">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2024 MediMart • Orders
+                Management</p>
+        </footer>
+    </main>
+
+    <!-- Order Detail Modal -->
+    <div id="orderModal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 id="modalOrderId" class="text-lg font-bold text-blue-900">Order Detail</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-grow space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Customer</p>
+                        <p id="detailName" class="text-sm font-semibold text-on-surface">-</p>
+                        <p id="detailEmail" class="text-xs text-slate-500">-</p>
+                        <p id="detailPhone" class="text-xs text-slate-500">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Shipping Address</p>
+                        <p id="detailAddress" class="text-sm text-slate-600">-</p>
+                    </div>
+                </div>
                 <div>
-                    <h2 class="text-lg font-bold text-blue-900 font-headline">All Orders</h2>
-                    <p class="text-slate-500 text-xs mt-1">Manage and track all customer orders.</p>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Order Items</p>
+                    <div id="detailItems" class="space-y-2"></div>
+                </div>
+                <div class="pt-4 border-t border-slate-100 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Subtotal</p>
+                        <p id="detailSubtotal" class="text-sm font-semibold text-slate-600">-</p>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Shipping Fee</p>
+                        <p id="detailShipping" class="text-sm font-semibold text-slate-600">-</p>
+                    </div>
+                    <div class="flex items-center justify-between pt-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Amount</p>
+                        <p id="detailTotal" class="text-xl font-extrabold text-blue-900 font-headline">-</p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Update
+                        Status</label>
+                    <div class="flex gap-3">
+                        <select id="statusSelect"
+                            class="flex-grow bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none">
+                            <option value="PENDING">Pending</option>
+                            <option value="PROCESSING">Processing</option>
+                            <option value="SHIPPED">Shipped</option>
+                            <option value="DELIVERED">Delivered</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                        <button onclick="updateStatus()"
+                            class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-container transition-colors">
+                            Update
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[900px]">
-                    <thead>
-                    <tr class="border-b border-slate-100 bg-slate-50/50">
-                        <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Order ID</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Customer</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Date</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Items</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody id="orders-tbody" class="divide-y divide-slate-50">
-                    <tr><td colspan="7" class="text-center py-12 text-slate-400">
-                        <span class="material-symbols-outlined text-4xl block mb-2">hourglass_empty</span>Loading orders...
-                    </td></tr>
-                    </tbody>
-                </table>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-between">
+                <button onclick="cancelOrder()"
+                    class="px-4 py-2 text-sm font-bold text-error hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">delete</span> Cancel Order
+                </button>
+                <button onclick="closeModal()"
+                    class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Close</button>
             </div>
-            <div class="px-6 py-4 border-t border-slate-50 flex items-center justify-between">
-                <p id="page-info" class="text-xs text-slate-500">Loading...</p>
-            </div>
-        </section>
+        </div>
     </div>
 
-    <footer class="mt-auto p-8 text-center">
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2024 MediMart • Orders Management</p>
-    </footer>
-</main>
-
-<!-- Order Detail Modal -->
-<div id="orderModal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-            <h3 id="modalOrderId" class="text-lg font-bold text-blue-900">Order Detail</h3>
-            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-        <div class="p-6 overflow-y-auto flex-grow space-y-5">
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Customer</p>
-                    <p id="detailName" class="text-sm font-semibold text-on-surface">-</p>
-                    <p id="detailEmail" class="text-xs text-slate-500">-</p>
-                    <p id="detailPhone" class="text-xs text-slate-500">-</p>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Shipping Address</p>
-                    <p id="detailAddress" class="text-sm text-slate-600">-</p>
-                </div>
-            </div>
-            <div>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Order Items</p>
-                <div id="detailItems" class="space-y-2"></div>
-            </div>
-            <div class="pt-4 border-t border-slate-100 space-y-2">
-                <div class="flex items-center justify-between">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Subtotal</p>
-                    <p id="detailSubtotal" class="text-sm font-semibold text-slate-600">-</p>
-                </div>
-                <div class="flex items-center justify-between">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Shipping Fee</p>
-                    <p id="detailShipping" class="text-sm font-semibold text-slate-600">-</p>
-                </div>
-                <div class="flex items-center justify-between pt-2">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Amount</p>
-                    <p id="detailTotal" class="text-xl font-extrabold text-blue-900 font-headline">-</p>
-                </div>
+    <!-- Bids Modal -->
+    <div id="bidsModal"
+        class="fixed inset-0 z-[100] hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-lg font-bold text-blue-900">Supplier Bids &amp; Negotiation</h3>
+                <button onclick="closeBidsModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
             </div>
             
             <!-- Rx Verification Status -->
@@ -227,81 +356,144 @@
                         <span>Update</span>
                     </button>
                 </div>
+            <div class="px-6 py-4 bg-primary/5 border-b border-slate-100 flex justify-between items-center">
+                <span class="text-sm font-bold text-slate-600 uppercase tracking-widest">Admin Target Price:</span>
+                <span class="text-xl font-black text-primary" id="bidsModalTargetPrice">Rs. 0.00</span>
+            </div>
+            <div class="p-6 overflow-y-auto flex-grow space-y-4" id="bidsList">
+                <!-- Bids injected via JS -->
             </div>
         </div>
-        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-between">
-            <button onclick="cancelOrder()" class="px-4 py-2 text-sm font-bold text-error hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">delete</span> Cancel Order
-            </button>
-            <button onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Close</button>
+    </div>
+
+    <!-- Broadcast RFQ Modal -->
+    <div id="rfqModal"
+        class="fixed inset-0 z-[100] hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-lg font-bold text-blue-900">Broadcast RFQ</h3>
+                <button onclick="closeRfqModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-slate-600 mb-4">Request quotations from all suppliers for <strong id="rfqMedName"
+                        class="text-primary"></strong>.</p>
+                <input type="hidden" id="rfqMedId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Quantity
+                            Required</label>
+                        <input type="number" id="rfqQty" value="100" min="1"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Target
+                            Price (Rs.)</label>
+                        <input type="number" id="rfqTargetPrice" value="50" min="0" step="0.01"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                <button onclick="closeRfqModal()"
+                    class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
+                <button onclick="confirmBroadcastRFQ()"
+                    class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-container transition-colors">Broadcast
+                    to Suppliers</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="toast"></div>
+    <div id="toast"></div>
 
-<script th:inline="javascript">
-    let allOrders = [];
-    let currentOrderId = null;
-    let deliveryFee = 0;
-    let medicineCatalog = {};
+    <script th:inline="javascript">
+        let allOrders = [];
+        let currentOrderId = null;
+        let deliveryFee = 0;
+        let medicineCatalog = {};
 
-    document.addEventListener('DOMContentLoaded', () => {
-        Promise.all([document.fonts.ready, new Promise(r => window.addEventListener('load', r))]).then(() => {
-            setTimeout(() => {
-                const p = document.getElementById('medimart-preloader');
-                if (p) { p.style.opacity = '0'; setTimeout(() => { p.style.display = 'none'; document.body.classList.remove('overflow-hidden'); }, 700); }
-            }, 400);
+        document.addEventListener('DOMContentLoaded', () => {
+            Promise.all([document.fonts.ready, new Promise(r => window.addEventListener('load', r))]).then(() => {
+                setTimeout(() => {
+                    const p = document.getElementById('medimart-preloader');
+                    if (p) { p.style.opacity = '0'; setTimeout(() => { p.style.display = 'none'; document.body.classList.remove('overflow-hidden'); }, 700); }
+                }, 400);
+            });
+
+            // Fetch delivery fee
+            fetch('/api/settings/public').then(res => res.json()).then(settings => {
+                deliveryFee = parseFloat(settings.standardDeliveryFee) || 0;
+            }).catch(e => console.error(e));
+
+            loadOrders();
+            loadProcurementQueue();
         });
-        
-        // Fetch delivery fee
-        fetch('/api/settings/public').then(res => res.json()).then(settings => {
-            deliveryFee = parseFloat(settings.standardDeliveryFee) || 0;
-        }).catch(e => console.error(e));
 
-        loadOrders();
-    });
-
-    function showToast(msg, isError = false) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.className = (isError ? 'error' : 'success') + ' show';
-        setTimeout(() => t.className = '', 4000);
-    }
-
-    async function apiCall(url, method = 'GET', body = null) {
-        const opts = { method, headers: body ? { 'Content-Type': 'application/json' } : {} };
-        if (body) opts.body = JSON.stringify(body);
-        const res = await fetch(url, opts);
-        if (!res.ok) {
-            const err = await res.text();
-            let msg = err;
-            try { msg = JSON.parse(err).message || msg; } catch(e){}
-            throw new Error(msg);
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = (isError ? 'error' : 'success') + ' show';
+            setTimeout(() => t.className = '', 4000);
         }
-        if (res.status !== 204) return res.json();
-    }
 
-    async function loadOrders() {
-        try {
-            allOrders = await apiCall('/api/orders');
-            updateKPIs();
-            renderTable(allOrders);
-            
-            // Load medicine catalog in background to get images
+        async function apiCall(url, method = 'GET', body = null) {
+            const opts = { method, headers: body ? { 'Content-Type': 'application/json' } : {} };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch(url, opts);
+            if (!res.ok) {
+                const err = await res.text();
+                let msg = err;
+                try { msg = JSON.parse(err).message || msg; } catch (e) { }
+                throw new Error(msg);
+            }
+            if (res.status !== 204) return res.json();
+        }
+
+        async function loadOrders() {
             try {
-                const medRes = await apiCall('/api/medicines?size=1000');
-                if (medRes && medRes.content) {
-                    medRes.content.forEach(m => {
-                        medicineCatalog[m.name] = m;
-                        if (m.id) medicineCatalog[m.id] = m;
-                    });
-                }
-            } catch(e) {}
-        } catch(e) {
-            showToast('Failed to load orders: ' + e.message, true);
-            document.getElementById('orders-tbody').innerHTML =
-                `<tr><td colspan="7" class="text-center py-12 text-slate-400"><span class="material-symbols-outlined text-4xl block mb-2">error_outline</span>Could not load orders.</td></tr>`;
+                allOrders = await apiCall('/api/orders');
+                updateKPIs();
+                renderTable(allOrders);
+
+                // Load medicine catalog in background to get images
+                try {
+                    const medRes = await apiCall('/api/medicines?size=1000');
+                    if (medRes && medRes.content) {
+                        medRes.content.forEach(m => {
+                            medicineCatalog[m.name] = m;
+                            if (m.id) medicineCatalog[m.id] = m;
+                        });
+                    }
+                } catch (e) { }
+            } catch (e) {
+                showToast('Failed to load orders: ' + e.message, true);
+                document.getElementById('orders-tbody').innerHTML =
+                    `<tr><td colspan="7" class="text-center py-12 text-slate-400"><span class="material-symbols-outlined text-4xl block mb-2">error_outline</span>Could not load orders.</td></tr>`;
+            }
+        }
+
+        function updateKPIs() {
+            const validOrders = allOrders.filter(o => o.status !== 'CANCELLED');
+            document.getElementById('kpiTotal').textContent = validOrders.length;
+            document.getElementById('kpiPending').textContent = allOrders.filter(o => o.status === 'PENDING').length;
+
+            // Revenue should only count DELIVERED orders to match the main dashboard metrics
+            const deliveredOrders = allOrders.filter(o => o.status === 'DELIVERED');
+            const rev = deliveredOrders.reduce((s, o) => s + parseFloat(o.totalPrice || 0), 0);
+            document.getElementById('kpiRevenue').textContent = 'Rs. ' + rev.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function getStatusBadge(status) {
+            const map = {
+                'PENDING': 'bg-orange-50 text-orange-700 border border-orange-100',
+                'PROCESSING': 'bg-blue-50 text-blue-700 border border-blue-100',
+                'SHIPPED': 'bg-secondary/10 text-secondary border border-secondary/20',
+                'DELIVERED': 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+                'CANCELLED': 'bg-error/10 text-error border border-error/20',
+            };
+            const cls = map[status] || 'bg-slate-100 text-slate-600';
+            return `<span class="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full ${cls}">${status}</span>`;
         }
     }
 
@@ -342,28 +534,32 @@
         if (Array.isArray(dateStr)) {
             const [y, m, d] = dateStr;
             return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-        }
-        return new Date(dateStr).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-    }
 
-    // Parse "Medicine Name (x2), Other (x1)" string into structured array
-    function parseMedicineDetails(details) {
-        if (!details) return [];
-        const pattern = /(.+?)\s+\(x(\d+)\)/g;
-        const items = [];
-        let match;
-        while ((match = pattern.exec(details)) !== null) {
-            items.push({ name: match[1].trim(), quantity: parseInt(match[2]) });
+        function getInitials(name) {
+            if (!name) return '?';
+            return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
         }
-        return items;
-    }
 
-    function renderTable(orders) {
-        const tbody = document.getElementById('orders-tbody');
-        document.getElementById('page-info').textContent = `Showing ${orders.length} of ${allOrders.length} orders`;
-        if (orders.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-slate-400"><span class="material-symbols-outlined text-4xl block mb-2">inbox</span>No orders found.</td></tr>`;
-            return;
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            // createdAt comes as an array [year,month,day,hour,min,sec] from Jackson LocalDateTime
+            if (Array.isArray(dateStr)) {
+                const [y, m, d] = dateStr;
+                return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+            return new Date(dateStr).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        // Parse "Medicine Name (x2), Other (x1)" string into structured array
+        function parseMedicineDetails(details) {
+            if (!details) return [];
+            const pattern = /(.+?)\s+\(x(\d+)\)/g;
+            const items = [];
+            let match;
+            while ((match = pattern.exec(details)) !== null) {
+                items.push({ name: match[1].trim(), quantity: parseInt(match[2]) });
+            }
+            return items;
         }
         tbody.innerHTML = orders.map(o => {
             const initials = getInitials(o.customerName);
@@ -371,6 +567,19 @@
             const totalPrice = parseFloat(o.totalPrice || 0);
             const rxBadge = o.hasPrescriptionItems ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-100 flex-shrink-0">Rx Required</span>` : '';
             return `
+
+        function renderTable(orders) {
+            const tbody = document.getElementById('orders-tbody');
+            document.getElementById('page-info').textContent = `Showing ${orders.length} of ${allOrders.length} orders`;
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-slate-400"><span class="material-symbols-outlined text-4xl block mb-2">inbox</span>No orders found.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = orders.map(o => {
+                const initials = getInitials(o.customerName);
+                const itemCount = o.items && o.items.length > 0 ? o.items.length : (o.quantity || 0);
+                const totalPrice = parseFloat(o.totalPrice || 0);
+                return `
             <tr class="hover:bg-blue-50/20 transition-colors group cursor-pointer" onclick="openModal('${o.orderId}')">
                 <td class="px-6 py-4 font-headline font-bold text-primary text-sm flex items-center">#${o.orderId}${rxBadge}</td>
                 <td class="px-6 py-4">
@@ -392,52 +601,52 @@
                     </button>
                 </td>
             </tr>`;
-        }).join('');
-    }
+            }).join('');
+        }
 
-    function filterTable() {
-        const search = (document.getElementById('filterSearch').value || document.getElementById('globalSearch').value || '').toLowerCase();
-        const status = document.getElementById('filterStatus').value;
-        const filtered = allOrders.filter(o => {
-            const matchSearch = !search ||
-                (o.orderId && o.orderId.toLowerCase().includes(search)) ||
-                (o.customerName && o.customerName.toLowerCase().includes(search)) ||
-                (o.customerEmail && o.customerEmail.toLowerCase().includes(search));
-            const matchStatus = !status || o.status === status;
-            return matchSearch && matchStatus;
-        });
-        renderTable(filtered);
-    }
+        function filterTable() {
+            const search = (document.getElementById('filterSearch').value || document.getElementById('globalSearch').value || '').toLowerCase();
+            const status = document.getElementById('filterStatus').value;
+            const filtered = allOrders.filter(o => {
+                const matchSearch = !search ||
+                    (o.orderId && o.orderId.toLowerCase().includes(search)) ||
+                    (o.customerName && o.customerName.toLowerCase().includes(search)) ||
+                    (o.customerEmail && o.customerEmail.toLowerCase().includes(search));
+                const matchStatus = !status || o.status === status;
+                return matchSearch && matchStatus;
+            });
+            renderTable(filtered);
+        }
 
-    function openModal(orderId) {
-        const o = allOrders.find(x => x.orderId === orderId);
-        if (!o) return;
-        currentOrderId = orderId;
-        document.getElementById('modalOrderId').textContent = 'Order #' + orderId;
-        document.getElementById('detailName').textContent = o.customerName || '-';
-        document.getElementById('detailEmail').textContent = o.customerEmail || '-';
-        document.getElementById('detailPhone').textContent = o.prescriptionSubmitted ? '📋 Prescription submitted' : 'No prescription';
-        document.getElementById('detailAddress').textContent = o.shippingAddress || '-';
-        
-        const total = parseFloat(o.totalPrice || 0);
-        const subtotal = Math.max(0, total - deliveryFee);
-        
-        document.getElementById('detailSubtotal').textContent = 'LKR ' + subtotal.toFixed(2);
-        document.getElementById('detailShipping').textContent = deliveryFee > 0 ? 'LKR ' + deliveryFee.toFixed(2) : 'FREE';
-        document.getElementById('detailTotal').textContent = 'LKR ' + total.toFixed(2);
-        
-        document.getElementById('statusSelect').value = o.status || 'PENDING';
+        function openModal(orderId) {
+            const o = allOrders.find(x => x.orderId === orderId);
+            if (!o) return;
+            currentOrderId = orderId;
+            document.getElementById('modalOrderId').textContent = 'Order #' + orderId;
+            document.getElementById('detailName').textContent = o.customerName || '-';
+            document.getElementById('detailEmail').textContent = o.customerEmail || '-';
+            document.getElementById('detailPhone').textContent = o.prescriptionSubmitted ? '📋 Prescription submitted' : 'No prescription';
+            document.getElementById('detailAddress').textContent = o.shippingAddress || '-';
 
-        const itemsEl = document.getElementById('detailItems');
-        if (o.items && o.items.length > 0) {
-            itemsEl.innerHTML = o.items.map(item => {
-                const med = medicineCatalog[item.medicineId] || medicineCatalog[item.medicineName];
-                let imgSrc = '/images/logo.png';
-                if (med) {
-                    if (med.imageUrl) imgSrc = '/uploads/' + med.imageUrl;
-                    else if (med.formType && med.formType !== 'OTHER') imgSrc = '/images/' + med.formType.toUpperCase() + '.png';
-                }
-                return `
+            const total = parseFloat(o.totalPrice || 0);
+            const subtotal = Math.max(0, total - deliveryFee);
+
+            document.getElementById('detailSubtotal').textContent = 'LKR ' + subtotal.toFixed(2);
+            document.getElementById('detailShipping').textContent = deliveryFee > 0 ? 'LKR ' + deliveryFee.toFixed(2) : 'FREE';
+            document.getElementById('detailTotal').textContent = 'LKR ' + total.toFixed(2);
+
+            document.getElementById('statusSelect').value = o.status || 'PENDING';
+
+            const itemsEl = document.getElementById('detailItems');
+            if (o.items && o.items.length > 0) {
+                itemsEl.innerHTML = o.items.map(item => {
+                    const med = medicineCatalog[item.medicineId] || medicineCatalog[item.medicineName];
+                    let imgSrc = '/images/logo.png';
+                    if (med) {
+                        if (med.imageUrl) imgSrc = '/uploads/' + med.imageUrl;
+                        else if (med.formType && med.formType !== 'OTHER') imgSrc = '/images/' + med.formType.toUpperCase() + '.png';
+                    }
+                    return `
                 <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-lg bg-surface-container-low flex-shrink-0 flex items-center justify-center overflow-hidden">
@@ -450,19 +659,19 @@
                     </div>
                     <p class="font-bold text-sm text-blue-900">Rs. ${(item.quantity * parseFloat(item.unitPrice || 0)).toFixed(2)}</p>
                 </div>`;
-            }).join('');
-        } else if (o.medicineDetails) {
-            // Fallback to parsed string if old order with no OrderItems
-            const parsedItems = parseMedicineDetails(o.medicineDetails);
-            if(parsedItems.length > 0) {
-                itemsEl.innerHTML = parsedItems.map(item => {
-                    const med = medicineCatalog[item.name];
-                    let imgSrc = '/images/logo.png';
-                    if (med) {
-                        if (med.imageUrl) imgSrc = '/uploads/' + med.imageUrl;
-                        else if (med.formType && med.formType !== 'OTHER') imgSrc = '/images/' + med.formType.toUpperCase() + '.png';
-                    }
-                    return `
+                }).join('');
+            } else if (o.medicineDetails) {
+                // Fallback to parsed string if old order with no OrderItems
+                const parsedItems = parseMedicineDetails(o.medicineDetails);
+                if (parsedItems.length > 0) {
+                    itemsEl.innerHTML = parsedItems.map(item => {
+                        const med = medicineCatalog[item.name];
+                        let imgSrc = '/images/logo.png';
+                        if (med) {
+                            if (med.imageUrl) imgSrc = '/uploads/' + med.imageUrl;
+                            else if (med.formType && med.formType !== 'OTHER') imgSrc = '/images/' + med.formType.toUpperCase() + '.png';
+                        }
+                        return `
                     <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                         <div class="flex items-center gap-3">
                             <div class="w-12 h-12 rounded-lg bg-surface-container-low flex-shrink-0 flex items-center justify-center overflow-hidden">
@@ -475,12 +684,154 @@
                         </div>
                         <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full">x${item.quantity}</span>
                     </div>`;
-                }).join('');
+                    }).join('');
+                } else {
+                    itemsEl.innerHTML = `<p class="text-sm text-slate-600 p-3 bg-slate-50 rounded-xl">${o.medicineDetails}</p>`;
+                }
             } else {
-                 itemsEl.innerHTML = `<p class="text-sm text-slate-600 p-3 bg-slate-50 rounded-xl">${o.medicineDetails}</p>`;
+                itemsEl.innerHTML = '<p class="text-sm text-slate-400 italic">No item details available.</p>';
             }
-        } else {
-            itemsEl.innerHTML = '<p class="text-sm text-slate-400 italic">No item details available.</p>';
+
+            const modal = document.getElementById('orderModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('orderModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            currentOrderId = null;
+        }
+
+        async function updateStatus() {
+            if (!currentOrderId) return;
+            const status = document.getElementById('statusSelect').value;
+            try {
+                await apiCall(`/api/orders/${currentOrderId}?status=${status}`, 'PUT');
+                showToast('Order status updated!');
+                closeModal();
+                await loadOrders();
+            } catch (e) {
+                showToast('Failed to update: ' + e.message, true);
+            }
+        }
+
+        async function cancelOrder() {
+            if (!currentOrderId) return;
+            if (!confirm(`Cancel order #${currentOrderId}? This cannot be undone.`)) return;
+            try {
+                await apiCall(`/api/orders/${currentOrderId}`, 'DELETE');
+                showToast('Order cancelled.');
+                closeModal();
+                await loadOrders();
+            } catch (e) {
+                showToast('Failed to cancel: ' + e.message, true);
+            }
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('orderModal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        async function loadProcurementQueue() {
+            try {
+                const [lowStockRes, requestsRes] = await Promise.all([
+                    fetch('/api/dashboard/low-stock'),
+                    fetch('/api/procurement/requests/open')
+                ]);
+
+                if (lowStockRes.ok) {
+                    const lowStockData = await lowStockRes.json();
+                    let openRequests = [];
+                    if (requestsRes.ok) {
+                        openRequests = await requestsRes.json();
+                    }
+                    const procList = document.getElementById('procurement-list');
+                    procList.innerHTML = '';
+
+                    if (lowStockData.length === 0) {
+                        procList.innerHTML = `
+                        <div class="col-span-full text-center py-8">
+                            <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">inventory_2</span>
+                            <p class="text-slate-500 font-bold">Stock levels optimal.</p>
+                        </div>
+                    `;
+                        return;
+                    }
+
+                    lowStockData.forEach(item => {
+                        const existingReq = openRequests.find(r => r.medicineId === item.id);
+                        let buttonHtml = '';
+                        if (existingReq) {
+                            buttonHtml = `<button onclick="viewBids(${existingReq.id})" class="block text-center w-full bg-secondary text-white text-xs font-black py-3 rounded-xl uppercase tracking-widest shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-95 transition-all">View Bids</button>`;
+                        } else {
+                            buttonHtml = `<button onclick="broadcastRFQ(${item.id}, '${item.name.replace(/'/g, "\\'")}')" class="block text-center w-full bg-primary text-white text-xs font-black py-3 rounded-xl uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Order Now (Broadcast)</button>`;
+                        }
+
+                        procList.innerHTML += `
+                        <div class="bg-surface-container-lowest p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-blue-50 text-primary flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-sm">medication</span>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xl font-black text-error">${item.totalQuantity}</p>
+                                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Units Left</p>
+                                </div>
+                            </div>
+                            <h5 class="font-bold text-on-surface">${item.name}</h5>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Category: ${item.categoryId || 'General'}</p>
+                            
+                            ${buttonHtml}
+                        </div>
+                    `;
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load procurement queue:', e);
+            }
+        }
+
+        function broadcastRFQ(medicineId, medicineName) {
+            document.getElementById('rfqMedId').value = medicineId;
+            document.getElementById('rfqMedName').textContent = medicineName;
+            document.getElementById('rfqQty').value = '100';
+            document.getElementById('rfqTargetPrice').value = '50';
+            document.getElementById('rfqModal').classList.remove('hidden');
+            document.getElementById('rfqModal').classList.add('flex');
+        }
+
+        function closeRfqModal() {
+            document.getElementById('rfqModal').classList.add('hidden');
+            document.getElementById('rfqModal').classList.remove('flex');
+        }
+
+        async function confirmBroadcastRFQ() {
+            const medicineId = document.getElementById('rfqMedId').value;
+            const medicineName = document.getElementById('rfqMedName').textContent;
+            const qtyStr = document.getElementById('rfqQty').value;
+            const targetPriceStr = document.getElementById('rfqTargetPrice').value;
+            const qty = parseInt(qtyStr, 10);
+            const targetPrice = parseFloat(targetPriceStr);
+
+            if (isNaN(qty) || qty <= 0) return alert("Invalid quantity");
+            if (isNaN(targetPrice) || targetPrice < 0) return alert("Invalid target price");
+
+            try {
+                await apiCall('/api/procurement/requests', 'POST', {
+                    medicineId: medicineId,
+                    medicineName: medicineName,
+                    quantity: qty,
+                    targetPrice: targetPrice
+                });
+                showToast('RFQ Broadcasted to Suppliers!');
+                closeRfqModal();
+                await loadProcurementQueue();
+            } catch (e) {
+                showToast('Failed to broadcast: ' + e.message, true);
+            }
         }
 
         // Reset Rx display
@@ -602,26 +953,51 @@
             await loadOrders();
         } catch(e) {
             showToast('Failed to update: ' + e.message, true);
+        async function viewBids(requestId) {
+            try {
+                const bids = await apiCall(`/api/procurement/requests/${requestId}/bids`);
+                const bidsList = document.getElementById('bidsList');
+                if (bids.length === 0) {
+                    bidsList.innerHTML = '<p class="text-slate-500 text-center py-4">No bids received yet.</p>';
+                } else {
+                    bidsList.innerHTML = bids.map(b => `
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <div>
+                            <p class="font-bold text-blue-900">${b.supplierName}</p>
+                            <p class="text-xs text-slate-500">Submitted: ${formatDate(b.createdAt)}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <p class="font-black text-lg text-secondary">Rs. ${parseFloat(b.price || 0).toFixed(2)}</p>
+                            ${b.status === 'PENDING' ? `<button onclick="acceptBid(${b.id})" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-container">Accept</button>` : `<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">${b.status}</span>`}
+                        </div>
+                    </div>
+                `).join('');
+                }
+                document.getElementById('bidsModal').classList.remove('hidden');
+                document.getElementById('bidsModal').classList.add('flex');
+            } catch (e) {
+                showToast('Failed to load bids: ' + e.message, true);
+            }
         }
-    }
 
-    async function cancelOrder() {
-        if (!currentOrderId) return;
-        if (!confirm(`Cancel order #${currentOrderId}? This cannot be undone.`)) return;
-        try {
-            await apiCall(`/api/orders/${currentOrderId}`, 'DELETE');
-            showToast('Order cancelled.');
-            closeModal();
-            await loadOrders();
-        } catch(e) {
-            showToast('Failed to cancel: ' + e.message, true);
+        function closeBidsModal() {
+            document.getElementById('bidsModal').classList.add('hidden');
+            document.getElementById('bidsModal').classList.remove('flex');
         }
-    }
 
-    // Close modal on backdrop click
-    document.getElementById('orderModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
-</script>
+        async function acceptBid(bidId) {
+            if (!confirm("Accept this bid and place the order?")) return;
+            try {
+                await apiCall(`/api/procurement/bids/${bidId}/accept`, 'POST');
+                showToast('Bid accepted! Order created.');
+                closeBidsModal();
+                await loadProcurementQueue();
+                await loadOrders();
+            } catch (e) {
+                showToast('Failed to accept bid: ' + e.message, true);
+            }
+        }
+    </script>
 </body>
+
 </html>

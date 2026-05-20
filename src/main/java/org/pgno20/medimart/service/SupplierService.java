@@ -101,4 +101,20 @@ public class SupplierService {
         r.setSupplierCategory(supplier.getSupplierCategory());
         return r;
     }
+
+    public Supplier getOrCreateSupplierByEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+        String normalizedEmail = email.trim();
+        return supplierRepository.findByEmailIgnoreCase(normalizedEmail).orElseGet(() -> {
+            Supplier newSupplier = new Supplier();
+            newSupplier.setId(generateNextId());
+            newSupplier.setName("Supplier " + normalizedEmail.split("@")[0]);
+            newSupplier.setEmail(normalizedEmail);
+            newSupplier.setType("WHOLESALER");
+            newSupplier.setContact("000000000");
+            return supplierRepository.save(newSupplier);
+        });
+    }
 }

@@ -785,8 +785,12 @@
                             navLink.classList.remove('hidden');
                             if (data.user.roleName === 'ROLE_ADMIN') {
                                 navLink.textContent = 'Admin Dashboard';
+                                navLink.href = '/dashboard';
+                            } else if (data.user.roleName === 'ROLE_SUPPLIER') {
+                                navLink.textContent = 'Supplier Dashboard';
+                                navLink.href = '/supplier-dashboard';
                             } else {
-                                navLink.textContent = 'Staff Dashboard';
+                                navLink.classList.add('hidden');
                             }
                         } else {
                             navLink.classList.add('hidden');

@@ -222,8 +222,24 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
-                // Redirect to dashboard or profile
-                window.location.href = '/profile.html';
+                try {
+                    const meRes = await fetch('/api/auth/me');
+                    const meData = await meRes.json();
+                    if (meData.loggedIn && meData.user) {
+                        const role = meData.user.roleName;
+                        if (role === 'ROLE_ADMIN') {
+                            window.location.href = '/dashboard';
+                        } else if (role === 'ROLE_SUPPLIER') {
+                            window.location.href = '/supplier-dashboard';
+                        } else {
+                            window.location.href = '/profile.html';
+                        }
+                    } else {
+                        window.location.href = '/profile.html';
+                    }
+                } catch(e) {
+                    window.location.href = '/profile.html';
+                }
             } else {
                 errorMsg.textContent = data.message || 'Login failed. Please check your credentials.';
                 errorMsg.classList.remove('hidden');
