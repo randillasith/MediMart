@@ -124,6 +124,8 @@ public class SecurityConfig {
                     "/checkout.html",
                     "/order-success.html",
                     "/profile.html",
+                    "/supplier-login.html",
+                    "/supplier-setup.html",
                     "/catalog",
                     "/home"
                 ).permitAll()
@@ -162,6 +164,9 @@ public class SecurityConfig {
                     "/api/auth/me"         // PUT / DELETE also covered
                 ).authenticated()
 
+                // ── Supplier pages (Thymeleaf templates) ──────────────────
+                .requestMatchers("/supplier-dashboard.html").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER")
+
                 // ── Admin-only pages (Thymeleaf templates) ────────────────
                 .requestMatchers(
                     "/dashboard",
@@ -191,7 +196,14 @@ public class SecurityConfig {
 
                 // ── Admin-only API — users, suppliers, orders, categories ──
                 .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/suppliers/email/*", "/api/suppliers/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER")
                 .requestMatchers("/api/suppliers/**").hasAuthority("ROLE_ADMIN")
+                
+                // ── Supplier orders REST endpoint security ──────────────────
+                .requestMatchers(HttpMethod.GET, "/api/supplier-orders/supplier/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER")
+                .requestMatchers(HttpMethod.PUT, "/api/supplier-orders/*/confirm", "/api/supplier-orders/*/reject", "/api/supplier-orders/*/delivered").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER")
+                .requestMatchers("/api/supplier-orders/**").hasAuthority("ROLE_ADMIN")
+
                 // POST /api/orders is allowed for any customer (even guests)
                 .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
                 // GET /api/orders requires at least being logged in — customers see own orders, admins see all

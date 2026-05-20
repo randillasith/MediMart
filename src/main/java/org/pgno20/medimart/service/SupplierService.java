@@ -3,6 +3,9 @@ package org.pgno20.medimart.service;
 import org.pgno20.medimart.dto.SupplierResponse;
 import org.pgno20.medimart.entity.Supplier;
 import org.pgno20.medimart.repository.SupplierRepository;
+import org.pgno20.medimart.repository.UserRepository;
+import org.pgno20.medimart.model.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +15,13 @@ import java.util.stream.Collectors;
 public class SupplierService {
 
     private final SupplierRepository supplierRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public SupplierService(SupplierRepository supplierRepository) {
+    public SupplierService(SupplierRepository supplierRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.supplierRepository = supplierRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Create
@@ -22,7 +29,24 @@ public class SupplierService {
         if (supplier.getId() == null || supplier.getId().isBlank()) {
             supplier.setId(generateNextId());
         }
-        return toResponse(supplierRepository.save(supplier));
+        Supplier saved = supplierRepository.save(supplier);
+        
+        // Auto-create User account for supplier
+        if (supplier.getEmail() != null && !supplier.getEmail().isBlank()) {
+            if (!userRepository.existsByEmail(supplier.getEmail())) {
+                User sUser = new User();
+                sUser.setFullName(supplier.getName() + " Admin");
+                sUser.setEmail(supplier.getEmail());
+                sUser.setPassword(passwordEncoder.encode("Supplier@123")); // Default password
+                sUser.setRoleName("ROLE_SUPPLIER");
+                sUser.setGender("Other");
+                sUser.setDob(java.time.LocalDate.now());
+                sUser.setActive(true);
+                userRepository.save(sUser);
+            }
+        }
+        
+        return toResponse(saved);
     }
 
     // Read all

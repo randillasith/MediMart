@@ -202,10 +202,16 @@
                 try {
                     const meRes = await fetch('/api/auth/me');
                     const meData = await meRes.json();
-                    if (meData.loggedIn && meData.user && meData.user.role === 'ROLE_SUPPLIER') {
-                        window.location.href = '/supplier-dashboard.html';
+                    if (meData.loggedIn && meData.user) {
+                        const role = meData.user.roleName;
+                        if (role === 'ROLE_SUPPLIER') {
+                            window.location.href = '/supplier-dashboard.html';
+                        } else if (role === 'ROLE_ADMIN') {
+                            window.location.href = '/dashboard';
+                        } else {
+                            window.location.href = '/index.html';
+                        }
                     } else {
-                        // If an admin accidentally logs in here, redirect to admin dashboard
                         window.location.href = '/index.html';
                     }
                 } catch(e) {

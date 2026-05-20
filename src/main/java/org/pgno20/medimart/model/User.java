@@ -32,7 +32,7 @@ public class User {
     @Column(name = "role_name", nullable = false)
     private String roleName;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "active", nullable = false)
     private Boolean active = true;
 
     /** Default shipping address saved from the checkout form. */

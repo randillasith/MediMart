@@ -446,6 +446,7 @@
             renderTable();
         } catch (e) {
             console.error(e);
+            document.getElementById('suppliersTableBody').innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-slate-500 font-medium">Could not load suppliers. Make sure Spring Boot is running.</td></tr>`;
         }
     }
 

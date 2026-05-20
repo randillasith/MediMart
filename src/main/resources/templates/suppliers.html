@@ -152,10 +152,16 @@
                 <h3 class="text-4xl font-headline font-extrabold tracking-tight text-primary">Supplier Directory</h3>
                 <p class="text-slate-500 mt-1">Manage and track your pharmaceutical procurement network.</p>
             </div>
-            <button th:if="${session.userRole == 'ROLE_ADMIN'}" onclick="showForm()" class="px-6 py-3 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-manrope font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-98 transition-all">
-                <span class="material-symbols-outlined">add_circle</span>
-                Add New Supplier
-            </button>
+            <div class="flex gap-3">
+                <a th:if="${session.userRole == 'ROLE_ADMIN'}" href="/orders.html" class="px-6 py-3 bg-surface-container-low text-primary border border-outline-variant/20 rounded-xl font-manrope font-bold flex items-center gap-2 hover:bg-surface-container hover:scale-[1.02] active:scale-98 transition-all">
+                    <span class="material-symbols-outlined">add_shopping_cart</span>
+                    Place Order
+                </a>
+                <button th:if="${session.userRole == 'ROLE_ADMIN'}" onclick="showForm()" class="px-6 py-3 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-manrope font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-98 transition-all">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    Add New Supplier
+                </button>
+            </div>
         </section>
 
         <!-- KPI Cards -->

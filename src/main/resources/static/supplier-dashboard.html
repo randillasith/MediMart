@@ -204,7 +204,7 @@
     async function initDashboard() {
         try {
             const meData = await apiCall('/api/auth/me');
-            if (!meData.loggedIn || !meData.user || meData.user.role !== 'ROLE_SUPPLIER') {
+            if (!meData.loggedIn || !meData.user || meData.user.roleName !== 'ROLE_SUPPLIER') {
                 window.location.href = '/login.html'; return;
             }
             const email = meData.user.email;
@@ -224,7 +224,7 @@
 
     async function loadOrders(supplierId) {
         try {
-            const data = await apiCall(`/api/orders/supplier/${supplierId}`);
+            const data = await apiCall(`/api/supplier-orders/supplier/${supplierId}`);
             ordersData = data || [];
             document.getElementById('statTotal').textContent = ordersData.length;
             document.getElementById('statPending').textContent = ordersData.filter(o=>o.status==='PENDING').length;
@@ -407,7 +407,7 @@
         try {
             for (const id of pendingGroupIds) {
                 const price = parseFloat(document.getElementById(`price_${id}`)?.value) || 0;
-                await apiCall(`/api/orders/${id}/confirm`, 'PUT', {
+                await apiCall(`/api/supplier-orders/${id}/confirm`, 'PUT', {
                     unitPrice: price,
                     expectedDelivery: deliveryDate,
                     notes: notes || 'Confirmed by Supplier'
@@ -426,7 +426,7 @@
         if (reason === null) return;
         try {
             for (const id of ids) {
-                await apiCall(`/api/orders/${id}/reject`, 'PUT', { reason: reason || 'Rejected by Supplier' });
+                await apiCall(`/api/supplier-orders/${id}/reject`, 'PUT', { reason: reason || 'Rejected by Supplier' });
             }
             showToast(`${ids.length} order(s) rejected.`);
             loadOrders(loggedInSupplier.id);
@@ -443,7 +443,7 @@
     async function markDelivered(id) {
         if (!confirm('Mark this order as delivered?')) return;
         try {
-            await apiCall(`/api/orders/${id}/delivered`, 'PUT');
+            await apiCall(`/api/supplier-orders/${id}/delivered`, 'PUT');
             showToast('Order marked as delivered!');
             loadOrders(loggedInSupplier.id);
         } catch(e) {
