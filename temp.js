@@ -101,7 +101,7 @@
         }
 
         try {
-            let url = `/api/medicines/storefront?size=50`; // Fetch max and client-side filter for now
+            let url = `/api/medicines/storefront?size=1000`; // Fetch max and client-side filter for now
             if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
             
             const res = await fetch(url);
