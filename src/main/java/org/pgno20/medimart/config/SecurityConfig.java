@@ -155,6 +155,12 @@ public class SecurityConfig {
                     "/api/categories"
                 ).permitAll()
 
+                // ── Supplier pages ───────────────────────────────────────────────
+                .requestMatchers(
+                    "/supplier-dashboard",
+                    "/supplier-dashboard.html"
+                ).hasAuthority("ROLE_SUPPLIER")
+
                 // ── Authenticated users — own profile management ───────────
                 .requestMatchers(
                     "/api/auth/logout",
@@ -189,12 +195,25 @@ public class SecurityConfig {
                 // GET batches is admin-only too (internal inventory data)
                 .requestMatchers(HttpMethod.GET,  "/api/medicines/*/batches").hasAuthority("ROLE_ADMIN")
 
-                // ── Admin-only API — users, suppliers, orders, categories ──
+                // ── API — users ───────────────────────────────────────
                 .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/api/suppliers/**").hasAuthority("ROLE_ADMIN")
+
+                // Supplier self-service (MUST be before the broad admin rules below)
+                .requestMatchers(HttpMethod.GET,  "/api/suppliers/my-orders").hasAuthority("ROLE_SUPPLIER")
+                .requestMatchers(HttpMethod.PUT,  "/api/suppliers/my-orders/*/status").hasAnyAuthority("ROLE_SUPPLIER", "ROLE_ADMIN")
+                .requestMatchers(HttpMethod.GET,  "/api/procurement/requests/open").hasAnyAuthority("ROLE_SUPPLIER", "ROLE_ADMIN", "ROLE_SUPPLIER_HANDLER")
+                .requestMatchers(HttpMethod.POST, "/api/procurement/bids").hasAuthority("ROLE_SUPPLIER")
+
+                // Admin-only supplier & procurement API (broad patterns come AFTER specific supplier routes)
+                .requestMatchers("/api/procurement/requests", "/api/procurement/requests/**", "/api/procurement/bids/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER_HANDLER")
+                .requestMatchers(HttpMethod.GET,    "/api/suppliers", "/api/suppliers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER_HANDLER")
+                .requestMatchers(HttpMethod.POST,   "/api/suppliers", "/api/suppliers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER_HANDLER")
+                .requestMatchers(HttpMethod.DELETE, "/api/suppliers/**").hasAuthority("ROLE_ADMIN")
+
+                // ── Orders ─────────────────────────────────────────────
                 // POST /api/orders is allowed for any customer (even guests)
                 .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
-                // GET /api/orders requires at least being logged in — customers see own orders, admins see all
+                // GET /api/orders requires at least being logged in
                 .requestMatchers(HttpMethod.GET, "/api/orders").authenticated()
                 // PUT/DELETE orders are admin-only
                 .requestMatchers("/api/orders/**").hasAuthority("ROLE_ADMIN")
