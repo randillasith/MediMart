@@ -21,7 +21,7 @@ public class FeedbackController {
     // READ
     @GetMapping
     public List<Feedback> getAll() {
-        return service.viewFeedbacks();
+        return service.getAllFeedbacks();
     }
 
     // DELETE
