@@ -53,13 +53,13 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     // --- Storefront queries (groups batches together for customer view) ---
 
-    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired, m.imageUrl, m.formType) " +
+    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(MIN(m.id), m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired, m.imageUrl, m.formType) " +
            "FROM Medicine m " +
            "WHERE m.status <> 'DISCONTINUED' " +
            "GROUP BY m.name, m.brand, m.dosage, m.category.name, m.prescriptionRequired, m.imageUrl, m.formType")
     Page<StorefrontMedicineDTO> getStorefrontMedicines(Pageable pageable);
 
-    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired, m.imageUrl, m.formType) " +
+    @Query("SELECT new org.pgno20.medimart.dto.StorefrontMedicineDTO(MIN(m.id), m.name, m.brand, m.dosage, MIN(m.price), SUM(CAST(m.stockQty AS long)), m.category.name, MIN(m.expiryDate), m.prescriptionRequired, m.imageUrl, m.formType) " +
            "FROM Medicine m " +
            "WHERE m.status <> 'DISCONTINUED' AND LOWER(m.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "GROUP BY m.name, m.brand, m.dosage, m.category.name, m.prescriptionRequired, m.imageUrl, m.formType")
@@ -71,6 +71,13 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     @Query("SELECT COUNT(m) FROM Medicine m WHERE m.stockQty > 0 AND m.stockQty <= 100 AND m.status <> 'DISCONTINUED'")
     long countLowStock();
+
+    @Query("SELECT m FROM Medicine m WHERE m.stockQty <= :threshold AND m.status <> 'DISCONTINUED'")
+    java.util.List<Medicine> findLowStockItems(@Param("threshold") int threshold);
+
+    /** Legacy no-arg version — defaults to 20 units for backwards compat */
+    @Query("SELECT m FROM Medicine m WHERE m.stockQty <= 20 AND m.status <> 'DISCONTINUED'")
+    java.util.List<Medicine> findLowStockItems();
 
     @Query("SELECT COUNT(m) FROM Medicine m WHERE m.stockQty = 0 AND m.status <> 'DISCONTINUED'")
     long countOutOfStock();

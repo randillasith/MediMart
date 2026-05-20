@@ -41,4 +41,13 @@ public class StockBatchController {
             @Valid @RequestBody StockBatchRequest req) {
         return ResponseEntity.ok(stockBatchService.updateBatch(medicineId, batchId, req));
     }
+
+    // Delete a batch
+    @DeleteMapping("/{batchId}")
+    public ResponseEntity<Void> deleteBatch(
+            @PathVariable Long medicineId,
+            @PathVariable Long batchId) {
+        stockBatchService.deleteBatch(medicineId, batchId);
+        return ResponseEntity.noContent().build();
+    }
 }

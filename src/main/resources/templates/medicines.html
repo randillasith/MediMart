@@ -344,9 +344,30 @@
                                 Form</label>
                             <select id="medForm" onchange="toggleDosageFields()"
                                 class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
-                                <option value="TABLET">Tablet/Capsule/Pill</option>
-                                <option value="SYRUP">Syrup/Liquid</option>
-                                <option value="CREAM">Cream/Ointment</option>
+                                <option value="TABLET">Tablet</option>
+                                <option value="CAPSULE">Capsule</option>
+                                <option value="SYRUP">Syrup</option>
+                                <option value="SOFTGEL">Softgel</option>
+                                <option value="CHEWABLE">Chewable</option>
+                                <option value="LOZENGE">Lozenge</option>
+                                <option value="CREAM">Cream</option>
+                                <option value="LIQUID">Liquid</option>
+                                <option value="BANDAGE">Bandage</option>
+                                <option value="PLASTER">Plaster</option>
+                                <option value="OINTMENT">Ointment</option>
+                                <option value="LOTION">Lotion</option>
+                                <option value="POWDER">Powder</option>
+                                <option value="DROPS">Drops</option>
+                                <option value="SPRAY">Spray</option>
+                                <option value="SUSPENSION">Suspension</option>
+                                <option value="SWAB">Swab</option>
+                                <option value="GAUZE">Gauze</option>
+                                <option value="TAPE">Tape</option>
+                                <option value="GEL">Gel</option>
+                                <option value="SHAMPOO">Shampoo</option>
+                                <option value="EFFERVESCENT">Effervescent</option>
+                                <option value="PEN">Pen</option>
+                                <option value="INJECTION">Injection</option>
                                 <option value="OTHER">Other/Custom</option>
                             </select>
                         </div>
@@ -1170,16 +1191,19 @@
 
         // =================== VIEW BATCHES FUNCTIONS ===================
 
+        let currentBatchMedicineId = null;
+
         async function viewBatches(medicineId, medicineName) {
+            currentBatchMedicineId = medicineId;
             document.getElementById('batchViewMedName').textContent = medicineName;
             const tbody = document.getElementById('batchViewRows');
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-400">Loading...</td></tr>';
             document.getElementById('batchViewModal').classList.remove('hidden');
 
             try {
                 const batches = await apiCall(`/api/medicines/${medicineId}/batches`);
                 if (!batches || batches.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">No batches found. Use the Restock button to add inventory.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-400">No batches found. Use the Restock button to add inventory.</td></tr>';
                     return;
                 }
 
@@ -1191,7 +1215,7 @@
                     const addedStr = b.addedDate ? new Date(b.addedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
                     const expiryStr = b.expiryDate || '-';
                     const row = document.createElement('tr');
-                    row.className = 'hover:bg-blue-50/30 transition-colors';
+                    row.className = 'hover:bg-blue-50/30 transition-colors group';
                     row.innerHTML = `
                         <td class="px-4 py-3 text-xs font-mono font-bold text-slate-500">${b.batchNumber}</td>
                         <td class="px-4 py-3 text-sm font-bold text-on-surface">${b.supplierName || '-'}</td>
@@ -1200,16 +1224,93 @@
                         <td class="px-4 py-3 text-sm text-slate-600">${expiryStr}</td>
                         <td class="px-4 py-3 text-sm text-slate-600">${addedStr}</td>
                         <td class="px-4 py-3"><span class="px-2 py-1 ${statusClass} text-[10px] font-bold rounded-full uppercase">${b.status}</span></td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="openEditBatchModal(${currentBatchMedicineId}, ${b.id}, ${b.quantity}, '${b.expiryDate || ''}', '${b.purchasePrice || ''}', '${b.supplierId || ''}')"
+                                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors" title="Edit Batch">
+                                    <span class="material-symbols-outlined text-base">edit</span>
+                                </button>
+                                <button onclick="deleteBatchRow(${currentBatchMedicineId}, ${b.id})"
+                                    class="p-1.5 text-slate-400 hover:text-error hover:bg-red-50 rounded-lg transition-colors" title="Delete Batch">
+                                    <span class="material-symbols-outlined text-base">delete</span>
+                                </button>
+                            </div>
+                        </td>
                     `;
                     tbody.appendChild(row);
                 });
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-red-400">Failed to load batches.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-red-400">Failed to load batches.</td></tr>';
             }
         }
 
         function closeBatchViewModal() {
             document.getElementById('batchViewModal').classList.add('hidden');
+            currentBatchMedicineId = null;
+        }
+
+        // =================== EDIT BATCH FUNCTIONS ===================
+
+        function openEditBatchModal(medicineId, batchId, quantity, expiryDate, purchasePrice, supplierId) {
+            document.getElementById('editBatchMedId').value = medicineId;
+            document.getElementById('editBatchId').value = batchId;
+            document.getElementById('editBatchQty').value = quantity;
+            document.getElementById('editBatchExpiry').value = expiryDate;
+            document.getElementById('editBatchPrice').value = purchasePrice;
+            document.getElementById('editBatchSupplier').value = supplierId;
+            document.getElementById('editBatchSaveBtn').disabled = false;
+            document.getElementById('editBatchSaveBtn').textContent = 'Save Changes';
+            document.getElementById('editBatchModal').classList.remove('hidden');
+        }
+
+        function closeEditBatchModal() {
+            document.getElementById('editBatchModal').classList.add('hidden');
+        }
+
+        async function saveEditBatch(event) {
+            if (event) event.preventDefault();
+            const btn = document.getElementById('editBatchSaveBtn');
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const medicineId = document.getElementById('editBatchMedId').value;
+                const batchId = document.getElementById('editBatchId').value;
+                const payload = {
+                    quantity: parseInt(document.getElementById('editBatchQty').value, 10),
+                    expiryDate: document.getElementById('editBatchExpiry').value || null,
+                    purchasePrice: document.getElementById('editBatchPrice').value
+                        ? parseFloat(document.getElementById('editBatchPrice').value) : null,
+                    supplierId: document.getElementById('editBatchSupplier').value || null
+                };
+
+                await apiCall(`/api/medicines/${medicineId}/batches/${batchId}`, 'PUT', payload);
+                showToast('Batch updated successfully!');
+                closeEditBatchModal();
+                // Refresh the batch list (re-use current medicine data)
+                const medName = document.getElementById('batchViewMedName').textContent;
+                await viewBatches(medicineId, medName);
+                loadMedicines(currentPage);
+            } catch (err) {
+                // error handled by apiCall
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+            }
+        }
+
+        async function deleteBatchRow(medicineId, batchId) {
+            if (!confirm('Delete this stock batch? This cannot be undone.')) return;
+            try {
+                await apiCall(`/api/medicines/${medicineId}/batches/${batchId}`, 'DELETE');
+                showToast('Batch deleted successfully!');
+                const medName = document.getElementById('batchViewMedName').textContent;
+                await viewBatches(medicineId, medName);
+                loadMedicines(currentPage);
+            } catch (err) {
+                // error handled by apiCall
+            }
         }
 
         async function loadSuppliers() {
@@ -1224,6 +1325,8 @@
                     
                 if (selMed) selMed.innerHTML = optHtml;
                 if (selRestock) selRestock.innerHTML = optHtml;
+                const selEditBatch = document.getElementById('editBatchSupplier');
+                if (selEditBatch) selEditBatch.innerHTML = optHtml;
             } catch (e) {
                 console.error('Failed to load suppliers', e);
             }
@@ -1556,6 +1659,8 @@
                                 Date</th>
                             <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status
                             </th>
+                            <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Actions
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="batchViewRows" class="divide-y divide-slate-50">
@@ -1570,6 +1675,62 @@
     </div>
 
     <div id="toast"></div>
+
+    <!-- Edit Batch Modal -->
+    <div id="editBatchModal" class="hidden fixed inset-0 z-[110] modal-overlay flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-blue-50 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-blue-700">edit</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-blue-900">Edit Stock Batch</h3>
+                        <p class="text-xs text-blue-600 font-medium">Update batch details below</p>
+                    </div>
+                </div>
+                <button onclick="closeEditBatchModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="editBatchForm" onsubmit="saveEditBatch(event)" class="space-y-4">
+                    <input type="hidden" id="editBatchMedId">
+                    <input type="hidden" id="editBatchId">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Quantity *</label>
+                        <input type="number" id="editBatchQty" required min="0"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500 outline-none transition-all"
+                            placeholder="e.g. 200">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Expiry Date</label>
+                        <input type="date" id="editBatchExpiry"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Purchase Price (Rs.)</label>
+                        <input type="number" step="0.01" id="editBatchPrice"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500 outline-none transition-all"
+                            placeholder="Leave blank to keep existing">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Supplier (Optional)</label>
+                        <select id="editBatchSupplier"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500 outline-none transition-all">
+                            <option value="">Select Supplier</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                <button type="button" onclick="closeEditBatchModal()"
+                    class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" form="editBatchForm" id="editBatchSaveBtn"
+                    class="px-4 py-2 text-sm font-bold bg-primary text-white hover:bg-primary-container rounded-lg shadow transition-colors disabled:opacity-50">Save Changes</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
