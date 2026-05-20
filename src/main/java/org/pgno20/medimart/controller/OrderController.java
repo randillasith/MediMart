@@ -55,6 +55,9 @@ public class OrderController {
             HttpStatus code = e.getMessage().contains("Order not found") ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
             return ResponseEntity.status(code)
                     .body(Map.of("error", e.getMessage(), "message", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage(), "message", e.getMessage()));
         }
     }
 

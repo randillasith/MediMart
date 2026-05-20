@@ -52,4 +52,12 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     long countActive();
 
     long countByStatus(String status);
+
+    /** Check if any prescription with the given status exists for a customer email.
+     *  Used by OrderService to gate status updates on prescription-required orders. */
+    boolean existsBySubmittedByEmailIgnoreCaseAndStatus(String email, String status);
+
+    /** Find prescriptions for a specific email filtered by status (used for Rx approval check). */
+    Page<Prescription> findBySubmittedByEmailIgnoreCaseAndStatus(
+            String submittedByEmail, String status, Pageable pageable);
 }

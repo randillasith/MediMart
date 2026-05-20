@@ -79,7 +79,7 @@ public class DashboardController {
                 .collect(Collectors.groupingBy(
                         order -> order.getCreatedAt().toLocalDate(),
                         Collectors.reducing(BigDecimal.ZERO, 
-                                            order -> order.getTotalPrice().subtract(order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO), 
+                                            order -> order.getTotalPrice().subtract(order.getDeliveryFee() != null ? order.getDeliveryFee() : BigDecimal.ZERO), 
                                             BigDecimal::add)
                 ));
 
