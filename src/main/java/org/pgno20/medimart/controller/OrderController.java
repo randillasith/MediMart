@@ -43,7 +43,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
-    /** Update order status. Returns 404 if the order does not exist. */
+    /** Update order status. Returns 400 on validation failure, 404 if order not found. */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStatus(
             @PathVariable String id,
@@ -52,8 +52,9 @@ public class OrderController {
             Order updated = orderService.updateOrderStatus(id, status);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
+            HttpStatus code = e.getMessage().contains("Order not found") ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(code)
+                    .body(Map.of("error", e.getMessage(), "message", e.getMessage()));
         }
     }
 
