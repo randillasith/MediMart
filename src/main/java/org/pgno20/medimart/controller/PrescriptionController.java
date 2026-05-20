@@ -114,6 +114,19 @@ public class PrescriptionController {
         return ResponseEntity.ok(prescriptionService.getById(id));
     }
 
+    /**
+     * GET /api/prescriptions/by-rx-id/RX001
+     * Returns a single prescription by its custom prescriptionId string.
+     */
+    @GetMapping("/by-rx-id/{prescriptionId}")
+    public ResponseEntity<Prescription> getByRxId(@PathVariable String prescriptionId) {
+        Prescription p = prescriptionService.getByPrescriptionId(prescriptionId);
+        if (p == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(p);
+    }
+
     // ─── UPDATE ──────────────────────────────────────────────────────────────
     /**
      * PUT /api/prescriptions/5

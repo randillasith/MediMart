@@ -243,6 +243,10 @@ public class PrescriptionService {
         return prescriptionRepository.countByStatus("REJECTED");
     }
 
+    public Prescription getByPrescriptionId(String prescriptionId) {
+        return prescriptionRepository.findByPrescriptionId(prescriptionId).orElse(null);
+    }
+
     private void validatePrescription(String patientName, String doctorName, String medicineDetails,
                                       String dosage, LocalDate prescriptionDate, MultipartFile file) {
         if (isBlank(patientName) || isBlank(doctorName) || isBlank(medicineDetails) || isBlank(dosage)) {

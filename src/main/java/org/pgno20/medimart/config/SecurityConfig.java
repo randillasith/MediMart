@@ -161,53 +161,47 @@ public class SecurityConfig {
                     "/api/auth/me"         // PUT / DELETE also covered
                 ).authenticated()
 
-                // ── Admin-only pages (Thymeleaf templates) ────────────────
-                .requestMatchers(
-                    "/dashboard",
-                    "/medicines",
-                    "/supplier-details",
-                    "/users-portal",
-                    "/addmindetails",
-                    "/orders-management",
-                    "/prescriptions",
-                    "/prescriptions.html",
-                    "/prescription-add.html",
-                    "/prescription-edit.html",
-                    "/settings"
-                ).hasAuthority("ROLE_ADMIN")
+                // ── Admin-only & Staff pages (Thymeleaf templates) ───────────
+                .requestMatchers("/dashboard").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER", "ROLE_ORDER_MANAGER", "ROLE_SUPPLIER_HANDLER")
+                .requestMatchers("/medicines").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
+                .requestMatchers("/supplier-details").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER_HANDLER")
+                .requestMatchers("/users-portal", "/addmindetails").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/orders-management").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORDER_MANAGER")
+                .requestMatchers("/prescriptions", "/prescriptions.html", "/prescription-add.html", "/prescription-edit.html").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORDER_MANAGER")
+                .requestMatchers("/settings").hasAuthority("ROLE_ADMIN")
 
-                // ── Admin-only API — write operations on medicines ─────────
-                .requestMatchers(HttpMethod.POST,   "/api/medicines").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT,    "/api/medicines/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/medicines/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.POST,   "/api/medicines/*/image").hasAuthority("ROLE_ADMIN")
+                // ── Write operations on medicines (Admin + Stock Manager) ───
+                .requestMatchers(HttpMethod.POST,   "/api/medicines").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
+                .requestMatchers(HttpMethod.PUT,    "/api/medicines/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/medicines/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
+                .requestMatchers(HttpMethod.POST,   "/api/medicines/*/image").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
 
-                // ── Admin-only API — stock batch management ────────────────
-                .requestMatchers(HttpMethod.POST, "/api/medicines/*/batches").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT,  "/api/medicines/*/batches/**").hasAuthority("ROLE_ADMIN")
-                // GET batches is admin-only too (internal inventory data)
-                .requestMatchers(HttpMethod.GET,  "/api/medicines/*/batches").hasAuthority("ROLE_ADMIN")
+                // ── Stock batch management (Admin + Stock Manager) ──────────
+                .requestMatchers(HttpMethod.POST, "/api/medicines/*/batches").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
+                .requestMatchers(HttpMethod.PUT,  "/api/medicines/*/batches/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
+                .requestMatchers(HttpMethod.GET,  "/api/medicines/*/batches").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
 
-                // ── Admin-only API — users, suppliers, orders, categories ──
+                // ── API — users, suppliers, orders, categories ──────────────
                 .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/api/suppliers/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/api/suppliers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER_HANDLER")
                 // POST /api/orders is allowed for any customer (even guests)
                 .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
-                // GET /api/orders requires at least being logged in — customers see own orders, admins see all
+                // GET /api/orders requires at least being logged in — customers see own orders, admins/order managers see all
                 .requestMatchers(HttpMethod.GET, "/api/orders").authenticated()
-                // PUT/DELETE orders are admin-only
-                .requestMatchers("/api/orders/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.POST,   "/api/categories").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAuthority("ROLE_ADMIN")
+                // PUT/DELETE orders are admin + order manager
+                .requestMatchers("/api/orders/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORDER_MANAGER")
+                .requestMatchers(HttpMethod.POST,   "/api/categories").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
+                .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
 
-                // Prescription submission and pharmacist/admin review
+                // Prescription submission and review
                 .requestMatchers(HttpMethod.GET, "/api/prescriptions/mine").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/prescriptions").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/prescriptions", "/api/prescriptions/*", "/api/prescriptions/stats").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/prescriptions/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/prescriptions/**").hasAuthority("ROLE_ADMIN")
-                // ── Admin-only API — system settings ──────────────────────
+                .requestMatchers(HttpMethod.GET, "/api/prescriptions", "/api/prescriptions/*", "/api/prescriptions/stats").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORDER_MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/api/prescriptions/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORDER_MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/prescriptions/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORDER_MANAGER")
+                
+                // ── System settings ──────────────────────
                 // /api/settings/public is open (customer-facing tax/fee data)
                 .requestMatchers(HttpMethod.GET, "/api/settings/public").permitAll()
                 // All other /api/settings/** require ADMIN
