@@ -1,6 +1,6 @@
-package Feedback;
+package org.pgno20.medimart.Feedback;
 
-public class Feedback {
+public class Feedback extends Person{
 
     private int id;
     private String customerName;
@@ -8,9 +8,17 @@ public class Feedback {
     private int rating;
 
     public Feedback(String customerName, String message, int rating) {
-        this.customerName = customerName;
+
+        super(customerName);
+
         this.message = message;
         this.rating = rating;
+    }
+
+
+
+    public int getId() {
+        return id;
     }
 
     public String getCustomerName() {
@@ -23,5 +31,21 @@ public class Feedback {
 
     public int getRating() {
         return rating;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 }
