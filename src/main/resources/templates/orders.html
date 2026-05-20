@@ -239,6 +239,7 @@
     let allOrders = [];
     let currentOrderId = null;
     let deliveryFee = 0;
+    let medicineCatalog = {};
 
     document.addEventListener('DOMContentLoaded', () => {
         Promise.all([document.fonts.ready, new Promise(r => window.addEventListener('load', r))]).then(() => {
@@ -281,6 +282,17 @@
             allOrders = await apiCall('/api/orders');
             updateKPIs();
             renderTable(allOrders);
+            
+            // Load medicine catalog in background to get images
+            try {
+                const medRes = await apiCall('/api/medicines?size=1000');
+                if (medRes && medRes.content) {
+                    medRes.content.forEach(m => {
+                        medicineCatalog[m.name] = m;
+                        if (m.id) medicineCatalog[m.id] = m;
+                    });
+                }
+            } catch(e) {}
         } catch(e) {
             showToast('Failed to load orders: ' + e.message, true);
             document.getElementById('orders-tbody').innerHTML =
@@ -409,26 +421,52 @@
 
         const itemsEl = document.getElementById('detailItems');
         if (o.items && o.items.length > 0) {
-            itemsEl.innerHTML = o.items.map(item => `
+            itemsEl.innerHTML = o.items.map(item => {
+                const med = medicineCatalog[item.medicineId] || medicineCatalog[item.medicineName];
+                let imgSrc = '/images/logo.png';
+                if (med) {
+                    if (med.imageUrl) imgSrc = '/uploads/' + med.imageUrl;
+                    else if (med.formType && med.formType !== 'OTHER') imgSrc = '/images/' + med.formType.toUpperCase() + '.png';
+                }
+                return `
                 <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                    <div>
-                        <p class="text-sm font-semibold text-blue-900">${item.medicineName}</p>
-                        <p class="text-xs text-slate-400">Qty: ${item.quantity} @ Rs.${parseFloat(item.unitPrice || 0).toFixed(2)}</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-lg bg-surface-container-low flex-shrink-0 flex items-center justify-center overflow-hidden">
+                            <img class="w-10 h-auto mix-blend-multiply" src="${imgSrc}" onerror="this.onerror=null; this.src='/images/logo.png';" alt="${item.medicineName}"/>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-blue-900">${item.medicineName}</p>
+                            <p class="text-xs text-slate-400">Qty: ${item.quantity} @ Rs.${parseFloat(item.unitPrice || 0).toFixed(2)}</p>
+                        </div>
                     </div>
                     <p class="font-bold text-sm text-blue-900">Rs. ${(item.quantity * parseFloat(item.unitPrice || 0)).toFixed(2)}</p>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         } else if (o.medicineDetails) {
             // Fallback to parsed string if old order with no OrderItems
             const parsedItems = parseMedicineDetails(o.medicineDetails);
             if(parsedItems.length > 0) {
-                itemsEl.innerHTML = parsedItems.map(item => `
+                itemsEl.innerHTML = parsedItems.map(item => {
+                    const med = medicineCatalog[item.name];
+                    let imgSrc = '/images/logo.png';
+                    if (med) {
+                        if (med.imageUrl) imgSrc = '/uploads/' + med.imageUrl;
+                        else if (med.formType && med.formType !== 'OTHER') imgSrc = '/images/' + med.formType.toUpperCase() + '.png';
+                    }
+                    return `
                     <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                        <div>
-                            <p class="text-sm font-semibold text-blue-900">${item.name}</p>
-                            <p class="text-xs text-slate-400">Qty: ${item.quantity}</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg bg-surface-container-low flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                <img class="w-10 h-auto mix-blend-multiply" src="${imgSrc}" onerror="this.onerror=null; this.src='/images/logo.png';" alt="${item.name}"/>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-blue-900">${item.name}</p>
+                                <p class="text-xs text-slate-400">Qty: ${item.quantity}</p>
+                            </div>
                         </div>
                         <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full">x${item.quantity}</span>
-                    </div>`).join('');
+                    </div>`;
+                }).join('');
             } else {
                  itemsEl.innerHTML = `<p class="text-sm text-slate-600 p-3 bg-slate-50 rounded-xl">${o.medicineDetails}</p>`;
             }
