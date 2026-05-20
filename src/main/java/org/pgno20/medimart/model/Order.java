@@ -53,11 +53,17 @@ public class Order {
     @Column(nullable = false)
     private boolean prescriptionSubmitted = false;
 
+    @Column(length = 50)
+    private String prescriptionId;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column
     private LocalDateTime updatedAt;
+
+    @Column(precision = 12, scale = 2)
+    private BigDecimal shippingFee = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<OrderItem> items = new java.util.ArrayList<>();
@@ -133,6 +139,12 @@ public class Order {
     public boolean isPrescriptionSubmitted() { return prescriptionSubmitted; }
     public void setPrescriptionSubmitted(boolean prescriptionSubmitted) { this.prescriptionSubmitted = prescriptionSubmitted; }
 
+    public String getPrescriptionId() { return prescriptionId; }
+    public void setPrescriptionId(String prescriptionId) { this.prescriptionId = prescriptionId; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public BigDecimal getShippingFee() { return shippingFee; }
+    public void setShippingFee(BigDecimal shippingFee) { this.shippingFee = shippingFee; }
 }
