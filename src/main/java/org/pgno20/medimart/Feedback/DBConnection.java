@@ -5,25 +5,27 @@ import java.sql.DriverManager;
 
 public class DBConnection {
 
+    private static Connection con;
+
     public static Connection getConnection() {
 
         try {
 
-            String url = "jdbc:mysql://localhost:3306/medical_store";
-            String user = "root";
-            String password = "";
+            if (con == null || con.isClosed()) {
 
-            Connection con = DriverManager.getConnection(url, user, password);
+                Class.forName("com.mysql.cj.jdbc.Driver");
 
-            System.out.println("Database Connected!");
-
-            return con;
+                con = DriverManager.getConnection(
+                        "jdbc:mysql://localhost:3306/medical_store",
+                        "root",
+                        ""
+                );
+            }
 
         } catch (Exception e) {
-
             System.out.println(e);
         }
 
-        return null;
+        return con;
     }
 }

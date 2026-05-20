@@ -1,7 +1,7 @@
 package org.pgno20.medimart.Feedback;
 
 import org.springframework.web.bind.annotation.*;
-import java.sql.SQLException;
+
 import java.util.List;
 
 @RestController
@@ -9,40 +9,32 @@ import java.util.List;
 @CrossOrigin
 public class FeedbackController {
 
-    private FeedbackService feedbackService = new FeedbackService();
+    FeedbackService service = new FeedbackService();
 
-    // ADD FEEDBACK
+    // CREATE
     @PostMapping
-    public String addFeedback(@RequestBody Feedback feedback) {
-        try {
-            feedbackService.addFeedback(feedback);
-            return "Feedback Added Successfully";
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "Error Adding Feedback";
-        }
+    public String add(@RequestBody Feedback feedback) {
+        service.addFeedback(feedback);
+        return "Feedback Added";
     }
 
-    // VIEW FEEDBACKS
+    // READ
     @GetMapping
-    public List<Feedback> getFeedbacks() {
-        try {
-            return feedbackService.viewFeedbacks();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public List<Feedback> getAll() {
+        return service.viewFeedbacks();
     }
 
-    // DELETE FEEDBACK
+    // DELETE
     @DeleteMapping("/{id}")
-    public String deleteFeedback(@PathVariable int id) {
-        try {
-            feedbackService.deleteFeedback(id);
-            return "Feedback Deleted";
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "Delete Failed";
-        }
+    public String delete(@PathVariable int id) {
+        service.deleteFeedback(id);
+        return "Deleted";
+    }
+
+    // UPDATE
+    @PutMapping("/{id}")
+    public String update(@PathVariable int id, @RequestBody Feedback f) {
+        service.updateFeedback(id, f.getMessage());
+        return "Updated";
     }
 }

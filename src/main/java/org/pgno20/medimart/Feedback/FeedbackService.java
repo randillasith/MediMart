@@ -23,37 +23,41 @@ public class FeedbackService {
 
             pst.executeUpdate();
 
-            System.out.println("Feedback Added Successfully!");
-
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
     // READ
-    public List<Feedback> viewFeedbacks() throws SQLException {
+    public List<Feedback> viewFeedbacks() {
 
-        List<Feedback> feedbackList = new ArrayList<>();
+        List<Feedback> list = new ArrayList<>();
 
-        String sql = "SELECT * FROM feedback";
+        try {
 
-        PreparedStatement pst = con.prepareStatement(sql);
+            String sql = "SELECT * FROM feedback";
 
-        ResultSet rs = pst.executeQuery();
+            PreparedStatement pst = con.prepareStatement(sql);
 
-        while (rs.next()) {
+            ResultSet rs = pst.executeQuery();
 
-            Feedback feedback = new Feedback();
+            while (rs.next()) {
 
-            feedback.setId(rs.getInt("id"));
-            feedback.setCustomerName(rs.getString("customer_name"));
-            feedback.setMessage(rs.getString("message"));
-            feedback.setRating(rs.getInt("rating"));
+                Feedback f = new Feedback();
 
-            feedbackList.add(feedback);
+                f.setId(rs.getInt("id"));
+                f.setCustomerName(rs.getString("customer_name"));
+                f.setMessage(rs.getString("message"));
+                f.setRating(rs.getInt("rating"));
+
+                list.add(f);
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
         }
 
-        return feedbackList;
+        return list;
     }
 
     // UPDATE
@@ -69,8 +73,6 @@ public class FeedbackService {
             pst.setInt(2, id);
 
             pst.executeUpdate();
-
-            System.out.println("Feedback Updated!");
 
         } catch (Exception e) {
             System.out.println(e);
@@ -89,8 +91,6 @@ public class FeedbackService {
             pst.setInt(1, id);
 
             pst.executeUpdate();
-
-            System.out.println("Feedback Deleted!");
 
         } catch (Exception e) {
             System.out.println(e);
