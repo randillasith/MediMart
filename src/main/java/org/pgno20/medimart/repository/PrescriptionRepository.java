@@ -35,6 +35,8 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
 
     Page<Prescription> findBySubmittedByEmailIgnoreCase(String submittedByEmail, Pageable pageable);
 
+    java.util.List<Prescription> findBySubmittedByEmailIgnoreCase(String submittedByEmail);
+
     // Combined search: patient name OR doctor name OR status
     @Query("SELECT p FROM Prescription p WHERE " +
            "(:search IS NULL OR LOWER(p.patientName) LIKE LOWER(CONCAT('%', :search, '%')) " +
