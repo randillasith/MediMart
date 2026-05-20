@@ -57,8 +57,10 @@ public class SuperAdminInitializer implements CommandLineRunner {
         } else {
             User superAdmin = userRepository.findByEmail(superAdminEmail).get();
             superAdmin.setPassword(passwordEncoder.encode("SuperAdmin@123"));
+            superAdmin.setActive(true);
+            superAdmin.setRoleName("ROLE_ADMIN");
             userRepository.save(superAdmin);
-            System.out.println("[SuperAdminInitializer] Super admin already exists. Password reset to BCrypt.");
+            System.out.println("[SuperAdminInitializer] Super admin already exists. Password reset to BCrypt. Status: active=" + superAdmin.getActive() + ", role=" + superAdmin.getRoleName());
         }
 
         // Seed Suppliers
