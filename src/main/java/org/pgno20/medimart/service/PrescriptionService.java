@@ -23,7 +23,8 @@ import java.util.UUID;
  * - Abstraction: controller doesn't know HOW things work, just WHAT to call
  * - Encapsulation: all logic is inside this class, hidden from controller
  *
- * File location: src/main/java/org/pgno20/medimart/service/PrescriptionService.java
+ * File location:
+ * src/main/java/org/pgno20/medimart/service/PrescriptionService.java
  *
  * ─────────────────────────────────────────────────────
  * HOW FILE HANDLING WORKS (for your viva):
@@ -34,7 +35,7 @@ import java.util.UUID;
  * 4. We use Files.copy() to save it to the "uploads/" folder on disk
  * 5. We store only the FILENAME in the database (not the whole file)
  * 6. When we want to show the file, we serve it via the /uploads/ URL
- *    (WebConfig already maps /uploads/** to the uploads folder)
+ * (WebConfig already maps /uploads/** to the uploads folder)
  * ─────────────────────────────────────────────────────
  */
 @Service
@@ -51,15 +52,14 @@ public class PrescriptionService {
 
     @Transactional
     public Prescription create(String patientName, String doctorName, String medicineDetails,
-                               String dosage, String instructions, LocalDate prescriptionDate,
-                               MultipartFile file, String submittedByName, String submittedByEmail) {
+            String dosage, String instructions, LocalDate prescriptionDate,
+            MultipartFile file, String submittedByName, String submittedByEmail) {
         validatePrescription(patientName, doctorName, medicineDetails, dosage, prescriptionDate, file);
 
         // 1. Build the Prescription object
         Prescription prescription = new Prescription(
                 patientName, doctorName, medicineDetails,
-                dosage, instructions, prescriptionDate
-        );
+                dosage, instructions, prescriptionDate);
         prescription.setStatus("PENDING");
         prescription.setSubmittedByName(submittedByName);
         prescription.setSubmittedByEmail(submittedByEmail);
@@ -100,6 +100,15 @@ public class PrescriptionService {
         return prescriptionRepository.findBySubmittedByEmailIgnoreCase(email, pageable);
     }
 
+    /** Find prescriptions by customer email, optionally filtered by status.
+     *  Used by the admin Orders page to check if a customer has an approved Rx. */
+    public Page<Prescription> findByEmail(String email, String status, Pageable pageable) {
+        if (status != null && !status.isBlank()) {
+            return prescriptionRepository.findBySubmittedByEmailIgnoreCaseAndStatus(email, status, pageable);
+        }
+        return prescriptionRepository.findBySubmittedByEmailIgnoreCase(email, pageable);
+    }
+
     public Prescription getById(Long id) {
         return prescriptionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found with id: " + id));
@@ -109,8 +118,8 @@ public class PrescriptionService {
 
     @Transactional
     public Prescription update(Long id, String patientName, String doctorName, String medicineDetails,
-                               String dosage, String instructions, LocalDate prescriptionDate,
-                               String status, MultipartFile file) {
+            String dosage, String instructions, LocalDate prescriptionDate,
+            String status, MultipartFile file) {
 
         // 1. Find existing prescription
         Prescription existing = getById(id);
@@ -174,7 +183,7 @@ public class PrescriptionService {
      * 1. Get the original filename (e.g. "myprescription.jpg")
      * 2. Extract the extension (e.g. ".jpg")
      * 3. Create a unique filename: "RX001_abc12345.jpg"
-     *    (UUID prevents two files from having the same name)
+     * (UUID prevents two files from having the same name)
      * 4. Ensure the "uploads/" folder exists on disk
      * 5. Copy the file bytes from memory to disk using Files.copy()
      * 6. Return the filename so we can store it in the database
@@ -215,7 +224,8 @@ public class PrescriptionService {
      * Called when updating or deleting a prescription.
      */
     private void deleteOldFile(String filename) {
-        if (filename == null || filename.isBlank()) return;
+        if (filename == null || filename.isBlank())
+            return;
         try {
             Path filePath = Paths.get("uploads").resolve(filename);
             Files.deleteIfExists(filePath);
@@ -243,8 +253,12 @@ public class PrescriptionService {
         return prescriptionRepository.countByStatus("REJECTED");
     }
 
+    public Prescription getByPrescriptionId(String prescriptionId) {
+        return prescriptionRepository.findByPrescriptionId(prescriptionId).orElse(null);
+    }
+
     private void validatePrescription(String patientName, String doctorName, String medicineDetails,
-                                      String dosage, LocalDate prescriptionDate, MultipartFile file) {
+            String dosage, LocalDate prescriptionDate, MultipartFile file) {
         if (isBlank(patientName) || isBlank(doctorName) || isBlank(medicineDetails) || isBlank(dosage)) {
             throw new IllegalArgumentException("Patient, doctor, medicine and dosage are required");
         }

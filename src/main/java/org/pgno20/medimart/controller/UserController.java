@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * All operations are routed through UserService to ensure:
  *  - Password strength validation before hashing with BCrypt
  *  - Email uniqueness enforced with a clean 400 (not a DB 500)
- *  - Role injection prevention (only ROLE_USER / ROLE_ADMIN accepted)
+ *  - Role injection prevention (only valid system roles accepted)
  *  - Consistent soft-delete behaviour (active = false, not hard delete)
  *
  * Access is restricted to ROLE_ADMIN by SecurityConfig.
@@ -78,7 +78,7 @@ public class UserController {
         @NotBlank(message = "Gender is required")
         public String gender;
 
-        public String roleName;   // ROLE_USER or ROLE_ADMIN
+        public String roleName;   // ROLE_USER, ROLE_ADMIN, ROLE_STOCK_MANAGER, ROLE_ORDER_MANAGER, or ROLE_SUPPLIER_HANDLER
         public Boolean active;    // null = don't change
 
         /** Leave blank to keep the existing password unchanged. */
