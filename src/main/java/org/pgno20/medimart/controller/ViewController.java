@@ -13,6 +13,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ViewController {
 
+    /** Admin: main dashboard overview */
+    @GetMapping("/dashboard")
+    public String dashboard() {
+        return "dashboard";
+    }
+
     /** Admin: staff / user management page */
     @GetMapping("/users-portal")
     public String users() {
@@ -35,6 +41,24 @@ public class ViewController {
     @GetMapping("/supplier-details")
     public String supplierDetails() {
         return "suppliers";
+    }
+
+    /** Admin: orders management page */
+    @GetMapping("/orders-management")
+    public String ordersManagement() {
+        return "orders";
+    }
+
+    /** Admin: prescription verification queue */
+    @GetMapping("/prescriptions")
+    public String prescriptions() {
+        return "prescriptions";
+    }
+
+    /** Admin: system configuration & global settings */
+    @GetMapping("/settings")
+    public String settings() {
+        return "settings";
     }
 
     /** Public: logout redirect (session cleared via POST /api/auth/logout) */

@@ -7,6 +7,8 @@ import org.pgno20.medimart.model.*;
 import org.pgno20.medimart.repository.CategoryRepository;
 import org.pgno20.medimart.repository.MedicineRepository;
 import org.pgno20.medimart.repository.StockBatchRepository;
+import org.pgno20.medimart.service.SystemSettingsService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,13 +31,16 @@ public class MedicineService {
     private final CategoryRepository categoryRepository;
     private final StockBatchRepository stockBatchRepository;
     private final StockBatchService stockBatchService;
+    private final SystemSettingsService settingsService;
 
     public MedicineService(MedicineRepository medicineRepository, CategoryRepository categoryRepository,
-            StockBatchRepository stockBatchRepository, StockBatchService stockBatchService) {
+            StockBatchRepository stockBatchRepository, StockBatchService stockBatchService,
+            @Lazy SystemSettingsService settingsService) {
         this.medicineRepository = medicineRepository;
         this.categoryRepository = categoryRepository;
         this.stockBatchRepository = stockBatchRepository;
         this.stockBatchService = stockBatchService;
+        this.settingsService = settingsService;
     }
 
     @Transactional
@@ -101,17 +106,22 @@ public class MedicineService {
 
     /**
      * Applies OOP polymorphism pricing to storefront DTOs.
-     * OTC: base price + 10% tax
-     * Prescription: base price + $5.00 dispensing fee
+     * Reads tax/fee live from SystemSettings so admin changes take effect immediately.
      */
     private org.pgno20.medimart.dto.StorefrontMedicineDTO applyFinalPrice(
             org.pgno20.medimart.dto.StorefrontMedicineDTO dto) {
+        var settings = settingsService.getSettings();
+        java.math.BigDecimal taxRate = settings.getOtcTaxRate(); // e.g. 10.00 = 10%
+        java.math.BigDecimal dispensingFee = settings.getPrescriptionDispensingFee();
+
         if (dto.getMinPrice() != null) {
             if (Boolean.TRUE.equals(dto.getPrescriptionRequired())) {
-                dto.setFinalPrice(dto.getMinPrice().add(new java.math.BigDecimal("5.00")));
+                dto.setFinalPrice(dto.getMinPrice().add(dispensingFee));
                 dto.setTypeLabel("Prescription Required");
             } else {
-                dto.setFinalPrice(dto.getMinPrice().multiply(new java.math.BigDecimal("1.10"))
+                java.math.BigDecimal multiplier = java.math.BigDecimal.ONE
+                    .add(taxRate.divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP));
+                dto.setFinalPrice(dto.getMinPrice().multiply(multiplier)
                         .setScale(2, java.math.RoundingMode.HALF_UP));
                 dto.setTypeLabel("OTC");
             }
@@ -239,7 +249,21 @@ public class MedicineService {
         r.setFormType(m.getFormType());
         r.setDosage(m.getDosage());
         r.setPrice(m.getPrice());
-        r.setFinalPrice(m.getFinalPrice());
+
+        // Compute finalPrice from live SystemSettings (not hardcoded entity method)
+        if (m.getPrice() != null) {
+            var settings = settingsService.getSettings();
+            if (Boolean.TRUE.equals(m.getPrescriptionRequired())) {
+                r.setFinalPrice(m.getPrice().add(settings.getPrescriptionDispensingFee()));
+            } else {
+                java.math.BigDecimal multiplier = java.math.BigDecimal.ONE.add(
+                    settings.getOtcTaxRate().divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP));
+                r.setFinalPrice(m.getPrice().multiply(multiplier).setScale(2, java.math.RoundingMode.HALF_UP));
+            }
+        } else {
+            r.setFinalPrice(java.math.BigDecimal.ZERO);
+        }
+
         r.setStockQty(m.getStockQty());
         r.setExpiryDate(m.getExpiryDate());
         r.setPrescriptionRequired(Boolean.TRUE.equals(m.getPrescriptionRequired()));
@@ -253,19 +277,9 @@ public class MedicineService {
     }
 
     private void assignDefaultImage(Medicine medicine) {
-        String defaultName = "other.png";
-        if (medicine.getFormType() != null) {
-            switch (medicine.getFormType().toUpperCase()) {
-                case "TABLET":
-                    defaultName = "Tablet_Capsule_Pill.png";
-                    break;
-                case "SYRUP":
-                    defaultName = "Syrup_Liquid.png";
-                    break;
-                case "CREAM":
-                    defaultName = "cream.png";
-                    break;
-            }
+        String defaultName = "logo.png";
+        if (medicine.getFormType() != null && !medicine.getFormType().equalsIgnoreCase("OTHER")) {
+            defaultName = medicine.getFormType().toUpperCase() + ".png";
         }
         try {
             Path uploadPath = Paths.get("uploads");
@@ -276,8 +290,14 @@ public class MedicineService {
             Path dest = uploadPath.resolve(newFilename);
             if (!Files.exists(dest)) {
                 try (java.io.InputStream in = getClass().getResourceAsStream("/images/" + defaultName)) {
-                    if (in != null)
+                    if (in != null) {
                         Files.copy(in, dest);
+                    } else {
+                        // Fallback to logo.png if the specific image doesn't exist
+                        try (java.io.InputStream fallbackIn = getClass().getResourceAsStream("/images/logo.png")) {
+                            if (fallbackIn != null) Files.copy(fallbackIn, dest);
+                        }
+                    }
                 }
             }
             medicine.setImageUrl(newFilename);
