@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="light" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>User Feedback | MediMart Admin</title>
+    <link rel="icon" href="/logo.png" type="image/png"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: {
+                colors: {
+                    "primary": "#00478d", "primary-container": "#005eb8",
+                    "secondary": "#006970", "error": "#ba1a1a",
+                    "surface": "#f9f9ff", "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f2f3fb", "surface-container": "#ecedf6",
+                    "surface-container-high": "#e7e8f0", "surface-tint": "#005db6",
+                    "on-surface": "#191c21", "on-surface-variant": "#424752",
+                    "outline": "#727783", "outline-variant": "#c2c6d4",
+                    "primary-fixed": "#d6e3ff", "on-primary-fixed-variant": "#00468c",
+                    "secondary-container": "#7af1fc", "on-secondary-container": "#006e75",
+                    "on-secondary-fixed-variant": "#004f54",
+                    "error-container": "#ffdad6", "on-error-container": "#93000a",
+                },
+                fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
+            }}
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align: middle; }
+        body { font-family: 'Inter', sans-serif; }
+        #toast { position:fixed;bottom:20px;right:20px;padding:1rem 1.5rem;color:white;border-radius:12px;box-shadow:0 10px 15px -3px rgba(0,0,0,.3);transform:translateY(100px);opacity:0;transition:all .3s cubic-bezier(.68,-.55,.265,1.55);z-index:9999; }
+        #toast.show { transform:translateY(0);opacity:1; }
+        #toast.success { background: linear-gradient(135deg, #00478d, #005eb8); }
+        #toast.error { background:#EF4444; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen antialiased">
+
+<!-- Sidebar -->
+<div th:replace="~{fragments/sidebar :: medimart-sidebar}"></div>
+
+<!-- Main Content -->
+<main class="md:ml-72 flex-1 flex flex-col bg-surface overflow-x-hidden">
+
+    <!-- TopAppBar -->
+    <header class="bg-surface/80 backdrop-blur-md flex justify-between items-center w-full px-8 h-20 sticky top-0 z-40 border-b border-slate-100">
+        <div class="flex items-center gap-4">
+            <div class="p-2.5 bg-primary/5 rounded-2xl text-primary">
+                <span class="material-symbols-outlined">rate_review</span>
+            </div>
+            <div>
+                <h1 class="text-xl font-black text-blue-900 font-headline tracking-tight leading-none">User Feedback</h1>
+                <p class="text-xs text-slate-400 font-medium mt-0.5">Manage and review customer ratings and experiences</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+                <p class="text-xs font-bold text-on-surface" th:text="${session.userFullName != null ? session.userFullName : 'Admin'}">Admin</p>
+                <p class="text-[10px] text-slate-500 font-bold uppercase" th:text="${session.userRole != null ? session.userRole.replace('ROLE_', '') : 'ADMIN'}">ADMIN</p>
+            </div>
+            <div class="h-10 w-10 rounded-full bg-[#00478D] flex items-center justify-center text-white font-bold border-2 border-white shadow-sm cursor-pointer"
+                 onclick="window.location.href='/addmindetails'" th:text="${session.userInitials != null ? session.userInitials : 'AD'}">AD</div>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="p-6 md:p-10 max-w-6xl mx-auto w-full flex-1 space-y-8">
+
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-3xl font-black text-primary font-headline tracking-tight">Customer Reviews</h2>
+                <p class="text-on-surface-variant text-sm mt-1">Review live feedback collected from your digital pharmacy store. Edit or moderate text messages as needed.</p>
+            </div>
+            <button onclick="loadFeedbacks()" class="px-5 py-2.5 bg-primary/5 hover:bg-primary/10 text-primary rounded-xl font-bold text-xs transition-colors flex items-center gap-2 border border-primary/10">
+                <span class="material-symbols-outlined text-sm">refresh</span>
+                Refresh Feedbacks
+            </button>
+        </div>
+
+        <!-- Feedbacks Bento Grid -->
+        <div id="feedback-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading Indicator -->
+            <div class="col-span-full py-16 text-center text-slate-400">
+                <span class="material-symbols-outlined animate-spin text-3xl mb-2">progress_activity</span>
+                <p class="text-sm font-semibold">Loading feedbacks from database...</p>
+            </div>
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-center bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+            <div class="w-16 h-16 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-3xl">sentiment_neutral</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700">No Feedbacks Found</h3>
+            <p class="text-slate-400 text-xs mt-1 max-w-xs">Customer feedback submissions will show up here once submitted on the storefront.</p>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] max-w-md w-full p-8 shadow-2xl border border-slate-100 transform scale-95 transition-all duration-300">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-primary/5 text-primary rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined">edit_note</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black text-primary font-headline">Edit Feedback Message</h3>
+                    <p class="text-xs text-slate-400">Modify the feedback text below</p>
+                </div>
+            </div>
+            
+            <input type="hidden" id="edit-id"/>
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Feedback Message</label>
+                <textarea id="edit-message" rows="4" 
+                          class="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all font-medium resize-none"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closeEditModal()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
+                    Cancel
+                </button>
+                <button onclick="submitEdit()" class="px-6 py-3 bg-gradient-to-r from-primary to-primary-container text-white rounded-xl text-xs font-bold shadow-sm hover:opacity-90 transition-all">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] max-w-sm w-full p-8 shadow-2xl border border-slate-100 transform scale-95 transition-all duration-300">
+            <div class="flex items-center gap-3 mb-6 text-error">
+                <div class="w-10 h-10 bg-error/10 text-error rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined">delete_forever</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black font-headline">Delete Feedback</h3>
+                    <p class="text-xs text-error/80">This action is irreversible</p>
+                </div>
+            </div>
+            
+            <input type="hidden" id="delete-id"/>
+            <p class="text-sm text-slate-600 mb-6 leading-relaxed">Are you sure you want to permanently delete this customer review from the database?</p>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closeDeleteModal()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
+                    Cancel
+                </button>
+                <button onclick="submitDelete()" class="px-6 py-3 bg-error text-white rounded-xl text-xs font-bold shadow-sm hover:bg-error/90 transition-all">
+                    Confirm Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-auto p-8 text-center">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2024 MediMart • Feedback Moderation</p>
+    </footer>
+</main>
+
+<div id="toast"></div>
+
+<script th:inline="none">
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = (isError ? 'error' : 'success') + ' show';
+        setTimeout(() => t.className = '', 4000);
+    }
+
+    async function loadFeedbacks() {
+        const grid = document.getElementById('feedback-grid');
+        const emptyState = document.getElementById('empty-state');
+        grid.innerHTML = `
+            <div class="col-span-full py-16 text-center text-slate-400">
+                <span class="material-symbols-outlined animate-spin text-3xl mb-2">progress_activity</span>
+                <p class="text-sm font-semibold">Loading feedbacks...</p>
+            </div>
+        `;
+        emptyState.classList.add('hidden');
+
+        try {
+            const res = await fetch('/api/feedbacks');
+            if (!res.ok) throw new Error('Failed to load');
+            const list = await res.json();
+
+            if (!list || list.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            grid.innerHTML = list.map(item => {
+                let stars = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= item.rating) {
+                        stars += `<span class="material-symbols-outlined text-amber-400 text-lg fill-current">star</span>`;
+                    } else {
+                        stars += `<span class="material-symbols-outlined text-slate-200 text-lg">star</span>`;
+                    }
+                }
+
+                return `
+                    <div class="bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 flex flex-col justify-between group hover:shadow-[0_12px_40px_rgba(25,28,33,0.05)] transition-all duration-300">
+                        <div>
+                            <div class="flex justify-between items-start gap-2 mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-primary/5 text-primary flex items-center justify-center font-bold text-sm">
+                                        ${item.customerName ? item.customerName.charAt(0).toUpperCase() : 'C'}
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm leading-tight">${item.customerName || 'Anonymous Customer'}</h4>
+                                        <div class="flex gap-0.5 mt-1">${stars}</div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded-lg">ID: #${item.id}</span>
+                            </div>
+                            <p class="text-slate-600 text-xs leading-relaxed font-medium mb-6 italic">"${item.message}"</p>
+                        </div>
+                        <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-50">
+                            <button onclick="openDeleteModal(${item.id})" class="p-2 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-semibold">
+                                <span class="material-symbols-outlined text-base">delete</span>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+        } catch (e) {
+            grid.innerHTML = '';
+            showToast('Failed to load feedbacks: ' + e.message, true);
+        }
+    }
+
+    // Modal Control Functions
+    function openEditModal(id, encodedMessage) {
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-message').value = decodeURIComponent(encodedMessage);
+        
+        const modal = document.getElementById('edit-modal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.firstElementChild.classList.remove('scale-95'), 50);
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('edit-modal');
+        modal.firstElementChild.classList.add('scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
+    async function submitEdit() {
+        const id = document.getElementById('edit-id').value;
+        const message = document.getElementById('edit-message').value;
+
+        try {
+            const res = await fetch(`/api/feedbacks/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showToast('✓ Feedback message updated!');
+                closeEditModal();
+                loadFeedbacks();
+            } else {
+                throw new Error(data.message || 'Failed to update');
+            }
+        } catch (e) {
+            showToast(e.message, true);
+        }
+    }
+
+    function openDeleteModal(id) {
+        document.getElementById('delete-id').value = id;
+        
+        const modal = document.getElementById('delete-modal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.firstElementChild.classList.remove('scale-95'), 50);
+    }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('delete-modal');
+        modal.firstElementChild.classList.add('scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
+    async function submitDelete() {
+        const id = document.getElementById('delete-id').value;
+
+        try {
+            const res = await fetch(`/api/feedbacks/${id}`, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showToast('✓ Feedback deleted successfully!');
+                closeDeleteModal();
+                loadFeedbacks();
+            } else {
+                throw new Error(data.message || 'Failed to delete');
+            }
+        } catch (e) {
+            showToast(e.message, true);
+        }
+    }
+
+    // Load on start
+    document.addEventListener('DOMContentLoaded', loadFeedbacks);
+</script>
+</body>
+</html>
