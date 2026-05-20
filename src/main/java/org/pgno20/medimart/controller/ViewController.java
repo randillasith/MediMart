@@ -43,6 +43,12 @@ public class ViewController {
         return "suppliers";
     }
 
+    /** Supplier: personal dashboard */
+    @GetMapping("/supplier-dashboard")
+    public String supplierDashboard() {
+        return "supplier-dashboard";
+    }
+
     /** Admin: orders management page */
     @GetMapping("/orders-management")
     public String ordersManagement() {

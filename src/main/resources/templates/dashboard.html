@@ -379,20 +379,16 @@
                         </table>
                     </div>
                 </div>
-
                 <!-- Procurement Queue -->
                 <div id="procurement-queue"
                     class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-                    <div
-                        class="px-10 py-8 border-b border-slate-50 flex justify-between items-center bg-error-container/5">
+                    <div class="px-10 py-8 border-b border-slate-50 flex justify-between items-center bg-surface-container-lowest">
                         <div>
-                            <h4 class="text-xl font-black text-on-surface">Procurement Queue</h4>
-
+                            <h4 class="text-xl font-black text-on-surface">Medicine Price Negotiation Portal</h4>
+                            <p class="text-sm text-slate-400 font-medium">Broadcast RFQs and negotiate directly with suppliers.</p>
                         </div>
-                        <a th:href="@{/supplier-details}"
-                            class="flex items-center gap-2 text-xs font-black text-secondary hover:text-secondary-fixed-variant transition-colors">
-                            <span class="material-symbols-outlined text-lg">local_shipping</span>
-                            Open Supplier Portal
+                        <a href="/supplier-details" class="flex items-center gap-2 text-secondary font-bold text-[10px] uppercase tracking-widest hover:text-secondary-container transition-colors">
+                            <span class="material-symbols-outlined text-sm">local_shipping</span> Open Supplier Portal
                         </a>
                     </div>
                     <div class="p-10">
@@ -418,6 +414,55 @@
                 Logistics</div>
         </footer>
     </main>
+
+    <!-- Bids Modal -->
+<div id="bidsModal" class="fixed inset-0 z-[100] hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-lg font-bold text-blue-900">Supplier Bids &amp; Negotiation</h3>
+            <button onclick="closeBidsModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="px-6 py-4 bg-primary/5 border-b border-slate-100 flex justify-between items-center">
+            <span class="text-sm font-bold text-slate-600 uppercase tracking-widest">Admin Target Price:</span>
+            <span class="text-xl font-black text-primary" id="bidsModalTargetPrice">Rs. 0.00</span>
+        </div>
+        <div class="p-6 overflow-y-auto flex-grow space-y-4" id="bidsList">
+            <!-- Bids injected via JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Broadcast RFQ Modal -->
+<div id="rfqModal" class="fixed inset-0 z-[100] hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-lg font-bold text-blue-900" id="rfqModalTitle">Broadcast RFQ</h3>
+            <button onclick="closeRfqModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-6">
+            <p class="text-sm text-slate-600 mb-4" id="rfqModalDesc">Request quotations from all suppliers for <strong id="rfqMedName" class="text-primary"></strong>.</p>
+            <input type="hidden" id="rfqMedId">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Quantity Required</label>
+                    <input type="number" id="rfqQty" value="100" min="1" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Target Price (Rs.)</label>
+                    <input type="number" id="rfqTargetPrice" value="50" min="0" step="0.01" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none">
+                </div>
+            </div>
+        </div>
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+            <button onclick="closeRfqModal()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
+            <button onclick="confirmBroadcastRFQ()" id="rfqSubmitBtn" class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-container transition-colors">Broadcast to Suppliers</button>
+        </div>
+    </div>
+</div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -458,11 +503,9 @@
 
                     orders.forEach(order => {
                         const statusColor = getStatusColorClass(order.status);
-                        // Use orderId (the actual field name from Order.java)
                         const displayId = order.orderId || order.id || 'N/A';
                         const email = order.customerEmail || order.customerName || 'Guest';
                         const initials = email.substring(0, 2).toUpperCase();
-                        // Use totalPrice (the actual field name from Order.java)
                         const amount = order.totalPrice ?? order.totalAmount ?? 0;
                         const amountStr = Number(amount).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                         const row = `
@@ -487,9 +530,17 @@
                     });
                 }
 
-                const lowStockRes = await fetch('/api/dashboard/low-stock');
+                const [lowStockRes, requestsRes] = await Promise.all([
+                    fetch('/api/dashboard/low-stock'),
+                    fetch('/api/procurement/requests/open')
+                ]);
+                
                 if (lowStockRes.ok) {
                     const lowStockItems = await lowStockRes.json();
+                    let openRequests = [];
+                    if (requestsRes.ok) {
+                        openRequests = await requestsRes.json();
+                    }
                     const list = document.getElementById('procurement-list');
                     list.innerHTML = '';
 
@@ -498,6 +549,19 @@
                     }
 
                     lowStockItems.forEach(item => {
+                        const existingReq = openRequests.find(r => r.medicineId === item.id);
+                        let buttonHtml = '';
+                        if (existingReq) {
+                            buttonHtml = `
+                                <div class="flex gap-2 mt-2 w-full">
+                                    <button onclick="editRFQ(${existingReq.id}, ${item.id}, '${item.name.replace(/'/g, "\\'")}', ${existingReq.quantityRequired}, ${existingReq.targetPrice || 0})" class="flex-1 bg-surface-container-high text-on-surface text-xs font-black py-3 rounded-xl uppercase tracking-widest shadow-sm hover:scale-[1.02] active:scale-95 transition-all">Edit</button>
+                                    <button onclick="viewBids(${existingReq.id})" class="flex-1 bg-secondary text-white text-xs font-black py-3 rounded-xl uppercase tracking-widest shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-95 transition-all">View Bids</button>
+                                </div>
+                            `;
+                        } else {
+                            buttonHtml = `<div class="mt-2 w-full"><button onclick="broadcastRFQ(${item.id}, '${item.name.replace(/'/g, "\\'")}')" class="w-full bg-primary text-white text-xs font-black py-3 rounded-xl uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Order Now</button></div>`;
+                        }
+
                         const card = `
                         <div class="p-6 bg-surface-container-low rounded-[2rem] border border-slate-100 group hover:border-primary transition-all">
                             <div class="flex justify-between items-start mb-4">
@@ -510,9 +574,9 @@
                                 </div>
                             </div>
                             <h5 class="text-base font-black text-on-surface leading-tight">${item.name}</h5>
-                            <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-tight">Category: ${item.categoryId}</p>
-                            <div class="mt-6">
-                                <a href="/supplier-details" class="block text-center w-full bg-primary text-white text-xs font-black py-3 rounded-xl uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Order Now</a>
+                            <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-tight">Category: ${item.categoryId || 'General'}</p>
+                            <div class="mt-6 flex flex-col gap-2">
+                                ${buttonHtml}
                             </div>
                         </div>
                     `;
@@ -520,14 +584,12 @@
                     });
                 }
 
-                // Fetch Analytics
                 const timeframe = document.getElementById('analytics-timeframe');
                 const days = timeframe ? timeframe.value : 7;
                 const analyticsRes = await fetch('/api/dashboard/analytics?days=' + days);
                 if (analyticsRes.ok) {
                     const analytics = await analyticsRes.json();
 
-                    // Process Daily Revenue Bar Chart
                     const dailyRev = analytics.dailyRevenue;
                     const maxRev = Math.max(...dailyRev.map(d => d.revenue), 100);
 
@@ -547,7 +609,6 @@
                             <span class="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold opacity-0 group-hover:opacity-100 whitespace-nowrap bg-white px-2 py-1 shadow-sm rounded-lg z-10 text-primary">LKR ${formattedRev}</span>
                         </div>
                     `;
-                        // If 30 days, skip some labels to avoid crowding
                         if (dailyRev.length > 7) {
                             if (index % 5 === 0 || index === dailyRev.length - 1) {
                                 labelsHTML += `<span class="whitespace-nowrap -rotate-45 origin-top-left text-[8px]">${day.shortDate}</span>`;
@@ -562,7 +623,6 @@
                     document.getElementById('revenue-bar-chart').innerHTML = barsHTML;
                     document.getElementById('revenue-bar-labels').innerHTML = labelsHTML;
 
-                    // Process Revenue Split Pie Chart
                     const rx = analytics.prescriptionRevenue || 0;
                     const otc = analytics.otcRevenue || 0;
                     const totalSplit = rx + otc;
@@ -584,8 +644,6 @@
                     document.getElementById('split-prescription').textContent = rxPct + '%';
                     document.getElementById('split-otc').textContent = otcPct + '%';
 
-                    // Update SVG dashes
-                    // Total circumference is 100 because r=15.915 (2*pi*r = 100)
                     document.getElementById('pie-prescription').setAttribute('stroke-dasharray', rxPct + ' ' + (100 - rxPct));
                     document.getElementById('pie-prescription').setAttribute('stroke-dashoffset', '0');
 
@@ -605,6 +663,191 @@
                 case 'DELIVERED': return 'bg-surface-container-high text-slate-500';
                 case 'CANCELLED': return 'bg-error-container text-error';
                 default: return 'bg-surface-container-high text-slate-500';
+            }
+        }
+
+        let isEditingRfq = false;
+        let currentEditRfqId = null;
+
+        function broadcastRFQ(medicineId, medicineName) {
+            isEditingRfq = false;
+            currentEditRfqId = null;
+            document.getElementById('rfqModalTitle').textContent = 'Broadcast RFQ';
+            document.getElementById('rfqModalDesc').innerHTML = `Request quotations from all suppliers for <strong id="rfqMedName" class="text-primary">${medicineName}</strong>.`;
+            document.getElementById('rfqSubmitBtn').textContent = 'Broadcast to Suppliers';
+            
+            document.getElementById('rfqMedId').value = medicineId;
+            document.getElementById('rfqMedName').textContent = medicineName;
+            document.getElementById('rfqQty').value = '100'; 
+            document.getElementById('rfqTargetPrice').value = '50';
+            document.getElementById('rfqModal').classList.remove('hidden');
+            document.getElementById('rfqModal').classList.add('flex');
+        }
+
+        function editRFQ(requestId, medicineId, medicineName, qty, targetPrice) {
+            isEditingRfq = true;
+            currentEditRfqId = requestId;
+            document.getElementById('rfqModalTitle').textContent = 'Edit Request';
+            document.getElementById('rfqModalDesc').innerHTML = `Update your existing quotation request for <strong id="rfqMedName" class="text-primary">${medicineName}</strong>.`;
+            document.getElementById('rfqSubmitBtn').textContent = 'Save Changes';
+            
+            document.getElementById('rfqMedId').value = medicineId;
+            document.getElementById('rfqMedName').textContent = medicineName;
+            document.getElementById('rfqQty').value = qty; 
+            document.getElementById('rfqTargetPrice').value = targetPrice;
+            document.getElementById('rfqModal').classList.remove('hidden');
+            document.getElementById('rfqModal').classList.add('flex');
+        }
+
+        function closeRfqModal() {
+            document.getElementById('rfqModal').classList.add('hidden');
+            document.getElementById('rfqModal').classList.remove('flex');
+        }
+
+        async function confirmBroadcastRFQ() {
+            const medicineId = document.getElementById('rfqMedId').value;
+            const medicineName = document.getElementById('rfqMedName').textContent;
+            const qtyStr = document.getElementById('rfqQty').value;
+            const targetPriceStr = document.getElementById('rfqTargetPrice').value;
+            const qty = parseInt(qtyStr, 10);
+            const targetPrice = parseFloat(targetPriceStr);
+            
+            if (isNaN(qty) || qty <= 0) return alert("Invalid quantity");
+            if (isNaN(targetPrice) || targetPrice < 0) return alert("Invalid target price");
+            
+            try {
+                const url = isEditingRfq ? `/api/procurement/requests/${currentEditRfqId}` : '/api/procurement/requests';
+                const method = isEditingRfq ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        medicineId: medicineId,
+                        medicineName: medicineName,
+                        quantity: qty,
+                        targetPrice: targetPrice
+                    })
+                });
+                if (res.ok) {
+                    alert(isEditingRfq ? 'Request updated successfully!' : 'RFQ Broadcasted to Suppliers!');
+                    closeRfqModal();
+                    await loadDashboardData();
+                } else {
+                    alert('Failed to broadcast.');
+                }
+            } catch(e) {
+                alert('Network error: ' + e.message);
+            }
+        }
+
+        async function viewBids(requestId) {
+            try {
+                const requestsRes = await fetch('/api/procurement/requests/open');
+                let targetPrice = 0;
+                if (requestsRes.ok) {
+                    const requests = await requestsRes.json();
+                    const req = requests.find(r => r.id === requestId);
+                    if (req && req.targetPrice) targetPrice = req.targetPrice;
+                }
+                
+                document.getElementById('bidsModalTargetPrice').textContent = `Rs. ${targetPrice.toFixed(2)}`;
+                
+                const res = await fetch(`/api/procurement/requests/${requestId}/bids`);
+                if (!res.ok) throw new Error('Failed');
+                const bids = await res.json();
+                
+                const bidsList = document.getElementById('bidsList');
+                bidsList.innerHTML = '';
+                
+                if (bids.length === 0) {
+                    bidsList.innerHTML = '<p class="text-slate-500 text-center py-8">No bids received yet.</p>';
+                } else {
+                    bids.forEach(bid => {
+                        let priceColorClass = 'text-primary';
+                        let indicatorHtml = '';
+                        if (targetPrice > 0) {
+                            if (bid.price <= targetPrice) {
+                                priceColorClass = 'text-green-600';
+                                indicatorHtml = `<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-[10px] font-bold uppercase ml-2">Below Target</span>`;
+                            } else {
+                                priceColorClass = 'text-red-500';
+                                indicatorHtml = `<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold uppercase ml-2">Above Target</span>`;
+                            }
+                        }
+                        
+                        let actionHtml = '';
+                        if (bid.status === 'REJECTED') {
+                            actionHtml = `<span class="px-3 py-1 bg-slate-200 text-slate-500 rounded text-xs font-bold uppercase">Rejected</span>`;
+                        } else if (bid.status === 'ACCEPTED') {
+                            actionHtml = `<span class="px-3 py-1 bg-green-200 text-green-800 rounded text-xs font-bold uppercase">Accepted</span>`;
+                        } else {
+                            actionHtml = `
+                                <div class="flex gap-2">
+                                    <button onclick="rejectBid(${bid.id}, ${requestId})" class="bg-surface-container-high text-on-surface px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-300 transition-colors">Reject</button>
+                                    <button onclick="acceptBid(${bid.id})" class="bg-primary text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors">Accept</button>
+                                </div>
+                            `;
+                        }
+
+                        bidsList.innerHTML += `
+                            <div class="border border-slate-100 rounded-xl p-4 flex justify-between items-center bg-slate-50">
+                                <div>
+                                    <h4 class="font-bold text-slate-800">${bid.supplierName}</h4>
+                                    <p class="text-xs text-slate-500">${new Date(bid.createdAt).toLocaleString()}</p>
+                                </div>
+                                <div class="text-right flex items-center gap-4">
+                                    <div class="text-right">
+                                        <p class="text-lg font-black ${priceColorClass}">Rs. ${bid.price.toFixed(2)}</p>
+                                        ${indicatorHtml}
+                                    </div>
+                                    ${actionHtml}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('bidsModal').classList.remove('hidden');
+                document.getElementById('bidsModal').classList.add('flex');
+            } catch(e) {
+                alert('Failed to load bids');
+            }
+        }
+
+        function closeBidsModal() {
+            document.getElementById('bidsModal').classList.add('hidden');
+            document.getElementById('bidsModal').classList.remove('flex');
+        }
+
+        async function acceptBid(bidId) {
+            if(!confirm("Accept this bid and place the order?")) return;
+            try {
+                const res = await fetch(`/api/procurement/bids/${bidId}/accept`, { method: 'POST' });
+                if (res.ok) {
+                    alert('Bid accepted! Order created.');
+                    closeBidsModal();
+                    await loadDashboardData();
+                } else {
+                    alert('Failed to accept bid.');
+                }
+            } catch(e) {
+                alert('Network error: ' + e.message);
+            }
+        }
+
+        async function rejectBid(bidId, requestId) {
+            if(!confirm("Are you sure you want to reject this bid?")) return;
+            try {
+                const res = await fetch(`/api/procurement/bids/${bidId}/reject`, { method: 'POST' });
+                if (res.ok) {
+                    alert('Bid rejected.');
+                    // Refresh the bids modal directly
+                    viewBids(requestId);
+                } else {
+                    alert('Failed to reject bid.');
+                }
+            } catch(e) {
+                alert('Network error: ' + e.message);
             }
         }
     </script>

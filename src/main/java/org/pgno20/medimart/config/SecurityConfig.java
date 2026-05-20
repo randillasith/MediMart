@@ -169,6 +169,26 @@ public class SecurityConfig {
                 .requestMatchers("/orders-management").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORDER_MANAGER")
                 .requestMatchers("/prescriptions", "/prescriptions.html", "/prescription-add.html", "/prescription-edit.html").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORDER_MANAGER")
                 .requestMatchers("/settings").hasAuthority("ROLE_ADMIN")
+                // ── Supplier pages ─────────────────────────────────────────
+                .requestMatchers(
+                    "/supplier-dashboard",
+                    "/supplier-dashboard.html"
+                ).hasAuthority("ROLE_SUPPLIER")
+
+                // ── Admin-only pages (Thymeleaf templates) ────────────────
+                .requestMatchers(
+                    "/dashboard",
+                    "/medicines",
+                    "/supplier-details",
+                    "/users-portal",
+                    "/addmindetails",
+                    "/orders-management",
+                    "/prescriptions",
+                    "/prescriptions.html",
+                    "/prescription-add.html",
+                    "/prescription-edit.html",
+                    "/settings"
+                ).hasAuthority("ROLE_ADMIN")
 
                 // ── Write operations on medicines (Admin + Stock Manager) ───
                 .requestMatchers(HttpMethod.POST,   "/api/medicines").hasAnyAuthority("ROLE_ADMIN", "ROLE_STOCK_MANAGER")
@@ -184,6 +204,18 @@ public class SecurityConfig {
                 // ── API — users, suppliers, orders, categories ──────────────
                 .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/suppliers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPPLIER_HANDLER")
+                // ── Supplier API ───────────────────────────────────────────
+                .requestMatchers(HttpMethod.GET, "/api/suppliers/my-orders").hasAuthority("ROLE_SUPPLIER")
+                .requestMatchers(HttpMethod.PUT, "/api/suppliers/my-orders/*/status").hasAnyAuthority("ROLE_SUPPLIER", "ROLE_ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/procurement/requests/open").hasAnyAuthority("ROLE_SUPPLIER", "ROLE_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/procurement/bids").hasAuthority("ROLE_SUPPLIER")
+
+                // ── Admin-only API — users, suppliers, orders, categories ──
+                .requestMatchers("/api/procurement/requests", "/api/procurement/requests/**", "/api/procurement/bids/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/suppliers", "/api/suppliers/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/suppliers", "/api/suppliers/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/suppliers/**").hasAuthority("ROLE_ADMIN")
                 // POST /api/orders is allowed for any customer (even guests)
                 .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
                 // GET /api/orders requires at least being logged in — customers see own orders, admins/order managers see all
