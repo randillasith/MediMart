@@ -102,6 +102,8 @@ public class SuperAdminInitializer implements CommandLineRunner {
             
             org.pgno20.medimart.entity.MedicineOrder o1 = new org.pgno20.medimart.entity.MedicineOrder();
             o1.setSupplierId("SUP001");
+            o1.setSupplierName("PharmaSys Lanka Ltd");
+            o1.setSupplierType(org.pgno20.medimart.entity.SupplierType.WHOLESALER.name());
             o1.setMedicineName("Vitamin C");
             o1.setQuantity(500);
             o1.setUnitPrice(15.50);
@@ -113,6 +115,8 @@ public class SuperAdminInitializer implements CommandLineRunner {
 
             org.pgno20.medimart.entity.MedicineOrder o2 = new org.pgno20.medimart.entity.MedicineOrder();
             o2.setSupplierId("SUP001");
+            o2.setSupplierName("PharmaSys Lanka Ltd");
+            o2.setSupplierType(org.pgno20.medimart.entity.SupplierType.WHOLESALER.name());
             o2.setMedicineName("Penadol");
             o2.setQuantity(1000);
             o2.setUnitPrice(9.82);
@@ -124,6 +128,8 @@ public class SuperAdminInitializer implements CommandLineRunner {
             
             org.pgno20.medimart.entity.MedicineOrder o3 = new org.pgno20.medimart.entity.MedicineOrder();
             o3.setSupplierId("SUP002");
+            o3.setSupplierName("Global Corporation Medicine");
+            o3.setSupplierType(org.pgno20.medimart.entity.SupplierType.MANUFACTURER.name());
             o3.setMedicineName("Ibuprofen");
             o3.setQuantity(200);
             o3.setUnitPrice(25.00);
