@@ -42,6 +42,9 @@ public class Order {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalPrice;
 
+    @Column(precision = 12, scale = 2)
+    private BigDecimal deliveryFee = new BigDecimal("300.00");
+
     @Column(nullable = false, length = 30)
     private String status = "PENDING";
 
@@ -53,17 +56,20 @@ public class Order {
     @Column(nullable = false)
     private boolean prescriptionSubmitted = false;
 
-    @Column(length = 50)
+    /** Tracks if the order contains any prescription-required medicines. */
+    @Column(name = "has_prescription_items", nullable = false)
+    private boolean hasPrescriptionItems = false;
+
+    /** The specific prescription ID associated with this order (e.g. RX001) */
+    @Column(name = "prescription_id", length = 20)
     private String prescriptionId;
+
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column
     private LocalDateTime updatedAt;
-
-    @Column(precision = 12, scale = 2)
-    private BigDecimal shippingFee = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<OrderItem> items = new java.util.ArrayList<>();
@@ -117,6 +123,16 @@ public class Order {
     public BigDecimal getTotalPrice() { return totalPrice; }
     public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
 
+    public BigDecimal getDeliveryFee() {
+        return deliveryFee != null ? deliveryFee : new BigDecimal("300.00");
+    }
+    public void setDeliveryFee(BigDecimal deliveryFee) { this.deliveryFee = deliveryFee; }
+
+    public BigDecimal getSubtotal() {
+        if (totalPrice == null) return BigDecimal.ZERO;
+        return totalPrice.subtract(getDeliveryFee()).max(BigDecimal.ZERO);
+    }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
@@ -139,12 +155,13 @@ public class Order {
     public boolean isPrescriptionSubmitted() { return prescriptionSubmitted; }
     public void setPrescriptionSubmitted(boolean prescriptionSubmitted) { this.prescriptionSubmitted = prescriptionSubmitted; }
 
+    public boolean isHasPrescriptionItems() { return hasPrescriptionItems; }
+    public void setHasPrescriptionItems(boolean hasPrescriptionItems) { this.hasPrescriptionItems = hasPrescriptionItems; }
+
     public String getPrescriptionId() { return prescriptionId; }
     public void setPrescriptionId(String prescriptionId) { this.prescriptionId = prescriptionId; }
 
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
-
-    public BigDecimal getShippingFee() { return shippingFee; }
-    public void setShippingFee(BigDecimal shippingFee) { this.shippingFee = shippingFee; }
 }

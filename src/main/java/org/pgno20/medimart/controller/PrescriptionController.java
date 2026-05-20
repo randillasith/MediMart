@@ -25,17 +25,18 @@ import java.util.Map;
  * - Abstraction: each method has a clear job, delegates details to the Service
  * - Encapsulation: the controller only knows WHAT the service does, not HOW
  *
- * File location: src/main/java/org/pgno20/medimart/controller/PrescriptionController.java
+ * File location:
+ * src/main/java/org/pgno20/medimart/controller/PrescriptionController.java
  *
  * ─────────────────────────────────────────────────────
  * REST ENDPOINT SUMMARY:
  * ─────────────────────────────────────────────────────
- * POST   /api/prescriptions          → Create
- * GET    /api/prescriptions          → List all (paginated)
- * GET    /api/prescriptions/{id}     → Get one
- * PUT    /api/prescriptions/{id}     → Update
- * DELETE /api/prescriptions/{id}     → Delete
- * GET    /api/prescriptions/stats    → Count stats
+ * POST /api/prescriptions → Create
+ * GET /api/prescriptions → List all (paginated)
+ * GET /api/prescriptions/{id} → Get one
+ * PUT /api/prescriptions/{id} → Update
+ * DELETE /api/prescriptions/{id} → Delete
+ * GET /api/prescriptions/stats → Count stats
  * ─────────────────────────────────────────────────────
  */
 @RestController
@@ -59,13 +60,13 @@ public class PrescriptionController {
      */
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<Prescription> create(
-            @RequestParam("patientName")      String patientName,
-            @RequestParam("doctorName")       String doctorName,
-            @RequestParam("medicineDetails")  String medicineDetails,
-            @RequestParam("dosage")           String dosage,
+            @RequestParam("patientName") String patientName,
+            @RequestParam("doctorName") String doctorName,
+            @RequestParam("medicineDetails") String medicineDetails,
+            @RequestParam("dosage") String dosage,
             @RequestParam(value = "instructions", required = false) String instructions,
             @RequestParam("prescriptionDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate prescriptionDate,
-            @RequestParam(value = "file",     required = false) MultipartFile file,
+            @RequestParam(value = "file", required = false) MultipartFile file,
             HttpServletRequest request) {
 
         HttpSession session = requireSession(request);
@@ -75,22 +76,30 @@ public class PrescriptionController {
         Prescription created = prescriptionService.create(
                 patientName, doctorName, medicineDetails,
                 dosage, instructions, prescriptionDate, file,
-                submittedByName, submittedByEmail
-        );
+                submittedByName, submittedByEmail);
         return ResponseEntity.ok(created);
     }
 
     // ─── READ ALL ─────────────────────────────────────────────────────────────
     /**
      * GET /api/prescriptions?search=John&status=ACTIVE&page=0&size=10
-     * Returns a paginated list. Optional search by patient/doctor name.
+     * GET /api/prescriptions?email=user@example.com&status=APPROVED&size=1  ← used by admin Rx gate check
+     * Returns a paginated list. Optional search by patient/doctor name or by customer email.
      */
     @GetMapping
     public ResponseEntity<Page<Prescription>> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String email,
             @PageableDefault(size = 10) Pageable pageable) {
 
+        // If email is supplied → filter by that customer's email (Rx approval check by admin)
+        if (email != null) {
+            if (email.isBlank()) {
+                return ResponseEntity.ok(Page.empty(pageable));
+            }
+            return ResponseEntity.ok(prescriptionService.findByEmail(email, status, pageable));
+        }
         Page<Prescription> result = prescriptionService.search(search, status, pageable);
         return ResponseEntity.ok(result);
     }
@@ -135,19 +144,18 @@ public class PrescriptionController {
     @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     public ResponseEntity<Prescription> update(
             @PathVariable Long id,
-            @RequestParam("patientName")      String patientName,
-            @RequestParam("doctorName")       String doctorName,
-            @RequestParam("medicineDetails")  String medicineDetails,
-            @RequestParam("dosage")           String dosage,
+            @RequestParam("patientName") String patientName,
+            @RequestParam("doctorName") String doctorName,
+            @RequestParam("medicineDetails") String medicineDetails,
+            @RequestParam("dosage") String dosage,
             @RequestParam(value = "instructions", required = false) String instructions,
             @RequestParam("prescriptionDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate prescriptionDate,
-            @RequestParam(value = "status",   required = false) String status,
-            @RequestParam(value = "file",     required = false) MultipartFile file) {
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
 
         Prescription updated = prescriptionService.update(
                 id, patientName, doctorName, medicineDetails,
-                dosage, instructions, prescriptionDate, status, file
-        );
+                dosage, instructions, prescriptionDate, status, file);
         return ResponseEntity.ok(updated);
     }
 
@@ -165,8 +173,7 @@ public class PrescriptionController {
                 id,
                 body.get("status"),
                 body.get("rejectionReason"),
-                reviewer
-        );
+                reviewer);
         return ResponseEntity.ok(reviewed);
     }
 
@@ -189,11 +196,10 @@ public class PrescriptionController {
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> stats() {
         return ResponseEntity.ok(Map.of(
-                "total",  prescriptionService.countTotal(),
+                "total", prescriptionService.countTotal(),
                 "approved", prescriptionService.countActive(),
                 "pending", prescriptionService.countPending(),
-                "rejected", prescriptionService.countRejected()
-        ));
+                "rejected", prescriptionService.countRejected()));
     }
 
     private HttpSession requireSession(HttpServletRequest request) {

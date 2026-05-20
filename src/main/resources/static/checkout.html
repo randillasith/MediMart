@@ -103,8 +103,6 @@ h1,h2,h3,.font-headline{font-family:'Manrope',sans-serif}
 <h2 class="text-xl font-headline font-bold mb-6 text-on-surface">Order Summary</h2>
 <div class="space-y-4 mb-8">
 <div class="flex justify-between text-body-md text-on-surface-variant"><span id="summary-items-count">Subtotal (0 items)</span><span id="summary-subtotal">Rs. 0.00</span></div>
-<!-- Prescription Dispensing Fee Isolated Row -->
-<div id="summary-dispensing-row" class="flex justify-between text-body-md text-on-surface-variant hidden"><span>Dispensing Fee</span><span id="summary-dispensing">LKR 0.00</span></div>
 <div class="flex justify-between text-body-md text-on-surface-variant"><span>Clinical Shipping</span><span class="text-secondary font-medium" id="summary-shipping">FREE</span></div>
 <div class="pt-4 mt-4 border-t border-outline-variant/20 flex justify-between items-end"><span class="font-headline font-bold text-on-surface">Total</span><span id="summary-total" class="text-2xl font-headline font-extrabold text-primary">Rs. 0.00</span></div>
 </div>
@@ -128,9 +126,8 @@ h1,h2,h3,.font-headline{font-family:'Manrope',sans-serif}
 <script>
 let cart = [];
 let subtotal = 0;
+let orderTotalPrice = 0;
 let deliveryFee = 0;
-let prescriptionDispensingFee = 5.00;
-let otcTaxRate = 10.00;
 let addressSaved = false;
 let paymentSaved = false;
 let savedAddress = null;
@@ -141,16 +138,14 @@ async function initCheckout() {
     if (storedCart) cart = JSON.parse(storedCart);
     if (cart.length === 0) { window.location.href = '/catalog.html'; return; }
 
-    // Load system settings to get live delivery fee and dispensing fee (public endpoint, no auth needed)
+    // Load system settings to get live delivery fee (public endpoint, no auth needed)
     try {
         const settingsRes = await fetch('/api/settings/public');
         if (settingsRes.ok) {
             const settings = await settingsRes.json();
             deliveryFee = parseFloat(settings.standardDeliveryFee) || 0;
-            prescriptionDispensingFee = parseFloat(settings.prescriptionDispensingFee) || 5.00;
-            otcTaxRate = parseFloat(settings.otcTaxRate) || 10.00;
         }
-    } catch(e) { /* use defaults if not available */ }
+    } catch(e) { /* use 0 if not available */ }
 
     renderCartItems();
     renderPaymentSection();
@@ -195,20 +190,12 @@ async function initCheckout() {
 function renderCartItems() {
     const container = document.getElementById('checkout-cart-items');
     container.innerHTML = '';
-    let baseSubtotal = 0;
-    let totalDispensingFee = 0;
+    subtotal = 0;
     let totalItems = 0;
-    let hasPrescriptionItem = false;
 
     cart.forEach(item => {
-        let basePrice = parseFloat(item.minPrice || item.price || 0);
-        if (item.prescriptionRequired) {
-            baseSubtotal += basePrice * item.cartQty;
-            hasPrescriptionItem = true;
-        } else {
-            basePrice = basePrice * (1 + otcTaxRate / 100);
-            baseSubtotal += basePrice * item.cartQty;
-        }
+        const itemPrice = item.finalPrice || 0;
+        subtotal += itemPrice * item.cartQty;
         totalItems += item.cartQty;
 
         const div = document.createElement('div');
@@ -222,38 +209,22 @@ function renderCartItems() {
             '<div class="mt-2 flex items-center justify-between"><div class="flex items-center gap-4">' +
             '<span class="text-body-sm font-medium text-on-surface-variant">Qty: ' + item.cartQty + '</span>' +
             '<button onclick="removeFromCart(\'' + item.cartId + '\')" class="text-primary text-body-sm font-medium hover:underline">Remove</button>' +
-            '</div><span class="text-lg font-headline font-bold text-primary">Rs. ' + (basePrice * item.cartQty).toFixed(2) + '</span></div></div>';
+            '</div><span class="text-lg font-headline font-bold text-primary">Rs. ' + (itemPrice * item.cartQty).toFixed(2) + '</span></div></div>';
         container.appendChild(div);
     });
 
-    if (hasPrescriptionItem) {
-        totalDispensingFee = prescriptionDispensingFee;
-    }
-
     document.getElementById('summary-items-count').innerText = 'Subtotal (' + totalItems + ' items)';
-    document.getElementById('summary-subtotal').innerText = 'LKR ' + baseSubtotal.toFixed(2);
-
-    // Update dispensing fee row
-    const dfRow = document.getElementById('summary-dispensing-row');
-    const dfVal = document.getElementById('summary-dispensing');
-    if (dfRow && dfVal) {
-        if (totalDispensingFee > 0) {
-            dfVal.innerText = 'LKR ' + totalDispensingFee.toFixed(2);
-            dfRow.classList.remove('hidden');
-        } else {
-            dfRow.classList.add('hidden');
-        }
-    }
+    document.getElementById('summary-subtotal').innerText = 'LKR ' + subtotal.toFixed(2);
 
     // Apply delivery fee from settings
-    const total = baseSubtotal + totalDispensingFee + deliveryFee;
+    const total = subtotal + deliveryFee;
     const shippingEl = document.getElementById('summary-shipping');
     if (shippingEl) {
         shippingEl.innerText = deliveryFee > 0 ? 'LKR ' + deliveryFee.toFixed(2) : 'FREE';
     }
     document.getElementById('summary-total').innerText = 'LKR ' + total.toFixed(2);
     // Store total (with delivery) for order submission
-    subtotal = total;
+    orderTotalPrice = total;
 }
 
 function removeFromCart(cartId) {
@@ -368,11 +339,12 @@ async function placeOrder() {
             }; 
         }),
         quantity: cart.reduce(function(acc, item) { return acc + item.cartQty; }, 0),
-        totalPrice: parseFloat(subtotal.toFixed(2)),
-        shippingFee: parseFloat(deliveryFee.toFixed(2)),
+        totalPrice: parseFloat(orderTotalPrice.toFixed(2)),
+        deliveryFee: parseFloat(deliveryFee.toFixed(2)),
         status: 'PENDING',
         shippingAddress: savedAddress.street + ', ' + savedAddress.cityStateZip,
         prescriptionSubmitted: sessionStorage.getItem('prescription_verified') === 'true',
+        hasPrescriptionItems: cart.some(function(item) { return item.prescriptionRequired === true; }),
         prescriptionId: sessionStorage.getItem('latest_prescription_id') || null
     };
 
@@ -396,6 +368,8 @@ async function placeOrder() {
             };
             localStorage.setItem('medimart_last_order', JSON.stringify(lastOrder));
             localStorage.removeItem('medimart_cart');
+            sessionStorage.removeItem('prescription_verified');
+            sessionStorage.removeItem('latest_prescription_id');
             window.location.href = '/order-success.html';
         }
         else { alert('Failed to place order. Status: ' + res.status); btn.disabled = false; spinner.classList.add('hidden'); icon.classList.remove('hidden'); }

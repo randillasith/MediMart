@@ -3,11 +3,10 @@ package org.pgno20.medimart.service;
 import org.pgno20.medimart.model.Medicine;
 import org.pgno20.medimart.model.Order;
 import org.pgno20.medimart.model.StockBatch;
-import org.pgno20.medimart.model.Prescription;
 import org.pgno20.medimart.repository.MedicineRepository;
 import org.pgno20.medimart.repository.OrderRepository;
+import org.pgno20.medimart.repository.PrescriptionRepository;
 import org.pgno20.medimart.repository.StockBatchRepository;
-import org.pgno20.medimart.service.SystemSettingsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,10 +45,7 @@ public class OrderService {
     private StockBatchRepository stockBatchRepository;
 
     @Autowired
-    private SystemSettingsService settingsService;
-
-    @Autowired
-    private org.pgno20.medimart.repository.PrescriptionRepository prescriptionRepository;
+    private PrescriptionRepository prescriptionRepository;
 
     /**
      * Places an order and deducts inventory in a single DB transaction.
@@ -58,6 +54,7 @@ public class OrderService {
     @Transactional
     public Order placeOrder(Order order) {
         // 1. Deduct stock for each item using medicineId (FEFO) and populate snapshot data
+        boolean rxRequired = false;
         if (order.getItems() != null && !order.getItems().isEmpty()) {
             for (org.pgno20.medimart.model.OrderItem item : order.getItems()) {
                 Medicine m = null;
@@ -87,28 +84,14 @@ public class OrderService {
                     );
                 }
                 
+                // Check if prescription required
+                if (Boolean.TRUE.equals(m.getPrescriptionRequired())) {
+                    rxRequired = true;
+                }
+                
                 // Set snapshot values
                 item.setMedicineName(m.getName());
-                
-                java.math.BigDecimal finalUnitPrice = m.getPrice();
-                if (finalUnitPrice != null) {
-                    var settings = settingsService.getSettings();
-                    if (Boolean.TRUE.equals(m.getPrescriptionRequired())) {
-                        // Prescription medicine: dynamic dispensing fee is flat per unique line item/order,
-                        // so B2C order items' unit price is saved as m.getPrice() (excluding dispensing fee).
-                        finalUnitPrice = m.getPrice();
-                    } else {
-                        // OTC: apply dynamic otcTaxRate
-                        java.math.BigDecimal taxRate = settings.getOtcTaxRate();
-                        java.math.BigDecimal multiplier = java.math.BigDecimal.ONE
-                            .add(taxRate.divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP));
-                        finalUnitPrice = m.getPrice().multiply(multiplier)
-                                .setScale(2, java.math.RoundingMode.HALF_UP);
-                    }
-                } else {
-                    finalUnitPrice = java.math.BigDecimal.ZERO;
-                }
-                item.setUnitPrice(finalUnitPrice);
+                item.setUnitPrice(m.getFinalPrice());
                 item.setOrder(order);
 
                 deductStockItem(item.getMedicineName(), item.getQuantity());
@@ -118,17 +101,8 @@ public class OrderService {
              deductStockFEFO(order.getMedicineDetails());
         }
 
-        // Auto-build medicineDetails if not present or blank
-        if (order.getItems() != null && !order.getItems().isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < order.getItems().size(); i++) {
-                org.pgno20.medimart.model.OrderItem item = order.getItems().get(i);
-                if (i > 0) {
-                    sb.append(", ");
-                }
-                sb.append(item.getMedicineName()).append(" (x").append(item.getQuantity()).append(")");
-            }
-            order.setMedicineDetails(sb.toString());
+        if (rxRequired) {
+            order.setHasPrescriptionItems(true);
         }
 
         // 2. Save the order record (cascades to order_items)
@@ -231,40 +205,29 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
         String oldStatus = order.getStatus();
-        
-        // Clinical Validation: If transitioning to active/fulfilled, ensure any required prescription is APPROVED
-        if ("PROCESSING".equals(newStatus) || "SHIPPED".equals(newStatus) || "DELIVERED".equals(newStatus)) {
-            if (requiresPrescription(order)) {
-                String rxId = order.getPrescriptionId();
-                if (rxId == null || rxId.isBlank()) {
-                    // Fallback to searching by customer email
-                    String email = order.getCustomerEmail();
-                    if (email == null || email.isBlank()) {
-                        throw new IllegalArgumentException("Cannot process order: A prescription is required but no prescription ID or customer email was provided.");
-                    }
-                    List<Prescription> prescriptions = prescriptionRepository.findBySubmittedByEmailIgnoreCase(email);
-                    boolean hasApproved = false;
-                    for (Prescription p : prescriptions) {
-                        if ("APPROVED".equalsIgnoreCase(p.getStatus()) && !p.isExpired()) {
-                            hasApproved = true;
-                            break;
-                        }
-                    }
-                    if (!hasApproved) {
-                        throw new IllegalArgumentException("Cannot process order: The prescription for this order has not been approved or has expired.");
+
+        // ── Prescription Gate ──────────────────
+        // Prevent progressing order if it has prescription items but lacks an approved prescription
+        if (!"CANCELLED".equals(newStatus) && !"PENDING".equals(newStatus)) {
+            if (order.isHasPrescriptionItems() || order.isPrescriptionSubmitted()) {
+                boolean hasApprovedRx = false;
+                String reason = "";
+                
+                // 1. If a specific prescription is linked, check it
+                if (order.getPrescriptionId() != null && !order.getPrescriptionId().isBlank()) {
+                    java.util.Optional<org.pgno20.medimart.model.Prescription> rxOpt = 
+                        prescriptionRepository.findByPrescriptionId(order.getPrescriptionId());
+                    hasApprovedRx = rxOpt.isPresent() && "APPROVED".equals(rxOpt.get().getStatus());
+                    if (!hasApprovedRx) {
+                        reason = "prescription " + order.getPrescriptionId() + " is not APPROVED yet.";
                     }
                 } else {
-                    // Find specific prescription by ID
-                    Prescription p = prescriptionRepository.findByPrescriptionId(rxId).orElse(null);
-                    if (p == null) {
-                        throw new IllegalArgumentException("Cannot process order: Associated prescription " + rxId + " was not found.");
-                    }
-                    if (!"APPROVED".equalsIgnoreCase(p.getStatus())) {
-                        throw new IllegalArgumentException("Cannot process order: Associated prescription " + rxId + " is not approved (status: " + p.getStatus() + ").");
-                    }
-                    if (p.isExpired()) {
-                        throw new IllegalArgumentException("Cannot process order: Associated prescription " + rxId + " has expired.");
-                    }
+                    reason = "no specific prescription is linked to this order.";
+                }
+                
+                if (!hasApprovedRx) {
+                    throw new IllegalStateException("Cannot update status to " + newStatus + 
+                        ": Order contains prescription items but " + reason);
                 }
             }
         }
@@ -283,31 +246,6 @@ public class OrderService {
         }
         
         return orderRepository.save(order);
-    }
-
-    /**
-     * Checks if any item in the order requires a prescription.
-     */
-    public boolean requiresPrescription(Order order) {
-        if (order.getItems() != null && !order.getItems().isEmpty()) {
-            for (org.pgno20.medimart.model.OrderItem item : order.getItems()) {
-                if (item.getMedicineId() != null) {
-                    Medicine m = medicineRepository.findById(item.getMedicineId()).orElse(null);
-                    if (m != null && Boolean.TRUE.equals(m.getPrescriptionRequired())) {
-                        return true;
-                    }
-                } else if (item.getMedicineName() != null) {
-                    List<Medicine> meds = medicineRepository.findByNameIgnoreCase(item.getMedicineName());
-                    if (!meds.isEmpty() && Boolean.TRUE.equals(meds.get(0).getPrescriptionRequired())) {
-                        return true;
-                    }
-                }
-            }
-        } else {
-            // Fallback for string-based or legacy orders
-            return order.isPrescriptionSubmitted();
-        }
-        return false;
     }
 
     /**

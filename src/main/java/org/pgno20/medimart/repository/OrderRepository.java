@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, String> {
 
-    @Query("SELECT SUM(o.totalPrice - COALESCE(o.shippingFee, 0)) FROM Order o WHERE o.status = 'DELIVERED'")
+    @Query("SELECT SUM(o.totalPrice - COALESCE(o.deliveryFee, 0)) FROM Order o WHERE o.status = 'DELIVERED'")
     BigDecimal calculateTotalRevenue();
 
     long countByStatus(String status);
@@ -21,7 +21,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
     List<Order> findTop10ByOrderByCreatedAtDesc();
 
-    @Query("SELECT SUM(o.totalPrice - COALESCE(o.shippingFee, 0)) FROM Order o WHERE o.status = 'DELIVERED' AND o.prescriptionSubmitted = :isPrescription")
+    @Query("SELECT SUM(o.totalPrice - COALESCE(o.deliveryFee, 0)) FROM Order o WHERE o.status = 'DELIVERED' AND o.prescriptionSubmitted = :isPrescription")
     BigDecimal calculateTotalRevenueByPrescription(@Param("isPrescription") boolean isPrescription);
 
     @Query("SELECT o FROM Order o WHERE o.status = 'DELIVERED' AND o.createdAt >= :startDate")
