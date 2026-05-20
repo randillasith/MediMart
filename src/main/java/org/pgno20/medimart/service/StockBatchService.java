@@ -161,6 +161,24 @@ public class StockBatchService {
     }
 
     /**
+     * Delete a batch entirely.
+     * Recalculates the parent medicine's cached stock.
+     */
+    @Transactional
+    public void deleteBatch(Long medicineId, Long batchId) {
+        StockBatch batch = stockBatchRepository.findById(batchId)
+                .orElseThrow(() -> new IllegalArgumentException("Batch not found"));
+
+        if (!batch.getMedicine().getId().equals(medicineId)) {
+            throw new IllegalArgumentException("Batch does not belong to this medicine");
+        }
+
+        Medicine medicine = batch.getMedicine();
+        stockBatchRepository.delete(batch);
+        recalculateMedicineStock(medicine);
+    }
+
+    /**
      * Get count of active batches for a medicine.
      */
     public long getActiveBatchCount(Long medicineId) {
