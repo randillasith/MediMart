@@ -5,6 +5,7 @@ import org.pgno20.medimart.model.Order;
 import org.pgno20.medimart.model.StockBatch;
 import org.pgno20.medimart.repository.MedicineRepository;
 import org.pgno20.medimart.repository.OrderRepository;
+import org.pgno20.medimart.repository.PrescriptionRepository;
 import org.pgno20.medimart.repository.StockBatchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,9 @@ public class OrderService {
     @Autowired
     private StockBatchRepository stockBatchRepository;
 
+    @Autowired
+    private PrescriptionRepository prescriptionRepository;
+
     /**
      * Places an order and deducts inventory in a single DB transaction.
      * If stock deduction fails for any item the whole transaction rolls back.
@@ -50,6 +54,7 @@ public class OrderService {
     @Transactional
     public Order placeOrder(Order order) {
         // 1. Deduct stock for each item using medicineId (FEFO) and populate snapshot data
+        boolean rxRequired = false;
         if (order.getItems() != null && !order.getItems().isEmpty()) {
             for (org.pgno20.medimart.model.OrderItem item : order.getItems()) {
                 Medicine m = null;
@@ -79,6 +84,11 @@ public class OrderService {
                     );
                 }
                 
+                // Check if prescription required
+                if (Boolean.TRUE.equals(m.getPrescriptionRequired())) {
+                    rxRequired = true;
+                }
+                
                 // Set snapshot values
                 item.setMedicineName(m.getName());
                 item.setUnitPrice(m.getFinalPrice());
@@ -89,6 +99,10 @@ public class OrderService {
         } else if (order.getMedicineDetails() != null && !order.getMedicineDetails().isBlank()) {
              // Fallback for backwards compatibility if old payload is sent
              deductStockFEFO(order.getMedicineDetails());
+        }
+
+        if (rxRequired) {
+            order.setHasPrescriptionItems(true);
         }
 
         // 2. Save the order record (cascades to order_items)
@@ -191,6 +205,33 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
         String oldStatus = order.getStatus();
+
+        // ── Prescription Gate ──────────────────
+        // Prevent progressing order if it has prescription items but lacks an approved prescription
+        if (!"CANCELLED".equals(newStatus) && !"PENDING".equals(newStatus)) {
+            if (order.isHasPrescriptionItems() || order.isPrescriptionSubmitted()) {
+                boolean hasApprovedRx = false;
+                String reason = "";
+                
+                // 1. If a specific prescription is linked, check it
+                if (order.getPrescriptionId() != null && !order.getPrescriptionId().isBlank()) {
+                    java.util.Optional<org.pgno20.medimart.model.Prescription> rxOpt = 
+                        prescriptionRepository.findByPrescriptionId(order.getPrescriptionId());
+                    hasApprovedRx = rxOpt.isPresent() && "APPROVED".equals(rxOpt.get().getStatus());
+                    if (!hasApprovedRx) {
+                        reason = "prescription " + order.getPrescriptionId() + " is not APPROVED yet.";
+                    }
+                } else {
+                    reason = "no specific prescription is linked to this order.";
+                }
+                
+                if (!hasApprovedRx) {
+                    throw new IllegalStateException("Cannot update status to " + newStatus + 
+                        ": Order contains prescription items but " + reason);
+                }
+            }
+        }
+
         order.setStatus(newStatus);
         
         // If status is changed to CANCELLED from something else, restore stock

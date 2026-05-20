@@ -240,11 +240,17 @@ public class UserService {
 
     /**
      * Validates and normalises a role string.
-     * Only ROLE_USER and ROLE_ADMIN are accepted; anything else throws.
+     * Valid roles: ROLE_USER, ROLE_ADMIN, ROLE_STOCK_MANAGER, ROLE_ORDER_MANAGER, ROLE_SUPPLIER_HANDLER.
      */
     private String resolveRole(String roleName) {
         if (roleName == null || roleName.isBlank()) return "ROLE_USER";
-        if ("ROLE_USER".equals(roleName) || "ROLE_ADMIN".equals(roleName)) return roleName;
-        throw new IllegalArgumentException("Invalid role. Must be ROLE_USER or ROLE_ADMIN");
+        if ("ROLE_USER".equals(roleName) || 
+            "ROLE_ADMIN".equals(roleName) ||
+            "ROLE_STOCK_MANAGER".equals(roleName) ||
+            "ROLE_ORDER_MANAGER".equals(roleName) ||
+            "ROLE_SUPPLIER_HANDLER".equals(roleName)) {
+            return roleName;
+        }
+        throw new IllegalArgumentException("Invalid role. Must be ROLE_USER, ROLE_ADMIN, ROLE_STOCK_MANAGER, ROLE_ORDER_MANAGER, or ROLE_SUPPLIER_HANDLER");
     }
 }

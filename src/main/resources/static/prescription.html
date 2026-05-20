@@ -124,8 +124,10 @@ var cart = [];
 var rxItems = [];
 var fileUploaded = false;
 var selectedFile = null;
+var prescriptionDispensingFee = 50.00;
+var otcTaxRate = 10.00;
 
-function init() {
+async function init() {
     var stored = localStorage.getItem('medimart_cart');
     if (stored) cart = JSON.parse(stored);
 
@@ -136,6 +138,17 @@ function init() {
         // No prescription items, skip to checkout
         window.location.href = '/checkout.html';
         return;
+    }
+
+    try {
+        var settingsRes = await fetch('/api/settings/public');
+        if (settingsRes.ok) {
+            var settings = await settingsRes.json();
+            prescriptionDispensingFee = parseFloat(settings.prescriptionDispensingFee) || 50.00;
+            otcTaxRate = parseFloat(settings.otcTaxRate) || 10.00;
+        }
+    } catch (e) {
+        console.error("Error loading dynamic settings", e);
     }
 
     renderRxItems();
@@ -163,11 +176,14 @@ function renderRxItems() {
     var container = document.getElementById('rx-items-list');
     var totalsContainer = document.getElementById('rx-totals');
     container.innerHTML = '';
-    var subtotal = 0;
 
+    // 1. Render prescription items in the main list
     rxItems.forEach(function(item) {
-        var price = item.finalPrice || 0;
-        subtotal += price * item.cartQty;
+        var basePrice = parseFloat(item.minPrice || item.price || 0);
+        if (basePrice === 0 && item.finalPrice) {
+            basePrice = parseFloat(item.finalPrice) - prescriptionDispensingFee;
+            if (basePrice < 0) basePrice = 0;
+        }
 
         var div = document.createElement('div');
         div.className = 'flex gap-6 items-start';
@@ -176,13 +192,49 @@ function renderRxItems() {
             '<span class="absolute top-0 left-0 bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded-br-lg uppercase tracking-wider">RX</span></div>' +
             '<div class="flex-grow"><h4 class="text-body-md font-bold text-on-surface">' + item.name + '</h4>' +
             '<p class="text-label-md text-on-surface-variant">' + (item.dosage || '') + ' &bull; ' + (item.brand || 'Generic') + '</p>' +
-            '<p class="text-body-md font-bold text-primary mt-2">Rs. ' + (price * item.cartQty).toFixed(2) + '</p></div>';
+            '<p class="text-body-md font-bold text-primary mt-2">Rs. ' + (basePrice * item.cartQty).toFixed(2) + '</p></div>';
         container.appendChild(div);
     });
 
-    totalsContainer.innerHTML = '<div class="flex justify-between text-body-md"><span class="text-on-surface-variant">Subtotal (' + rxItems.length + ' Rx items)</span><span class="text-on-surface font-medium">Rs. ' + subtotal.toFixed(2) + '</span></div>' +
-        '<div class="flex justify-between text-body-md"><span class="text-on-surface-variant">Verified Clinical Fee</span><span class="text-secondary font-medium">Free</span></div>' +
-        '<div class="flex justify-between text-xl font-headline font-extrabold pt-4 text-primary"><span>Total</span><span>Rs. ' + subtotal.toFixed(2) + '</span></div>';
+    // 2. Calculate totals over the entire cart for complete order summary consistency
+    var baseSubtotal = 0;
+    var totalDispensingFee = 0;
+    var totalItems = 0;
+    var hasPrescriptionItem = false;
+
+    cart.forEach(function(item) {
+        totalItems += item.cartQty;
+        var basePrice = parseFloat(item.minPrice || item.price || 0);
+        if (item.prescriptionRequired === true) {
+            if (basePrice === 0 && item.finalPrice) {
+                basePrice = parseFloat(item.finalPrice) - prescriptionDispensingFee;
+                if (basePrice < 0) basePrice = 0;
+            }
+            baseSubtotal += basePrice * item.cartQty;
+            hasPrescriptionItem = true;
+        } else {
+            basePrice = basePrice * (1 + otcTaxRate / 100);
+            baseSubtotal += basePrice * item.cartQty;
+        }
+    });
+
+    if (hasPrescriptionItem) {
+        totalDispensingFee = prescriptionDispensingFee;
+    }
+
+    var grandTotal = baseSubtotal + totalDispensingFee;
+
+    // 3. Render totals breakdown matching shopping cart drawer and checkout page
+    var totalsHtml = '<div class="flex justify-between text-body-md"><span class="text-on-surface-variant">Subtotal (' + totalItems + ' items)</span><span class="text-on-surface font-medium">Rs. ' + baseSubtotal.toFixed(2) + '</span></div>';
+    
+    if (totalDispensingFee > 0) {
+        totalsHtml += '<div class="flex justify-between text-body-md"><span class="text-on-surface-variant">Prescription Dispensing Fee</span><span class="text-on-surface font-medium">Rs. ' + totalDispensingFee.toFixed(2) + '</span></div>';
+    }
+    
+    totalsHtml += '<div class="flex justify-between text-body-md"><span class="text-on-surface-variant">Verified Clinical Fee</span><span class="text-secondary font-medium">Free</span></div>' +
+        '<div class="flex justify-between text-xl font-headline font-extrabold pt-4 text-primary"><span>Total Estimate</span><span>Rs. ' + grandTotal.toFixed(2) + '</span></div>';
+
+    totalsContainer.innerHTML = totalsHtml;
 }
 
 function handleFileUpload(input) {
