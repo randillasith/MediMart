@@ -1,8 +1,8 @@
 package org.pgno20.medimart.Feedback;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FeedbackService {
 
@@ -13,7 +13,7 @@ public class FeedbackService {
 
         try {
 
-            String sql = "INSERT INTO feedback(customer_name,message,rating) VALUES(?,?,?)";
+            String sql = "INSERT INTO feedback(customer_name, message, rating) VALUES (?, ?, ?)";
 
             PreparedStatement pst = con.prepareStatement(sql);
 
@@ -23,7 +23,7 @@ public class FeedbackService {
 
             pst.executeUpdate();
 
-            System.out.println("Feedback Added!");
+            System.out.println("Feedback Added Successfully!");
 
         } catch (Exception e) {
             System.out.println(e);
@@ -31,29 +31,29 @@ public class FeedbackService {
     }
 
     // READ
-    public void viewFeedbacks() {
+    public List<Feedback> viewFeedbacks() throws SQLException {
 
-        try {
+        List<Feedback> feedbackList = new ArrayList<>();
 
-            String sql = "SELECT * FROM feedback";
+        String sql = "SELECT * FROM feedback";
 
-            PreparedStatement pst = con.prepareStatement(sql);
+        PreparedStatement pst = con.prepareStatement(sql);
 
-            ResultSet rs = pst.executeQuery();
+        ResultSet rs = pst.executeQuery();
 
-            while (rs.next()) {
+        while (rs.next()) {
 
-                System.out.println(
-                        rs.getInt("id") + " | " +
-                                rs.getString("customer_name") + " | " +
-                                rs.getString("message") + " | " +
-                                rs.getInt("rating")
-                );
-            }
+            Feedback feedback = new Feedback();
 
-        } catch (Exception e) {
-            System.out.println(e);
+            feedback.setId(rs.getInt("id"));
+            feedback.setCustomerName(rs.getString("customer_name"));
+            feedback.setMessage(rs.getString("message"));
+            feedback.setRating(rs.getInt("rating"));
+
+            feedbackList.add(feedback);
         }
+
+        return feedbackList;
     }
 
     // UPDATE
