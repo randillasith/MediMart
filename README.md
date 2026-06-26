@@ -205,28 +205,4 @@ The diagram above illustrates the overall architecture of the MediMart Pharmacy 
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
----
 
-*Built with 💙 by [Randil Lasith](https://github.com/randillasith)*
-
----
-
-## Future Roadmap
-
-### Short-Term
-- ✅ Payment gateway integration (Stripe)
-- ✅ Email notifications for order status
-- ✅ SMS alerts for prescription status
-- ✅ Barcode/QR code scanning for medicines
-
-### Medium-Term
-- 🔄 Mobile app (React Native / Flutter)
-- 🔄 AI-powered medicine recommendations
-- 🔄 Real-time order tracking with WebSockets
-- 🔄 Multi-language support
-
-### Long-Term
-- 🔮 Hospital integration API
-- 🔮 Pharmacy chain multi-branch support
-- 🔮 Doctor consultation booking system
-- 🔮 Health record management (EHR)
