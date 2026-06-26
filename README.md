@@ -221,11 +221,3 @@ The diagram above illustrates the overall architecture of the MediMart Pharmacy 
 
 ---
 
-<div align="center">
-  <p><strong>MediMart</strong> — SLIIT Year 1 Semester 2 OOP Mini-Project</p>
-  <p>Built with 💙 by <a href="https://github.com/randillasith">Randil Lasith</a></p>
-  <p>
-    <a href="https://github.com/randillasith/MediMart">GitHub</a> •
-    <a href="https://github.com/randillasith/MediMart/issues">Report Issue</a>
-  </p>
-</div>
